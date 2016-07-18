@@ -1,0 +1,79 @@
+[
+{
+  "fields": {
+    "service_name": "Pill"
+  },
+  "model": "referral_system.service",
+  "pk": 1
+},
+{
+  "fields": {
+    "service_name": "Injectable"
+  },
+  "model": "referral_system.service",
+  "pk": 2
+},
+{
+  "fields": {
+    "service_name": "IUD insert"
+  },
+  "model": "referral_system.service",
+  "pk": 3
+},
+{
+  "fields": {
+    "service_name": "IUD Removal"
+  },
+  "model": "referral_system.service",
+  "pk": 4
+},
+{
+  "fields": {
+    "service_name": "Implant insert"
+  },
+  "model": "referral_system.service",
+  "pk": 5
+},
+{
+  "fields": {
+    "service_name": "Implant removal"
+  },
+  "model": "referral_system.service",
+  "pk": 6
+},
+{
+  "fields": {
+    "service_name": "Permanent Method"
+  },
+  "model": "referral_system.service",
+  "pk": 7
+},
+{
+  "fields": {
+    "service_name": "Post Abortion Care"
+  },
+  "model": "referral_system.service",
+  "pk": 8
+},
+{
+  "fields": {
+    "service_name": "STI testing & treatment"
+  },
+  "model": "referral_system.service",
+  "pk": 9
+},
+{
+  "fields": {
+    "service_name": "Cervical cancer screening"
+  },
+  "model": "referral_system.service",
+  "pk": 10
+},
+{
+  "fields": {
+    "service_name": "Other"
+  },
+  "model": "referral_system.service",
+  "pk": 11
+}
+]

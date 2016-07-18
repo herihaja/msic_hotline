@@ -1,0 +1,32 @@
+{% load staticfiles %}
+<html>
+    <head>
+        <title>MSIC Hotline Platform</title>
+        <link rel="stylesheet" href="{% static 'referral_system/foundation-6.2.3/css/foundation.css' %}">
+    	<link rel="stylesheet" href="{% static 'referral_system/foundation-6.2.3/css/app.css' %}">
+        <link href='//fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="{% static 'referral_system/css/online.css' %}">
+        
+		<script src="https://use.fontawesome.com/7beb934639.js"></script>
+        
+        
+        <script src="{% static 'referral_system/foundation-6.2.3/js/vendor/jquery.js' %}"></script>
+    </head>
+    <body>
+       <div>    
+	        <div class="row">
+	      		<div class="large-12 columns">
+	        		{% block content %}
+	            	{% endblock %}
+	      		</div>
+	    	</div>
+        </div>
+        
+        
+        <!-- Include and launch foundation -->
+        
+    	<script src="{% static 'referral_system/foundation-6.2.3/js/vendor/what-input.js' %}"></script>
+    	<script src="{% static 'referral_system/foundation-6.2.3/js/vendor/foundation.js' %}"></script>
+    	<script src="{% static 'referral_system/foundation-6.2.3/js/app.js' %}"></script>
+    </body>
+</html>

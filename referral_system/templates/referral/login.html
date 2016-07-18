@@ -1,0 +1,57 @@
+{% extends 'referral/scriptOnly.html' %}
+{% load staticfiles%}
+
+{% block content %}
+
+<style type="text/css">
+body {background: #009fda;}
+.signup-panel {background: #fff;}
+</style>
+
+<div class="row">
+	<div class="large-3 columns">&nbsp;</div>
+    <div class="large-6 columns">
+
+      <div class="signup-panel">
+		<div id="logo" style="text-align: center;">
+		        <img src="http://www.mariestopes.org.kh/sites/staging.ethiopia.mariestopes.ipproducts.co.uk/files/msi-cambodia-logo-3.png" />
+		</div>
+		<br />
+		{% if error != '' %}
+			<div class="callout alert">
+				{{error}}
+			</div>
+		{% endif %}
+        <p class="welcome"> Welcome to MSI Cambodia Referral App</p>
+		<br />
+        <form method="post" action="/referral_system/authenticateMsicHotline/">
+        
+        <div class="input-group">
+  			<span class="input-group-label"><i class="fa fa-envelope-o" aria-hidden="true"></i></span>
+  			<input class="input-group-field" type="text" placeholder="username" name="username">
+		</div>
+
+		<div class="input-group">
+  			<span class="input-group-label"><i class="fa fa-key" aria-hidden="true"></i></span>
+  			<input class="input-group-field" type="text" placeholder="password"  name="password">
+		</div>
+		
+		<button type="submit" class="button ">SIGN IN</button>
+        </form>
+
+      </div>
+      
+      <div class="row copyright">
+            <div class="large-12 columns">
+                <p>Powered by <a href="http://www.hni.org" target="_blank"><img alt="Human Network International" src="http://hni.org/wp-content/uploads/2014/01/hni_logo_toosmall.png"></a></p>
+            </div>
+    	</div>
+
+    </div>
+    
+    <div class="large-6 columns">
+    
+    </div>
+
+   </div>
+   {% endblock %}

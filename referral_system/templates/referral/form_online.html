@@ -1,0 +1,234 @@
+{% extends 'referral/base.html' %}
+{% load staticfiles%}
+
+{% block content %}
+    <h5>1) Client information</h5>
+    
+    <div class="callout secondary">
+    <div class="row">
+	      <div class="large-6 columns">	      
+	      		<label>Sex
+  					<select name="sex">
+    					<option value="m">Male</option>
+    					<option value="f">Female</option>
+  					</select>
+				</label>
+				
+				<label> Telephone
+  					<input type="text" name="phone" value="">
+				</label>
+				
+				
+	      </div>
+	      <div class="large-6 columns">
+	      		<label> Age
+  					<input type="text" name="age" value="">
+				</label>
+				
+				<label> Occupation
+  					<input type="text" name="phone" value="">
+				</label>
+				
+				
+				
+	      </div>
+	</div>
+	
+	<h6><u>Garment Factory</u></h6>
+	<div class="row">
+		<div class="large-2 columns">
+			<label>Province
+        		<select id="gf-province">
+          			<option value="0">-- Select --</option>
+          			{% for itemProvince in garmentProvinces %}
+          				<option value="{{ itemProvince.province }}" onclick="loadGFDistrict('{{ itemProvince.province }}')">{{ itemProvince.province }}</option>
+          			{% endfor %}
+        		</select>
+      		</label>
+		</div>
+		
+		<div class="large-2 columns">
+			<label>District
+        		<select id="gf-district">
+          			<option value="0">-- Select --</option>
+        		</select>
+      		</label>
+      	</div>
+      	
+      	
+		<div class="large-2 columns">
+			<label>Village
+        		<select id="gf-village">
+          			<option value="0">-- Select --</option>
+        		</select>
+      		</label>
+      	</div>
+      	
+      	
+		<div class="large-4 columns">
+			<label>Garment Factory
+        		<select id="garment">
+          			<option value="0">-- Select --</option>
+        		</select>
+      		</label>
+      	</div>
+      	
+      	<div class="large-2 columns"><input type="hidden" name="gf-gps" id="gf-gps" /></div>
+      	
+	</div>
+	
+	<h6><u>Current address</u></h6>
+	<div class="row">
+	      <div class="large-2 columns">
+	      		<label> Street
+  					<input type="text" name="street" id="street" value="">
+				</label>
+	      </div>
+	      
+	      <div class="large-2 columns">
+	      		<label> Village
+  					<input type="text" name="village" id="village" value="">
+				</label>
+	      </div>
+	      
+	      <div class="large-2 columns">
+	      		<label> Commune
+  					<input type="text" name="commune" id="commune" value="">
+				</label>
+	      </div>	      
+	      
+	      <div class="large-2 columns">
+	      		<label> District
+  					<input type="text" name="district" id="district" value="">
+				</label>
+	      </div>
+	      
+	      <div class="large-2 columns">
+	      		<label> Province
+  					<input type="text" name="province" id="province" value="">
+				</label>
+	      </div>
+	      
+	      <div class="large-2 columns"></div>
+	</div>
+    </div>
+    
+    
+	
+	<h5>2) Referred Services</h5>
+	
+	<div class="callout secondary">
+	{% for itemService in allServices %}
+    <input type="checkbox" 
+    		name="service[]" 
+    		id="service-{{ itemService.id_services }}" value="{{ itemService.id_services }}" />
+    <label for="service-{{ itemService.id_services }}">{{ itemService.service_name }}</label>
+	{% endfor %}
+	<input type="text" name="service-other" value="" placeholder="Tape here if other ... ">
+	</div>
+	
+	<h5>3) Health Facility</h5>
+	<div class="callout secondary">
+	<p>Choose a Facility that is closest to the client's home or <<name of garment factory>> </p>
+	
+	<p>Do you want to want to search for suitable health facilities based on the selected services and the location of ?</p>
+	<input type="radio" name="searchtype" class="searchtype" value="gf" id="search-type-gf" /><label for="search-type-gf">Garment Factory</label> <br />
+	<input type="radio" name="searchtype" class="searchtype" value="cr" id="search-type-ca" checked="checked" /><label for="search-type-ca">Client's residence</label>
+	
+	</div>
+	 <div class="row">
+	 	<div class="large-2 columns res-col">
+	      		<h5>Search Criteria</h5>
+	      		<hr />
+	      		<label> Number of Results
+  					<input id="numberResults" type="text" value="10" />
+				</label>	      
+				<button type="button" class="success button" onclick="codeAddress();">SEARCH</button>	
+			
+			<div id="closest-fac-div" class="callout success"></div>
+	    </div>
+	    <div class="large-4 columns res-col">
+	    	<h5>GIS Online Directory</h5>
+	      	<hr />
+	      	<div id="map_wrapper">
+    			<div id="map_canvas" class="mapping"></div>
+    		</div>
+	    </div>
+	      
+	    <div class="large-3 columns res-col">
+	      		<h5>Itineraire</h5>
+	      		<hr />
+	      		<div id="direction-panel"></div>
+	    </div>
+	    
+	    <div class="large-3 columns">
+	      		<h5>Selected Health Facility</h5>
+	      		<hr />
+	      		
+	      		<input type="hidden" name="id_selected_facility" id="id_selected_facility" value="" />
+	      		<div class="callout secondary">
+	      		<div id="selected-panel"></div>
+	      		</div>
+	      </div>
+	    
+	 </div>
+    <br />
+    <br />
+    <div class="callout secondary">
+    <div class="row">
+	      <div class="large-6 columns">
+	      		<label> Referral Date
+  					<input type="text" name="referral-date" value="" id="referral-date"  />
+				</label>
+	      </div>
+	      <div class="large-6 columns">
+	      		<label> Expiry Date
+  					<input type="text" name="expiry-date" value="" id="expiry-date"  />
+				</label>
+	      </div>
+	</div>
+	
+	<div class="row">
+	      <div class="large-12 columns">
+	      		<p>What language do you want to use in the referral SMS ?</p>
+	      		<input type="radio" name="language-sms" value="khmer" id="lang-khmer"><label for="lang-khmer">Khmer</label>
+	      		<input type="radio" name="language-sms" value="english" id="lang-english" checked="checked"><label for="lang-english">English</label>
+	      </div>
+	</div>
+	</div>
+	
+	<div class="row">
+	      <div class="large-12 columns">
+	      		<a href="#" class="button alert radius">Cancel</a>
+	      		<buttun type="submit" class="button success round">Save</button>
+	      </div>
+	</div>
+	
+	
+    
+</div>
+
+
+
+<script type="text/javascript">
+
+ _markers = [
+    {{markerList|safe}}
+];
+
+ _infoWindowContent = [
+    {{infowList|safe}}
+];
+  
+ 
+ $(function(){
+	 autoSetExpiryDate();
+ });
+ 
+ 
+</script>
+<script src="{% static 'referral_system/js/map_functions.js' %}"></script>
+<script src="{% static 'referral_system/js/garment_cascade_select.js' %}"></script>
+
+
+{% endblock %}

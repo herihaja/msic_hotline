@@ -1,0 +1,57 @@
+{% load staticfiles %}
+<html>
+    <head>
+        <title>MSIC Hotline Platform</title>
+        <link rel="stylesheet" href="{% static 'referral_system/foundation-6.2.3/css/foundation.css' %}">
+    	<link rel="stylesheet" href="{% static 'referral_system/foundation-6.2.3/css/app.css' %}">
+        <link href='//fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="{% static 'referral_system/css/online.css' %}">
+        <link rel="stylesheet" href="{% static 'referral_system/css/foundation-datepicker.css' %}">
+        
+        
+        <script src="{% static 'referral_system/foundation-6.2.3/js/vendor/jquery.js' %}"></script>
+    </head>
+    <body>
+        <div id="msic-line">
+        	<div class="content-centered">
+        		<ul class="dropdown menu menu-profile" data-dropdown-menu>
+  					<li>
+    					<a href="#">Hi <b>{{ user.first_name }} {{ user.last_name }} </b></a>
+    					<ul class="menu">
+      						<li><a href="/referral_system/logout/">Sign out</a></li>
+      					</ul>
+    				</li>
+    			</ul>
+        	</div>
+        </div>
+        
+        <div class="content-centered">
+	        <div id="msic-header">
+		        <div id="logo">
+		        	<img src="http://www.mariestopes.org.kh/sites/staging.ethiopia.mariestopes.ipproducts.co.uk/files/msi-cambodia-logo-3.png" />
+		        </div>
+	        </div>
+	        <div id="msic-menu">
+		        <ul class="menu">
+				  <li {% if menuactive == "online" %} class="active" {% endif %}><a href="/referral_system/online/">NEW REFERRAL</a></li>
+				  <li {% if menuactive == "existing" %} class="active" {% endif %}><a href="/referral_system/existing/">EXISTING REFERALL</a></li>
+				</ul>
+	        </div>
+	        
+	        <div class="row">
+	      		<div class="large-12 columns">
+	        		{% block content %}
+	            	{% endblock %}
+	      		</div>
+	    	</div>
+        </div>
+        
+        
+        <!-- Include and launch foundation -->
+        
+    	<script src="{% static 'referral_system/foundation-6.2.3/js/vendor/what-input.js' %}"></script>
+    	<script src="{% static 'referral_system/foundation-6.2.3/js/vendor/foundation.js' %}"></script>
+    	<script src="{% static 'referral_system/js/foundation-datepicker.js' %}"></script>
+    	<script src="{% static 'referral_system/foundation-6.2.3/js/app.js' %}"></script>
+    </body>
+</html>
