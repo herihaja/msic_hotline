@@ -9,10 +9,11 @@ class AjaxFunction:
         SELECT
         distinct
         quest_16 AS parent,
-        quest_16 AS province 
+        quest_16 AS province,
+        quest_42 AS province_khmer 
         FROM
         sms_fac
-        GROUP BY quest_16
+        GROUP BY quest_16, quest_42
         ''')
         return listProvince
     
@@ -22,7 +23,8 @@ class AjaxFunction:
         SELECT
         distinct
         quest_16 AS parent,
-        quest_31 AS district 
+        quest_31 AS district,
+        quest_48 AS district_khmer  
         FROM
         sms_fac
         WHERE quest_16 LIKE \'''' + _province + '''\'
@@ -36,7 +38,8 @@ class AjaxFunction:
         SELECT
         distinct
         quest_31 AS parent,
-        quest_44 AS village 
+        quest_19 AS village,
+        quest_44 AS village_khmer 
         FROM
         sms_fac
         WHERE quest_31 LIKE \'''' + _district + '''\'
@@ -51,11 +54,12 @@ class AjaxFunction:
         SELECT
         distinct
         quest_16 AS parent,
-        quest_16 AS province 
+        quest_16 AS province,
+        quest_42 AS province_khmer  
         FROM
         sms_fac
         WHERE quest_22 LIKE 'Garment factory infirmary'
-        GROUP BY quest_16
+        GROUP BY quest_16, quest_42
         ''')
         return listProvince
     
@@ -65,7 +69,8 @@ class AjaxFunction:
         SELECT
         distinct
         quest_16 AS parent,
-        quest_31 AS district 
+        quest_31 AS district,
+        quest_48 AS district_khmer 
         FROM
         sms_fac
         WHERE 
@@ -81,7 +86,8 @@ class AjaxFunction:
         SELECT
         distinct
         quest_31 AS parent,
-        quest_44 AS village 
+        quest_19 AS village,
+        quest_44 AS village_khmer 
         FROM
         sms_fac
         WHERE

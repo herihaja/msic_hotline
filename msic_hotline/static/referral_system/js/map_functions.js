@@ -79,14 +79,28 @@ function initialize() {
         //google.maps.event.removeListener(boundsListener);
     });
     
-    direction = new google.maps.DirectionsRenderer({
-        map   : map, 
-        panel : panel 
-    });
+    
     
 }
 
+function clearRouteAndFacility(){
+	if (direction != null) {
+		direction.setMap(null);
+		direction = null;
+	}
+	$("#direction-panel").html(" ");
+	$("#selected-panel").html(" ");
+	$("#id_selected_facility").val("");
+	$("#btn-itineraire").hide();
+	direction = new google.maps.DirectionsRenderer({
+        map   : map, 
+        panel : panel 
+    });
+}
+
 function codeAddress() {
+	clearRouteAndFacility();
+	
 	// cr = client residence
 	// gf = garment factory
 	var search_type = $( "input:radio[name='searchtype']:checked" ).val();
@@ -120,14 +134,19 @@ function codeAddress() {
             closest = findClosestN(results[0].geometry.location, numResults);
             
             bounds_2 = new google.maps.LatLngBounds();
+            bounds_2.extend(customerMarker.getPosition());
             
             var _closest_div = "";
             for (var i = 0; i < closest.length; i++) {
                 closest[i].setMap(map);
                 bounds_2.extend(closest[i].getPosition());
                 
+                
+                var dist_km = Math.round(closest[i].distance / 1000).toFixed(2);
+                
                 //populate div
-                _closest_div += "<li onclick='animateSpecificMarker(" + closest[i].distance+ ")'>" + closest[i].title +  " </li>" ;
+                _closest_div += "<li class='list-closest-marker' onclick='animateSpecificMarker(" + closest[i].distance+ ")'>" + closest[i].title + " </li>" ;
+                //_closest_div += "<li class='list-closest-marker' onclick='animateSpecificMarker(" + closest[i].distance+ ")'>" + closest[i].title + " [" + dist_km +  "km ] </li>" ;
                 
             }
             if(closest.length > 0) {
@@ -168,6 +187,7 @@ function animateSpecificMarker(_distance) {
     }
 	calculate(markers[_index].getPosition());
 	displaySelectedFacility(_index);
+	$("#btn-itineraire").show();
 }
 
 function calculate(_destination){
@@ -192,22 +212,31 @@ function displaySelectedFacility(_index){
 	var _selectedMarker = listeMarkers[_index] ;
 	var _html_selected = "";
 	
-	_html_selected += "<h5>" + _selectedMarker[0] + "</h5>";
-	_html_selected += "<h6>Address</h6>";
-	_html_selected += "<p>" + _selectedMarker[2] + " ";
-	_html_selected += "" + _selectedMarker[3] + " ";
+	_html_selected += " <span class='round label warning'><h6>" + _selectedMarker[0] + " <br/>" + _selectedMarker[19] + "</h6></span>";
+	_html_selected += "<h6>Address [EN]</h6>";
+	_html_selected += "<p>" + _selectedMarker[3] + " ";
 	_html_selected += "" + _selectedMarker[4] + " ";
 	_html_selected += "" + _selectedMarker[5] + " ";
-	_html_selected += "" + _selectedMarker[6] + "</p> ";
-	_html_selected += "<h6>Contact Telephone</h6>";
-	_html_selected += "<p>" + _selectedMarker[7] + "</p>";
-	_html_selected += "<h6>Opening Hours</h6>";
-	_html_selected += "<p>" + _selectedMarker[8] + "</p>";
-	_html_selected += "<h6>Available Services</h6>";
-	_html_selected += "<p><b>FP Services: </b>" + _selectedMarker[9] + "</p>";
-	_html_selected += "<p><b>Safe abortion services: </b>" + _selectedMarker[10] + ", " + _selectedMarker[11] + "</p>";
+	_html_selected += "" + _selectedMarker[6] + " ";
+	_html_selected += "" + _selectedMarker[7] + "</p> ";
 	
-	$("#id_selected_facility").val();
+	_html_selected += "<h6>Address [KHMER]</h6>";
+	_html_selected += "<p>" + _selectedMarker[18] + " ";
+	_html_selected += "" + _selectedMarker[17] + " ";
+	_html_selected += "" + _selectedMarker[16] + " ";
+	_html_selected += "" + _selectedMarker[15] + " ";
+	_html_selected += "" + _selectedMarker[14] + "</p> ";
+	
+	_html_selected += "<h6>Contact Telephone</h6>";
+	_html_selected += "<p>" + _selectedMarker[8] + "</p>";
+	_html_selected += "<h6>Opening Hours</h6>";
+	_html_selected += "<p>" + _selectedMarker[9] + "</p>";
+	_html_selected += "<h6>Available Services</h6>";
+	_html_selected += "<p><b>FP Services: </b>" + _selectedMarker[10] + "</p>";
+	_html_selected += "<p><b>Safe abortion services: </b>" + _selectedMarker[11] + ", " + _selectedMarker[12] + "</p>";
+	
+	//alert(_selectedMarker[13]);
+	$("#id_selected_facility").val(_selectedMarker[13]);
 	$("#selected-panel").html(_html_selected);
 	
 }

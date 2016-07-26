@@ -15,30 +15,22 @@ body, body a, body p { font-size: 12px;}
 #msic-header { margin: 10px 0; }
 #msic-menu { margin-bottom: 20px; }
 
-#map_wrapper {
-	width: 100%;
-    height: 400px;
-}
+#map_wrapper { width: 100%; height: 500px; }
 
-#map_canvas {
-    width: 100%;
-    height: 100%;
-}
+#map_canvas { width: 100%; height: 100%; }
 
-#closest-fac-div {
-	
-}
+.list-closest-marker { cursor: pointer; text-decoration: underline; color: #2199e8; }
+.list-closest-marker {  }
 
-#direction-panel {
-	height: 400px;
-	overflow: auto;
-}
+#direction-panel { height: 400px; overflow: auto; }
 
 .res-col { border-right: 1px solid rgba(10, 10, 10, 0.25); margin-right: 0px; min-height: 400px; }
 
 .copyright { text-align: right; padding-top: 30px;}
 .copyright p { font-size: 10px; }
 .copyright p img { width: 140px; }
+#itineraire-dropdown { border: 2px solid #2199e8; }
+
 
 /*Login page*/
 .signup-panel {
@@ -59,29 +51,19 @@ body, body a, body p { font-size: 12px;}
 }
 
 .signup-panel .welcome {
-
   font-size: 26px;
-
   text-align: center;
-
   margin-left: 0;
-
 }
 
 .signup-panel p {
-
   font-size: 13px;
-
   font-weight: 200;
-
   margin-left: 25%;
-
 }
 
 .signup-panel .button {
-
   margin-left: 35%;
-
 }
 
 

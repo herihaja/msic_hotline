@@ -4,8 +4,9 @@ from django.contrib import admin
 
 
 from .models import Client, SmsFac
-from referral_system.models import Service
+from referral_system.models import Service, Appointment
 
 admin.site.register(Client)
 admin.site.register(SmsFac)
 admin.site.register(Service)
+admin.site.register(Appointment)

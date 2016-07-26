@@ -2,7 +2,28 @@
 {% load staticfiles%}
 
 {% block content %}
-    <h5>1) Client information</h5>
+
+<form method="post" action="/referral_system/referralSaveExistingForm/"  data-abide novalidate>
+	<input type="hidden" name="form_type" value="existing_form" />
+	
+	<!-- Add "display: none" right away -->
+    <div data-abide-error class="alert callout" style="display: none;">
+    	<p><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> There are some errors in your form.</p>
+  	</div>
+	
+	<h5>1) Referral ID</h5>
+	<div class="callout secondary">
+    	<div class="row">
+	    	<div class="large-6 columns">
+	    		<label> Referral ID
+  					<input type="text" name="referral_id" value="" placeholder="M000001">
+  					<span class="form-error">The Referral ID field is required !</span>
+				</label>
+	    	</div>
+	    </div>
+	</div>
+	
+    <h5>2) Client informations</h5>
     
     <div class="callout secondary">
     <div class="row">
@@ -15,17 +36,19 @@
 				</label>
 				
 				<label> Telephone
-  					<input type="text" name="phone" value="">
+  					<input type="text" name="phone" value="" required>
+  					<span class="form-error">Add a phone number</span>
 				</label>
 
 	      </div>
 	      <div class="large-6 columns">
 	      		<label> Age
-  					<input type="text" name="age" value="">
+  					<input type="text" name="age" value="" required pattern="number">
+  					<span class="form-error">Enter the client's age!</span>
 				</label>
 				
 				<label> Occupation
-  					<input type="text" name="phone" value="">
+  					<input type="text" name="occupation" value="">
 				</label>
 				
 				
@@ -35,18 +58,18 @@
 	
 	<h6><u>Garment Factory</u></h6>
 	<div class="row">
-		<div class="large-2 columns">
+		<div class="large-3 columns">
 			<label>Province
         		<select id="gf-province">
           			<option value="0">-- Select --</option>
           			{% for itemProvince in garmentProvinces %}
-          				<option value="{{ itemProvince.province }}" onclick="loadGFDistrict('{{ itemProvince.province }}')">{{ itemProvince.province }}</option>
+          				<option value="{{ itemProvince.province }}" onclick="loadGFDistrict('{{ itemProvince.province }}')">{{ itemProvince.province }}  [{{ itemProvince.province_khmer }}]</option>
           			{% endfor %}
         		</select>
       		</label>
 		</div>
 		
-		<div class="large-2 columns">
+		<div class="large-3 columns">
 			<label>District
         		<select id="gf-district">
           			<option value="0">-- Select --</option>
@@ -55,7 +78,7 @@
       	</div>
       	
       	
-		<div class="large-2 columns">
+		<div class="large-3 columns">
 			<label>Village
         		<select id="gf-village">
           			<option value="0">-- Select --</option>
@@ -64,15 +87,14 @@
       	</div>
       	
       	
-		<div class="large-4 columns">
+		<div class="large-3 columns">
 			<label>Garment Factory
-        		<select id="garment">
+        		<select id="garment" name="selected_gf">
           			<option value="0">-- Select --</option>
         		</select>
       		</label>
+      		<input type="hidden" name="gf-gps" id="gf-gps" />
       	</div>
-      	
-      	<div class="large-2 columns"><input type="hidden" name="gf-gps" id="gf-gps" /></div>
       	
 	</div>
 	
@@ -80,31 +102,36 @@
 	<div class="row">
 	      <div class="large-2 columns">
 	      		<label> Street
-  					<input type="text" name="adr_street" id="adr_street" value="">
+  					<input type="text" name="adr_street" id="adr_street" value="" required>
+  					<span class="form-error">This field is required</span>
 				</label>
 	      </div>
 	      
 	      <div class="large-2 columns">
 	      		<label> Village
-  					<input type="text" name="adr_village" id="adr_village" value="">
+  					<input type="text" name="adr_village" id="adr_village" value="" required>
+  					<span class="form-error">This field is required</span>
 				</label>
 	      </div>
 	      
 	      <div class="large-2 columns">
 	      		<label> Commune
-  					<input type="text" name="adr_commune" id="adr_commune" value="">
+  					<input type="text" name="adr_commune" id="adr_commune" value="" required>
+  					<span class="form-error">This field is required</span>
 				</label>
 	      </div>	      
 	      
 	      <div class="large-2 columns">
 	      		<label> District
-  					<input type="text" name="adr_district" id="adr_district" value="">
+  					<input type="text" name="adr_district" id="adr_district" value="" required>
+  					<span class="form-error">This field is required</span>
 				</label>
 	      </div>
 	      
 	      <div class="large-2 columns">
 	      		<label> Province
-  					<input type="text" name="adr_province" id="adr_province" value="">
+  					<input type="text" name="adr_province" id="adr_province" value="" required>
+  					<span class="form-error">This field is required</span>
 				</label>
 	      </div>
 	      
@@ -114,7 +141,7 @@
     
     
 	
-	<h5>2) Referred Services</h5>
+	<h5>3) Referred Services</h5>
 	
 	<div class="callout secondary">
 	{% for itemService in allServices %}
@@ -123,10 +150,10 @@
     		id="service-{{ itemService.id_services }}" value="{{ itemService.id_services }}" />
     <label for="service-{{ itemService.id_services }}">{{ itemService.service_name }}</label>
 	{% endfor %}
-	<input type="text" name="service-other" value="" placeholder="Tape here if other ... ">
+	<input type="text" name="service_other" value="" placeholder="Tape here if other ... ">
 	</div>
 	
-	<h5>3) Select a Referral Health Facility</h5>
+	<h5>4) Select a Referral Health Facility</h5>
 	
 	 <div class="row">
 	 	<div class="large-4 columns res-col">
@@ -137,20 +164,20 @@
         		<select id="province">
           			<option value="0">-- Select --</option>
           			{% for itemProvince in allProvinces %}
-          				<option value="{{ itemProvince.province }}" onclick="loadDistrict('{{ itemProvince.province }}')">{{ itemProvince.province }}</option>
+          				<option value="{{ itemProvince.province }}" onclick="loadDistrict('{{ itemProvince.province }}')">{{ itemProvince.province }} [{{ itemProvince.province_khmer }}]</option>
           			{% endfor %}
         		</select>
       		</label>
       		
 			<label>District
         		<select id="district">
-          			<option value="0">-- Select --</option>
+          			<option value="0">Select</option>
         		</select>
       		</label>	
       		
       		<label>Village
         		<select id="village">
-          			<option value="">Test</option>
+          			<option value="">Select</option>
         		</select>
       		</label>
       		</div>
@@ -160,8 +187,8 @@
 	    	<h5>Find Facility</h5>
 	    	<div class="callout secondary">
 	    	<label>Health Facility
-        		<select id="selected_facility" name="selected_facility">
-          			<option value="">Test</option>
+        		<select id="selected_facility" name="id_selected_facility">
+          			<option value="0">Select</option>
         		</select>
       		</label>
 	    	</div>
@@ -180,12 +207,14 @@
     <div class="row">
 	      <div class="large-6 columns">
 	      		<label> Referral Date
-  					<input type="text" name="referral-date" value="" id="referral-date"  />
+  					<input type="text" name="referral_date" value="" id="referral-date"  required />
+  					<span class="form-error">Select the Referral Date !</span>
 				</label>
 	      </div>
 	      <div class="large-6 columns">
 	      		<label> Expiry Date
-  					<input type="text" name="expiry-date" value="" id="expiry-date"  />
+  					<input type="text" name="expiry_date" value="" id="expiry-date"  required />
+  					<span class="form-error">Select the Expiry Date !</span>
 				</label>
 	      </div>
 	</div>
@@ -193,22 +222,20 @@
 	<div class="row">
 	      <div class="large-12 columns">
 	      		<p>What language do you want to use in the referral SMS ?</p>
-	      		<input type="radio" name="language-sms" value="khmer" id="lang-khmer"><label for="lang-khmer">Khmer</label>
-	      		<input type="radio" name="language-sms" value="english" id="lang-english" checked="checked"><label for="lang-english">English</label>
+	      		<input type="radio" name="language_sms" value="khmer" id="lang-khmer"><label for="lang-khmer">Khmer</label>
+	      		<input type="radio" name="language_sms" value="english" id="lang-english" checked="checked"><label for="lang-english">English</label>
 	      </div>
 	</div>
 	</div>
 	
 	<div class="row">
 	      <div class="large-12 columns">
-	      		<a href="#" class="button alert radius">Cancel</a>
-	      		<button type="submit" class="button success round">Save</button>
+	      		<a href="/referral_system/existing/" class="button alert radius">Cancel</a>
+	      		<button type="submit" class="button success round"  onclick="return validateForm();">Save</button>
 	      </div>
 	</div>
 	
 	
-    
-</div>
 
 <script type="text/javascript">  
  
@@ -216,10 +243,17 @@
 	 autoSetExpiryDate();
  });
  
- 
+ function validateForm(){
+	 if($("#selected_facility").val() == '0' || $("#selected_facility").val() == 0) {
+		 alert("Please select a suitable Health Facility !"); return false;
+	 }
+	 
+	 return true;
+ }
 </script>
 
 <script src="{% static 'referral_system/js/existing_referral.js' %}"></script>
 <script src="{% static 'referral_system/js/garment_cascade_select.js' %}"></script>
 
+</form>
 {% endblock %}

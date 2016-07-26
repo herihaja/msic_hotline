@@ -1,4 +1,4 @@
-function loadDistrict(_province){
+	function loadDistrict(_province){
 		$.ajax({
 		    url: '/referral_system/ajaxListDistrict/',
 		    data: { province : _province },
@@ -8,7 +8,7 @@ function loadDistrict(_province){
 		    	var _html = "<option value='0'>-- Select --</option>";
 				$.each(dataJson, function(index) {
 					_html += "<option onclick=\"loadVillage('" + dataJson[index].district + "')\" value='" + dataJson[index].district + "'> ";
-					_html +=  dataJson[index].district ;
+					_html +=  dataJson[index].district + " [" + dataJson[index].district_khmer + "]" ;
 					_html += "</option> ";
 		        });
 				$("#district").html(_html);
@@ -30,7 +30,7 @@ function loadDistrict(_province){
 		    	var _html = "<option value='0'>-- Select --</option>";
 				$.each(dataJson, function(index) {
 					_html += "<option onclick=\"loadFacilities('" + dataJson[index].village + "')\" value='" + dataJson[index].village + "'> ";
-					_html +=  dataJson[index].village ;
+					_html +=  dataJson[index].village + " [" + dataJson[index].village_khmer + "]" ;
 					_html += "</option> ";
 		        });
 				$("#village").html(_html);
@@ -53,7 +53,7 @@ function loadDistrict(_province){
 		    	var _html = "<option value='0'>-- Select --</option>";
 				$.each(dataJson, function(index) {
 					_html += "<option onclick=\"selectFacility('" + dataJson[index].fields.quest_21 + "')\" value='" + dataJson[index].fields.quest_21 + "'> ";
-					_html +=  dataJson[index].fields.quest_20 ;
+					_html +=  dataJson[index].fields.quest_20 +  + " [" + dataJson[index].fields.quest_12 + "]" ;
 					_html += "</option> ";
 		        });
 				$("#selected_facility").html(_html);
@@ -74,13 +74,22 @@ function loadDistrict(_province){
 		    	data = data.split('====');
 		    	
 		    	var _html = "<div class='callout success'>";
-		    	_html += "<h5>" + data[0] + "</h5>";
-		    	_html += "<h6>Address</h6>";
+		    	_html += "<span class='round label warning'><h6>" + data[0] + "<br>" + data[12] + "</h6></span><hr />";
+		    	
+		    	_html += "<h6>Address [EN]</h6>";
 		    	_html += "<p>" + data[2] + " ";
 		    	_html += "" + data[3] + " ";
 		    	_html += "" + data[4] + " ";
 		    	_html += "" + data[5] + " ";
 		    	_html += "" + data[6] + "</p> ";
+		    	
+		    	_html += "<h6>Address [KHMER]</h6>";
+		    	_html += "<p>" + data[13] + " ";
+		    	_html += "" + data[14] + " ";
+		    	_html += "" + data[15] + " ";
+		    	_html += "" + data[16] + " ";
+		    	_html += "" + data[17] + "</p> ";
+		    	
 		    	_html += "<h6>Contact Telephone</h6>";
 		    	_html += "<p>" + data[7] + "</p>";
 		    	_html += "<h6>Opening Hours</h6>";
@@ -90,6 +99,7 @@ function loadDistrict(_province){
 		    	_html += "<p><b>Safe abortion services: </b>" + data[10] + ", " + data[11] + "</p>";
 		    	_html += "</div>";
 				
+		    	//$("#id_selected_facility").val(_quest_21);
 				$("#selected-facility-div").html(_html);
 		    },
 		    failure: function(data) { 

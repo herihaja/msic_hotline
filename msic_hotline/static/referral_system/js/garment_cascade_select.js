@@ -41,7 +41,7 @@
 		    	var _html = "<option value='0'>-- Select --</option>";
 				$.each(dataJson, function(index) {
 					_html += "<option onclick=\"loadGFVillage('" + dataJson[index].district + "')\" value='" + dataJson[index].district + "'> ";
-					_html +=  dataJson[index].district ;
+					_html +=  dataJson[index].district + " [" + dataJson[index].district_khmer + "]" ;
 					_html += "</option> ";
 		        });
 				$("#gf-district").html(_html);
@@ -63,7 +63,7 @@
 		    	var _html = "<option value='0'>-- Select --</option>";
 				$.each(dataJson, function(index) {
 					_html += "<option onclick=\"loadGarment('" + dataJson[index].village + "')\" value='" + dataJson[index].village + "'> ";
-					_html +=  dataJson[index].village ;
+					_html +=  dataJson[index].village + " [" + dataJson[index].village_khmer + "]" ;
 					_html += "</option> ";
 		        });
 				$("#gf-village").html(_html);
@@ -86,7 +86,7 @@
 		    	var _html = "<option value='0'>-- Select --</option>";
 				$.each(dataJson, function(index) {
 					_html += "<option onclick=\"selectGarment('" + dataJson[index].fields.quest_21 + "','" + dataJson[index].fields.quest_25 + "')\" value='" + dataJson[index].fields.quest_21 + "'> ";
-					_html +=  dataJson[index].fields.quest_20 ;
+					_html +=  dataJson[index].fields.quest_20  + " [" + dataJson[index].fields.quest_12 + "]" ;
 					_html += "</option> ";
 		        });
 				$("#garment").html(_html);

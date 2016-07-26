@@ -10,14 +10,15 @@
 from __future__ import unicode_literals
 
 from django.db import models
+        
 
 
 class Appointment(models.Model):
     referral_id = models.CharField(primary_key=True, max_length=30)
     referral_date = models.DateField(blank=True, null=True)
     language = models.CharField(max_length=20, blank=True, null=True)
-    id_client = models.ForeignKey('Client', db_column='id_client', blank=True, null=True)
-    id_facility = models.ForeignKey('SmsFac', db_column='id_facility', blank=True, null=True)
+    id_client = models.IntegerField(blank=True, null=True)
+    id_facility = models.CharField(max_length=30, blank=True, null=True)
     notification_client_id = models.IntegerField(blank=True, null=True)
     notification_facility_id = models.IntegerField(blank=True, null=True)
     mode = models.IntegerField(blank=True, null=True)
@@ -28,12 +29,12 @@ class Appointment(models.Model):
 
 
 class Client(models.Model):
-    id_client = models.IntegerField(primary_key=True)
+    id_client = models.AutoField(primary_key=True)
     sex = models.CharField(max_length=1, blank=True, null=True)
     age = models.IntegerField(blank=True, null=True)
     phone = models.CharField(max_length=100, blank=True, null=True)
     occupation = models.CharField(max_length=250, blank=True, null=True)
-    garment = models.ForeignKey('SmsFac', blank=True, null=True)
+    garment_id = models.CharField(max_length=100, blank=True, null=True)
     adr_street = models.CharField(max_length=255, blank=True, null=True)
     adr_village = models.CharField(max_length=255, blank=True, null=True)
     adr_commune = models.CharField(max_length=255, blank=True, null=True)
@@ -47,7 +48,7 @@ class Client(models.Model):
 
 class OtherServices(models.Model):
     other_services_name = models.CharField(max_length=256, blank=True, null=True)
-    id_appointment = models.ForeignKey(Appointment, db_column='id_appointment', blank=True, null=True)
+    id_appointment = models.CharField(max_length=250, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -61,6 +62,13 @@ class Service(models.Model):
     class Meta:
         managed = False
         db_table = 'SERVICE'
+        
+class VoucherCode(models.Model):
+    unique_id = models.CharField(primary_key=True, max_length=10)
+    
+    class Meta:
+        managed = False
+        db_table = 'VOUCHER_CODE'
 
 
 class AuthGroup(models.Model):
@@ -213,8 +221,8 @@ class DwQuestionnaire(models.Model):
 
 
 class ReferralService(models.Model):
-    id_app = models.ForeignKey(Appointment, db_column='id_app')
-    id_service = models.ForeignKey(Service, db_column='id_service')
+    id_app = models.CharField(max_length=30)
+    id_service = models.SmallIntegerField()
 
     class Meta:
         managed = False
@@ -258,7 +266,6 @@ class SmsApi(models.Model):
 
 
 class SmsFac(models.Model):
-    id = models.AutoField(primary_key=True)
     id_niveau = models.IntegerField(blank=True, null=True)
     status = models.CharField(max_length=10, blank=True, null=True)
     code_questionnaire = models.CharField(max_length=20, blank=True, null=True)
@@ -286,7 +293,7 @@ class SmsFac(models.Model):
     quest_18 = models.CharField(max_length=250, blank=True, null=True)
     quest_19 = models.CharField(max_length=250, blank=True, null=True)
     quest_20 = models.CharField(max_length=250, blank=True, null=True)
-    quest_21 = models.CharField(unique=True, max_length=250, blank=True, null=True)
+    quest_21 = models.CharField(unique=True, max_length=250)
     quest_22 = models.CharField(max_length=250, blank=True, null=True)
     quest_23 = models.CharField(max_length=250, blank=True, null=True)
     quest_24 = models.CharField(max_length=250, blank=True, null=True)
