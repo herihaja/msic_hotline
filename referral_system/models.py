@@ -329,6 +329,35 @@ class SmsFac(models.Model):
         db_table = 'sms_fac'
 
 
+    def getMarker(self):
+        marker = "['" + (self.quest_20).replace("'", " ") #name 0
+        marker += "'," + self.quest_25 #coordinnates 1-2
+        marker += ",'" + (self.quest_17).replace("'", " ") #street 3
+        marker += "','" + (self.quest_19).replace("'", " ") #village 4
+        marker += "','" + (self.quest_14).replace("'", " ") #commune 5
+        marker += "','" + (self.quest_31).replace("'", " ") #district 6
+        marker += "','" + (self.quest_16).replace("'", " ") #province 7
+        marker += "','" + (self.quest_13).replace("'", " ") #phone 8
+        marker += "; "+ (self.quest_27).replace("'", " ") #phone 1st
+        marker += "; "+ (self.quest_32).replace("'", " ") #phone 2nd
+        marker += "','" + (self.quest_49).replace("'", " ") #hours 9
+        marker += "','" + (self.quest_28).replace("'", " ") #FP Services 10
+        marker += "','" + (self.quest_29).replace("'", " ") #Safe abortion services 11
+        marker += "','" + (self.quest_38).replace("'", " ") #Safe abortion services 12
+        marker += "','" + (self.quest_21).replace("'", " ") #ID 13
+
+        #khmer
+        marker += "','" + (self.quest_42).replace("'", " ") #province khmer 14
+        marker += "','" + (self.quest_48).replace("'", " ") #district khmer 15
+        marker += "','" + (self.quest_40).replace("'", " ") #commune khmer 16
+        marker += "','" + (self.quest_44).replace("'", " ") #village khmer 17
+        marker += "','" + (self.quest_35).replace("'", " ") #street khmer 18
+        marker += "','" + (self.quest_12).replace("'", " ") #name khmer 19
+
+        marker += "']"
+        return marker
+
+
 class SmsFacTmp(models.Model):
     id = models.AutoField(primary_key=True)
     id_niveau = models.IntegerField(blank=True, null=True)

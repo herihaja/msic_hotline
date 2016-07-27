@@ -23,39 +23,8 @@ class Referral:
         self.allServices = Service.objects.all()
     
     def createFacilitiesMarkers(self):
-        markerCptr = 0;
-        
-        for  itemFacility in self.allFacilities:
-            if(itemFacility.quest_25 != ""):
-                if(markerCptr != 0):
-                    self.facilityMarkerList += ","
-                self.facilityMarkerList += "['" + (itemFacility.quest_20).replace("'", " ") #name 0
-                self.facilityMarkerList += "'," + itemFacility.quest_25 #coordinnates 1-2
-                self.facilityMarkerList += ",'" + (itemFacility.quest_17).replace("'", " ") #street 3
-                self.facilityMarkerList += "','" + (itemFacility.quest_19).replace("'", " ") #village 4
-                self.facilityMarkerList += "','" + (itemFacility.quest_14).replace("'", " ") #commune 5
-                self.facilityMarkerList += "','" + (itemFacility.quest_31).replace("'", " ") #district 6
-                self.facilityMarkerList += "','" + (itemFacility.quest_16).replace("'", " ") #province 7
-                self.facilityMarkerList += "','" + (itemFacility.quest_13).replace("'", " ") #phone 8
-                self.facilityMarkerList += "; "+ (itemFacility.quest_27).replace("'", " ") #phone 1st
-                self.facilityMarkerList += "; "+ (itemFacility.quest_32).replace("'", " ") #phone 2nd
-                self.facilityMarkerList += "','" + (itemFacility.quest_49).replace("'", " ") #hours 9
-                self.facilityMarkerList += "','" + (itemFacility.quest_28).replace("'", " ") #FP Services 10
-                self.facilityMarkerList += "','" + (itemFacility.quest_29).replace("'", " ") #Safe abortion services 11
-                self.facilityMarkerList += "','" + (itemFacility.quest_38).replace("'", " ") #Safe abortion services 12
-                self.facilityMarkerList += "','" + (itemFacility.quest_21).replace("'", " ") #ID 13
-                
-                #khmer
-                self.facilityMarkerList += "','" + (itemFacility.quest_42).replace("'", " ") #province khmer 14
-                self.facilityMarkerList += "','" + (itemFacility.quest_48).replace("'", " ") #district khmer 15
-                self.facilityMarkerList += "','" + (itemFacility.quest_40).replace("'", " ") #commune khmer 16
-                self.facilityMarkerList += "','" + (itemFacility.quest_44).replace("'", " ") #village khmer 17
-                self.facilityMarkerList += "','" + (itemFacility.quest_35).replace("'", " ") #street khmer 18
-                self.facilityMarkerList += "','" + (itemFacility.quest_12).replace("'", " ") #name khmer 19
-                
-                self.facilityMarkerList += "']"
-            
-                markerCptr = markerCptr + 1
+        markers = [facility.getMarker() for facility in self.allFacilities if facility.quest_25 != '']
+        self.facilityMarkerList = ','.join(markers)
                 
     def createFacilityInfoswindow(self):
         infowCptr = 0;
