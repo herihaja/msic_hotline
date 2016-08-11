@@ -7,6 +7,7 @@ var customerMarker = null;
 var listeMarkers = _markers;
 var markers = [];
 var closest = [];
+var referredServices = [];
 var map;
 var address_icon = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
 
@@ -47,7 +48,7 @@ function initialize() {
         marker = new google.maps.Marker({
             position: position,
             map: map,
-            title: listeMarkers[i][0]
+            title: listeMarkers[i][19]
         });
         /*
         marker = new google.maps.Marker({
@@ -62,12 +63,15 @@ function initialize() {
         markers.push(marker);
         
         // Allow each marker to have an info window    
+        
         google.maps.event.addListener(marker, 'click', (function(marker, i) {
             return function() {
-                infoWindow.setContent(infoWindowContent[i][0]);
-                infoWindow.open(map, marker);
+            	selectClickedMarker(i);
+                //infoWindow.setContent(infoWindowContent[i][0]);
+                //infoWindow.open(map, marker);
             }
         })(marker, i));
+        
 
         // Automatically center the map fitting all markers on the screen
         map.fitBounds(bounds);
@@ -83,7 +87,7 @@ function initialize() {
     
 }
 
-function clearRouteAndFacility(){
+function clearRoute(){
 	if (direction != null) {
 		direction.setMap(null);
 		direction = null;
@@ -92,27 +96,41 @@ function clearRouteAndFacility(){
 	$("#selected-panel").html(" ");
 	$("#id_selected_facility").val("");
 	$("#btn-itineraire").hide();
+}
+
+function clearRouteAndFacility(){
+	clearRoute();
 	direction = new google.maps.DirectionsRenderer({
         map   : map, 
         panel : panel 
     });
 }
 
+function getCheckedServices(){
+	referredServices = [];
+	$(".cb_services").each(function () {
+		if (this.checked) {
+			referredServices.push($( this ).val());
+	    }
+	});
+	//alert(JSON.stringify(referredServices));
+}
 function codeAddress() {
 	clearRouteAndFacility();
+	getCheckedServices();
 	
 	// cr = client residence
 	// gf = garment factory
 	var search_type = $( "input:radio[name='searchtype']:checked" ).val();
 	
 	if(search_type == 'cr') {
-		address = document.getElementById('street').value;
-		address += " " + document.getElementById('village').value;
-		address += " " + document.getElementById('commune').value;
-		address += " " + document.getElementById('district').value;
-		address += " " + document.getElementById('province').value;
+		address = document.getElementById('adr_street').value;
+		address += " " + document.getElementById('adr_village').value;
+		address += " " + document.getElementById('adr_commune').value;
+		address += " " + document.getElementById('adr_district').value;
+		address += " " + document.getElementById('adr_province').value;
 	} else {
-		address = document.getElementById('gf-gps').value;
+		address = document.getElementById('gf_gps').value;
 	}
     
     geocoder.geocode({
@@ -160,12 +178,33 @@ function codeAddress() {
     });
 }
 
+function filterFacilityByServices(){	
+	
+	filteredMarkersIndex = [];
+	for (var i = 0; i < listeMarkers.length; i++) {
+		facilityServices = listeMarkers[i][20].split(",");
+		serviceFound = 0;
+		
+		for (var j = 0; j < referredServices.length; j++) {
+			if(facilityServices.indexOf(referredServices[j]) > -1){
+				serviceFound++ ;
+			}
+		}
+		if(serviceFound > 0 || referredServices.length == 0){
+			filteredMarkersIndex.push(i);
+		}		
+	}
+	return filteredMarkersIndex;
+}
+
 function findClosestN(pt, numberOfResults) {
+	filteredMarkersIndex = filterFacilityByServices();
     var closest = [];
-    for (var i = 0; i < markers.length; i++) {
-        markers[i].distance = google.maps.geometry.spherical.computeDistanceBetween(pt, markers[i].getPosition());
-        markers[i].setMap(null);
-        closest.push(markers[i]);
+    for (var i = 0; i < filteredMarkersIndex.length; i++) {
+    	j = filteredMarkersIndex[i];
+        markers[j].distance = google.maps.geometry.spherical.computeDistanceBetween(pt, markers[j].getPosition());
+        markers[j].setMap(null);
+        closest.push(markers[j]);
     }
     closest.sort(sortByDist);
     return closest.splice(0,numberOfResults);
@@ -173,6 +212,18 @@ function findClosestN(pt, numberOfResults) {
 
 function sortByDist(a, b) {
     return (a.distance - b.distance)
+}
+
+function selectClickedMarker(_index){
+	
+	for (var i = 0; i < markers.length; i++) {
+		markers[i].setAnimation(null);
+    }
+	markers[_index].setAnimation(google.maps.Animation.BOUNCE);
+	//calculate(markers[_index].getPosition());
+	clearRoute();
+	displaySelectedFacility(_index);
+	
 }
 
 function animateSpecificMarker(_distance) {
@@ -212,13 +263,7 @@ function displaySelectedFacility(_index){
 	var _selectedMarker = listeMarkers[_index] ;
 	var _html_selected = "";
 	
-	_html_selected += " <span class='round label warning'><h6>" + _selectedMarker[0] + " <br/>" + _selectedMarker[19] + "</h6></span>";
-	_html_selected += "<h6>Address [EN]</h6>";
-	_html_selected += "<p>" + _selectedMarker[3] + " ";
-	_html_selected += "" + _selectedMarker[4] + " ";
-	_html_selected += "" + _selectedMarker[5] + " ";
-	_html_selected += "" + _selectedMarker[6] + " ";
-	_html_selected += "" + _selectedMarker[7] + "</p> ";
+	_html_selected += " <span class='round label warning'><h6>" + _selectedMarker[19] + " <br/>" + _selectedMarker[0] + "</h6></span>";	
 	
 	_html_selected += "<h6>Address [KHMER]</h6>";
 	_html_selected += "<p>" + _selectedMarker[18] + " ";
@@ -227,11 +272,19 @@ function displaySelectedFacility(_index){
 	_html_selected += "" + _selectedMarker[15] + " ";
 	_html_selected += "" + _selectedMarker[14] + "</p> ";
 	
+	_html_selected += "<h6>Address [EN]</h6>";
+	_html_selected += "<p>" + _selectedMarker[3] + " ";
+	_html_selected += "" + _selectedMarker[4] + " ";
+	_html_selected += "" + _selectedMarker[5] + " ";
+	_html_selected += "" + _selectedMarker[6] + " ";
+	_html_selected += "" + _selectedMarker[7] + "</p> ";
+	
 	_html_selected += "<h6>Contact Telephone</h6>";
 	_html_selected += "<p>" + _selectedMarker[8] + "</p>";
 	_html_selected += "<h6>Opening Hours</h6>";
 	_html_selected += "<p>" + _selectedMarker[9] + "</p>";
 	_html_selected += "<h6>Available Services</h6>";
+	_html_selected += "<p><b>Referred Services: </b>" + _selectedMarker[20] + "</p>";
 	_html_selected += "<p><b>FP Services: </b>" + _selectedMarker[10] + "</p>";
 	_html_selected += "<p><b>Safe abortion services: </b>" + _selectedMarker[11] + ", " + _selectedMarker[12] + "</p>";
 	

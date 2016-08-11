@@ -7,6 +7,8 @@ urlpatterns = [
     # ex: /referral_system/5/ referralFormOnline
     url(r'^(?P<client_id>[0-9]+)/$', views.viewClient, name='viewClient'),
     
+    url(r'^viewReferral/', views.viewReferral, name='viewReferral'),
+    
     #/referral_online/
     url(r'^online/', views.referralFormOnline, name='referralFormOnline'),
     #url(r'^online/(?P<notifi>.+)/$', views.referralFormOnline, name='referralFormOnline'),
@@ -26,9 +28,9 @@ urlpatterns = [
     url(r'^ajaxListVillage/$', views.ajaxListVillage, name='ajaxListVillage'),
     url(r'^ajaxListFacilities/$', views.ajaxListFacilities, name='ajaxListFacilities'),
     url(r'^ajaxSelectFacility/$', views.ajaxSelectFacility, name='ajaxSelectFacility'),    
-    url(r'^ajaxListGFDistrict/$', views.ajaxListGFDistrict, name='ajaxListGFDistrict'),
-    url(r'^ajaxListGFVillage/$', views.ajaxListGFVillage, name='ajaxListGFVillage'),
-    url(r'^ajaxListGarment/$', views.ajaxListGarment, name='ajaxListGarment'),
+    url(r'^ajaxListLocalityDistrict/$', views.ajaxListLocalityDistrict, name='ajaxListLocalityDistrict'),
+    url(r'^ajaxListLocalityCommune/$', views.ajaxListLocalityCommune, name='ajaxListLocalityCommune'),
+    url(r'^ajaxListLocalityVillage/$', views.ajaxListLocalityVillage, name='ajaxListLocalityVillage'),
     
     
     

@@ -1,6 +1,8 @@
-from referral_system.models import SmsFac, Service
+from referral_system.models import SmsFac, ReferredServices, Occupation
 import json
 from django.db import connection
+from referral_system.classes.AjaxFunction import AjaxFunction
+from django.db.models import Q
 
 
 class Referral:
@@ -16,20 +18,35 @@ class Referral:
         self.createFacilityInfoswindow()
     
     def populateFacilities(self):
-        self.allFacilities = SmsFac.objects.all().extra(where=[" UPPER(quest_26) = 'YES' "])
-        #self.allFacilities = SmsFac.objects.all().filter(quest_26="Yes") #show on GIS ? Yes or No
+        dictFacilities = AjaxFunction.runSQL('''
+        SELECT
+        * 
+        FROM
+        sms_fac
+        WHERE
+        quest_50 LIKE 'Both (Referral System and Public Facing Platform)' 
+        OR 
+        quest_50 LIKE 'Referral System only'
+        ''')
+        
+        #self.allFacilities = list(dictFacilities)
+        
+        self.allFacilities = SmsFac.objects.all().filter(
+                                                         Q(quest_50 = "Both (Referral System and Public Facing Platform)")                                                         
+                                                         |
+                                                         Q(quest_50 = "Referral System only")
+                                                         ) #show on GIS ? Yes or No
         
     def populateServices(self):
-        self.allServices = Service.objects.all()
+        self.allServices = ReferredServices.objects.all()
     
     def createFacilitiesMarkers(self):
-        markers = [facility.getMarker() for facility in self.allFacilities if facility.quest_25 != '']
+        markers = [self.createMarker(facility) for facility in self.allFacilities if facility.quest_24 != '' ]
         self.facilityMarkerList = ','.join(markers)
                 
     def createFacilityInfoswindow(self):
         infowCptr = 0;
-        for  itemFacility in self.allFacilities:
-            if(itemFacility.quest_25 != ""):
+        for  itemFacility in self.allFacilities:           
                 if(infowCptr != 0):
                     self.facilityInfowList += ","
                 self.facilityInfowList += "['<div class=\"info_content\">" 
@@ -68,7 +85,40 @@ class Referral:
         return self.allServices 
     
     def getAllFacilities(self):
-        return self.allFacilities        
+        return self.allFacilities     
+    
+    def getAllOccupations(self):
+        return Occupation.objects.all()
+    
+    def createMarker(self, facility):
+        marker = "['" + (facility.quest_19).replace("'", " ") #name 0
+        marker += "'," + facility.quest_24 #coordinnates 1-2
+        marker += ",'" + (facility.quest_16).replace("'", " ") #street 3
+        marker += "','" + (facility.quest_18).replace("'", " ") #village 4
+        marker += "','" + (facility.quest_13).replace("'", " ") #commune 5
+        marker += "','" + (facility.quest_30).replace("'", " ") #district 6
+        marker += "','" + (facility.quest_15).replace("'", " ") #province 7
+        marker += "','" + (facility.quest_11).replace("'", " ") #phone 8
+        marker += "; "+ (facility.quest_26).replace("'", " ") #phone 1st
+        marker += "; "+ (facility.quest_31).replace("'", " ") #phone 2nd
+        marker += "','" + (facility.quest_48).replace("'", " ") #hours 9
+        marker += "','" + (facility.quest_27).replace("'", " ") #FP Services 10
+        marker += "','" + (facility.quest_28).replace("'", " ") #Safe abortion services 11
+        marker += "','" + (facility.quest_37).replace("'", " ") #Safe abortion services 12
+        marker += "','" + (facility.quest_20).replace("'", " ") #ID 13
+
+        #khmer
+        marker += "','" + (facility.quest_41).replace("'", " ") #province khmer 14
+        marker += "','" + (facility.quest_47).replace("'", " ") #district khmer 15
+        marker += "','" + (facility.quest_39).replace("'", " ") #commune khmer 16
+        marker += "','" + (facility.quest_43).replace("'", " ") #village khmer 17
+        marker += "','" + (facility.quest_34).replace("'", " ") #street khmer 18
+        marker += "','" + (facility.quest_12).replace("'", " ") #name khmer 19
+        
+        marker += "','" + (facility.quest_49).replace("'", " ") # referred service 20
+
+        marker += "']"
+        return marker
                 
     
                 

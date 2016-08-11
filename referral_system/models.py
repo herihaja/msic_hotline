@@ -10,65 +10,24 @@
 from __future__ import unicode_literals
 
 from django.db import models
-        
 
 
 class Appointment(models.Model):
     referral_id = models.CharField(primary_key=True, max_length=30)
     referral_date = models.DateField(blank=True, null=True)
+    expiry_date = models.DateField(blank=True, null=True)
     language = models.CharField(max_length=20, blank=True, null=True)
     id_client = models.IntegerField(blank=True, null=True)
-    id_facility = models.CharField(max_length=30, blank=True, null=True)
+    id_facility = models.CharField(max_length=20, blank=True, null=True)
     notification_client_id = models.IntegerField(blank=True, null=True)
     notification_facility_id = models.IntegerField(blank=True, null=True)
     mode = models.IntegerField(blank=True, null=True)
+    created = models.DateTimeField(blank=True, null=True)
+    last_updated = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = False
-        db_table = 'APPOINTMENT'
-
-
-class Client(models.Model):
-    id_client = models.AutoField(primary_key=True)
-    sex = models.CharField(max_length=1, blank=True, null=True)
-    age = models.IntegerField(blank=True, null=True)
-    phone = models.CharField(max_length=100, blank=True, null=True)
-    occupation = models.CharField(max_length=250, blank=True, null=True)
-    garment_id = models.CharField(max_length=100, blank=True, null=True)
-    adr_street = models.CharField(max_length=255, blank=True, null=True)
-    adr_village = models.CharField(max_length=255, blank=True, null=True)
-    adr_commune = models.CharField(max_length=255, blank=True, null=True)
-    adr_district = models.CharField(max_length=255, blank=True, null=True)
-    adr_province = models.CharField(max_length=255, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'CLIENT'
-
-
-class OtherServices(models.Model):
-    other_services_name = models.CharField(max_length=256, blank=True, null=True)
-    id_appointment = models.CharField(max_length=250, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'OTHER_SERVICES'
-
-
-class Service(models.Model):
-    id_services = models.IntegerField(primary_key=True)
-    service_name = models.CharField(max_length=250, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'SERVICE'
-        
-class VoucherCode(models.Model):
-    unique_id = models.CharField(primary_key=True, max_length=10)
-    
-    class Meta:
-        managed = False
-        db_table = 'VOUCHER_CODE'
+        db_table = 'appointment'
 
 
 class AuthGroup(models.Model):
@@ -111,6 +70,7 @@ class AuthUser(models.Model):
     is_staff = models.BooleanField()
     is_active = models.BooleanField()
     date_joined = models.DateTimeField()
+    facility_id = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -135,6 +95,24 @@ class AuthUserUserPermissions(models.Model):
         managed = False
         db_table = 'auth_user_user_permissions'
         unique_together = (('user', 'permission'),)
+
+
+class Client(models.Model):
+    id_client = models.AutoField(primary_key=True)
+    sex = models.CharField(max_length=1, blank=True, null=True)
+    age = models.IntegerField(blank=True, null=True)
+    phone = models.CharField(max_length=100, blank=True, null=True)
+    occupation = models.CharField(max_length=250, blank=True, null=True)
+    garment_id = models.CharField(max_length=100, blank=True, null=True)
+    adr_street = models.CharField(max_length=255, blank=True, null=True)
+    adr_village = models.CharField(max_length=255, blank=True, null=True)
+    adr_commune = models.CharField(max_length=255, blank=True, null=True)
+    adr_district = models.CharField(max_length=255, blank=True, null=True)
+    adr_province = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'client'
 
 
 class DjangoAdminLog(models.Model):
@@ -218,16 +196,36 @@ class DwQuestionnaire(models.Model):
     class Meta:
         managed = False
         db_table = 'dw_questionnaire'
-
-
-class ReferralService(models.Model):
-    id_app = models.CharField(max_length=30)
-    id_service = models.SmallIntegerField()
+        
+class Occupation(models.Model):
+    occupation_name = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
         managed = False
-        db_table = 'referral_service'
-        unique_together = (('id_app', 'id_service'),)
+        db_table = 'occupation'
+
+
+class ReferralOperation(models.Model):
+    referral_id = models.CharField(max_length=20, blank=True, null=True)
+    actor_id = models.IntegerField(blank=True, null=True)
+    last_actor_id = models.IntegerField(blank=True, null=True)
+    referred_services = models.TextField(blank=True, null=True)
+    other_services = models.TextField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
+    last_updated = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'referral_operation'
+
+
+class ReferredServices(models.Model):
+    service_name = models.CharField(primary_key=True, max_length=250)
+    created = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'referred_services'
 
 
 class Sms(models.Model):
@@ -258,7 +256,7 @@ class SmsApi(models.Model):
     date_soumission_u = models.CharField(max_length=6)
     imported = models.IntegerField()
     short_code_calculated = models.IntegerField()
-    phone_number = models.CharField(max_length=15)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -266,108 +264,16 @@ class SmsApi(models.Model):
 
 
 class SmsFac(models.Model):
-    id_niveau = models.IntegerField(blank=True, null=True)
-    status = models.CharField(max_length=10, blank=True, null=True)
-    code_questionnaire = models.CharField(max_length=20, blank=True, null=True)
-    date_soumission = models.DateField(blank=True, null=True)
-    date_soumission_u = models.CharField(max_length=6, blank=True, null=True)
-    imported = models.IntegerField(blank=True, null=True)
-    short_code_calculated = models.IntegerField(blank=True, null=True)
-    phone_number = models.CharField(max_length=15, blank=True, null=True)
-    quest_2 = models.CharField(max_length=250, blank=True, null=True)
-    quest_3 = models.CharField(max_length=250, blank=True, null=True)
-    quest_4 = models.CharField(max_length=250, blank=True, null=True)
-    quest_5 = models.CharField(max_length=250, blank=True, null=True)
-    quest_6 = models.CharField(max_length=250, blank=True, null=True)
-    quest_7 = models.CharField(max_length=250, blank=True, null=True)
-    quest_8 = models.CharField(max_length=250, blank=True, null=True)
-    quest_9 = models.CharField(max_length=250, blank=True, null=True)
-    quest_10 = models.CharField(max_length=250, blank=True, null=True)
-    quest_11 = models.CharField(max_length=250, blank=True, null=True)
-    quest_12 = models.CharField(max_length=250, blank=True, null=True)
-    quest_13 = models.CharField(max_length=250, blank=True, null=True)
-    quest_14 = models.CharField(max_length=250, blank=True, null=True)
-    quest_15 = models.CharField(max_length=250, blank=True, null=True)
-    quest_16 = models.CharField(max_length=250, blank=True, null=True)
-    quest_17 = models.CharField(max_length=250, blank=True, null=True)
-    quest_18 = models.CharField(max_length=250, blank=True, null=True)
-    quest_19 = models.CharField(max_length=250, blank=True, null=True)
-    quest_20 = models.CharField(max_length=250, blank=True, null=True)
-    quest_21 = models.CharField(unique=True, max_length=250)
-    quest_22 = models.CharField(max_length=250, blank=True, null=True)
-    quest_23 = models.CharField(max_length=250, blank=True, null=True)
-    quest_24 = models.CharField(max_length=250, blank=True, null=True)
-    quest_25 = models.CharField(max_length=250, blank=True, null=True)
-    quest_26 = models.CharField(max_length=250, blank=True, null=True)
-    quest_27 = models.CharField(max_length=250, blank=True, null=True)
-    quest_28 = models.CharField(max_length=250, blank=True, null=True)
-    quest_29 = models.CharField(max_length=250, blank=True, null=True)
-    quest_30 = models.CharField(max_length=250, blank=True, null=True)
-    quest_31 = models.CharField(max_length=250, blank=True, null=True)
-    quest_32 = models.CharField(max_length=250, blank=True, null=True)
-    quest_33 = models.CharField(max_length=250, blank=True, null=True)
-    quest_34 = models.CharField(max_length=250, blank=True, null=True)
-    quest_35 = models.CharField(max_length=250, blank=True, null=True)
-    quest_36 = models.CharField(max_length=250, blank=True, null=True)
-    quest_37 = models.CharField(max_length=250, blank=True, null=True)
-    quest_38 = models.CharField(max_length=250, blank=True, null=True)
-    quest_39 = models.CharField(max_length=250, blank=True, null=True)
-    quest_40 = models.CharField(max_length=250, blank=True, null=True)
-    quest_41 = models.CharField(max_length=250, blank=True, null=True)
-    quest_42 = models.CharField(max_length=250, blank=True, null=True)
-    quest_43 = models.CharField(max_length=250, blank=True, null=True)
-    quest_44 = models.CharField(max_length=250, blank=True, null=True)
-    quest_45 = models.CharField(max_length=250, blank=True, null=True)
-    quest_46 = models.CharField(max_length=250, blank=True, null=True)
-    quest_47 = models.CharField(max_length=250, blank=True, null=True)
-    quest_48 = models.CharField(max_length=250, blank=True, null=True)
-    quest_49 = models.CharField(max_length=250, blank=True, null=True)
-    quest_1 = models.CharField(max_length=250, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'sms_fac'
-
-
-    def getMarker(self):
-        marker = "['" + (self.quest_20).replace("'", " ") #name 0
-        marker += "'," + self.quest_25 #coordinnates 1-2
-        marker += ",'" + (self.quest_17).replace("'", " ") #street 3
-        marker += "','" + (self.quest_19).replace("'", " ") #village 4
-        marker += "','" + (self.quest_14).replace("'", " ") #commune 5
-        marker += "','" + (self.quest_31).replace("'", " ") #district 6
-        marker += "','" + (self.quest_16).replace("'", " ") #province 7
-        marker += "','" + (self.quest_13).replace("'", " ") #phone 8
-        marker += "; "+ (self.quest_27).replace("'", " ") #phone 1st
-        marker += "; "+ (self.quest_32).replace("'", " ") #phone 2nd
-        marker += "','" + (self.quest_49).replace("'", " ") #hours 9
-        marker += "','" + (self.quest_28).replace("'", " ") #FP Services 10
-        marker += "','" + (self.quest_29).replace("'", " ") #Safe abortion services 11
-        marker += "','" + (self.quest_38).replace("'", " ") #Safe abortion services 12
-        marker += "','" + (self.quest_21).replace("'", " ") #ID 13
-
-        #khmer
-        marker += "','" + (self.quest_42).replace("'", " ") #province khmer 14
-        marker += "','" + (self.quest_48).replace("'", " ") #district khmer 15
-        marker += "','" + (self.quest_40).replace("'", " ") #commune khmer 16
-        marker += "','" + (self.quest_44).replace("'", " ") #village khmer 17
-        marker += "','" + (self.quest_35).replace("'", " ") #street khmer 18
-        marker += "','" + (self.quest_12).replace("'", " ") #name khmer 19
-
-        marker += "']"
-        return marker
-
-
-class SmsFacTmp(models.Model):
     id = models.AutoField(primary_key=True)
-    id_niveau = models.IntegerField(blank=True, null=True)
-    status = models.CharField(max_length=10, blank=True, null=True)
-    code_questionnaire = models.CharField(max_length=20, blank=True, null=True)
-    date_soumission = models.DateField(blank=True, null=True)
-    date_soumission_u = models.CharField(max_length=6, blank=True, null=True)
-    imported = models.IntegerField(blank=True, null=True)
-    short_code_calculated = models.IntegerField(blank=True, null=True)
+    id_niveau = models.IntegerField()
+    status = models.CharField(max_length=10)
+    code_questionnaire = models.CharField(max_length=20)
+    date_soumission = models.DateField()
+    date_soumission_u = models.CharField(max_length=6)
+    imported = models.IntegerField()
+    short_code_calculated = models.IntegerField()
     phone_number = models.CharField(max_length=15, blank=True, null=True)
+    quest_1 = models.CharField(max_length=250, blank=True, null=True)
     quest_2 = models.CharField(max_length=250, blank=True, null=True)
     quest_3 = models.CharField(max_length=250, blank=True, null=True)
     quest_4 = models.CharField(max_length=250, blank=True, null=True)
@@ -416,11 +322,127 @@ class SmsFacTmp(models.Model):
     quest_47 = models.CharField(max_length=250, blank=True, null=True)
     quest_48 = models.CharField(max_length=250, blank=True, null=True)
     quest_49 = models.CharField(max_length=250, blank=True, null=True)
+    quest_50 = models.CharField(max_length=250, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'sms_fac'
+
+
+class SmsFacTmp(models.Model):
+    id = models.AutoField(primary_key=True)
+    id_niveau = models.IntegerField()
+    status = models.CharField(max_length=10)
+    code_questionnaire = models.CharField(max_length=20)
+    date_soumission = models.DateField()
+    date_soumission_u = models.CharField(max_length=6)
+    imported = models.IntegerField()
+    short_code_calculated = models.IntegerField()
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
     quest_1 = models.CharField(max_length=250, blank=True, null=True)
+    quest_2 = models.CharField(max_length=250, blank=True, null=True)
+    quest_3 = models.CharField(max_length=250, blank=True, null=True)
+    quest_4 = models.CharField(max_length=250, blank=True, null=True)
+    quest_5 = models.CharField(max_length=250, blank=True, null=True)
+    quest_6 = models.CharField(max_length=250, blank=True, null=True)
+    quest_7 = models.CharField(max_length=250, blank=True, null=True)
+    quest_8 = models.CharField(max_length=250, blank=True, null=True)
+    quest_9 = models.CharField(max_length=250, blank=True, null=True)
+    quest_10 = models.CharField(max_length=250, blank=True, null=True)
+    quest_11 = models.CharField(max_length=250, blank=True, null=True)
+    quest_12 = models.CharField(max_length=250, blank=True, null=True)
+    quest_13 = models.CharField(max_length=250, blank=True, null=True)
+    quest_14 = models.CharField(max_length=250, blank=True, null=True)
+    quest_15 = models.CharField(max_length=250, blank=True, null=True)
+    quest_16 = models.CharField(max_length=250, blank=True, null=True)
+    quest_17 = models.CharField(max_length=250, blank=True, null=True)
+    quest_18 = models.CharField(max_length=250, blank=True, null=True)
+    quest_19 = models.CharField(max_length=250, blank=True, null=True)
+    quest_20 = models.CharField(max_length=250, blank=True, null=True)
+    quest_21 = models.CharField(max_length=250, blank=True, null=True)
+    quest_22 = models.CharField(max_length=250, blank=True, null=True)
+    quest_23 = models.CharField(max_length=250, blank=True, null=True)
+    quest_24 = models.CharField(max_length=250, blank=True, null=True)
+    quest_25 = models.CharField(max_length=250, blank=True, null=True)
+    quest_26 = models.CharField(max_length=250, blank=True, null=True)
+    quest_27 = models.CharField(max_length=250, blank=True, null=True)
+    quest_28 = models.CharField(max_length=250, blank=True, null=True)
+    quest_29 = models.CharField(max_length=250, blank=True, null=True)
+    quest_30 = models.CharField(max_length=250, blank=True, null=True)
+    quest_31 = models.CharField(max_length=250, blank=True, null=True)
+    quest_32 = models.CharField(max_length=250, blank=True, null=True)
+    quest_33 = models.CharField(max_length=250, blank=True, null=True)
+    quest_34 = models.CharField(max_length=250, blank=True, null=True)
+    quest_35 = models.CharField(max_length=250, blank=True, null=True)
+    quest_36 = models.CharField(max_length=250, blank=True, null=True)
+    quest_37 = models.CharField(max_length=250, blank=True, null=True)
+    quest_38 = models.CharField(max_length=250, blank=True, null=True)
+    quest_39 = models.CharField(max_length=250, blank=True, null=True)
+    quest_40 = models.CharField(max_length=250, blank=True, null=True)
+    quest_41 = models.CharField(max_length=250, blank=True, null=True)
+    quest_42 = models.CharField(max_length=250, blank=True, null=True)
+    quest_43 = models.CharField(max_length=250, blank=True, null=True)
+    quest_44 = models.CharField(max_length=250, blank=True, null=True)
+    quest_45 = models.CharField(max_length=250, blank=True, null=True)
+    quest_46 = models.CharField(max_length=250, blank=True, null=True)
+    quest_47 = models.CharField(max_length=250, blank=True, null=True)
+    quest_48 = models.CharField(max_length=250, blank=True, null=True)
+    quest_49 = models.CharField(max_length=250, blank=True, null=True)
+    quest_50 = models.CharField(max_length=250, blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'sms_fac_tmp'
+
+
+class SmsLoc(models.Model):
+    id = models.AutoField(primary_key=True)
+    id_niveau = models.IntegerField()
+    status = models.CharField(max_length=10)
+    code_questionnaire = models.CharField(max_length=20)
+    date_soumission = models.DateField()
+    date_soumission_u = models.CharField(max_length=6)
+    imported = models.IntegerField()
+    short_code_calculated = models.IntegerField()
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    quest_1 = models.CharField(max_length=250, blank=True, null=True)
+    quest_2 = models.CharField(max_length=250, blank=True, null=True)
+    quest_3 = models.CharField(max_length=250, blank=True, null=True)
+    quest_4 = models.CharField(max_length=250, blank=True, null=True)
+    quest_5 = models.CharField(max_length=250, blank=True, null=True)
+    quest_6 = models.CharField(max_length=250, blank=True, null=True)
+    quest_7 = models.CharField(max_length=250, blank=True, null=True)
+    quest_8 = models.CharField(max_length=250, blank=True, null=True)
+    quest_9 = models.CharField(max_length=250, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'sms_loc'
+
+
+class SmsLocTmp(models.Model):
+    id = models.AutoField(primary_key=True)
+    id_niveau = models.IntegerField()
+    status = models.CharField(max_length=10)
+    code_questionnaire = models.CharField(max_length=20)
+    date_soumission = models.DateField()
+    date_soumission_u = models.CharField(max_length=6)
+    imported = models.IntegerField()
+    short_code_calculated = models.IntegerField()
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    quest_1 = models.CharField(max_length=250, blank=True, null=True)
+    quest_2 = models.CharField(max_length=250, blank=True, null=True)
+    quest_3 = models.CharField(max_length=250, blank=True, null=True)
+    quest_4 = models.CharField(max_length=250, blank=True, null=True)
+    quest_5 = models.CharField(max_length=250, blank=True, null=True)
+    quest_6 = models.CharField(max_length=250, blank=True, null=True)
+    quest_7 = models.CharField(max_length=250, blank=True, null=True)
+    quest_8 = models.CharField(max_length=250, blank=True, null=True)
+    quest_9 = models.CharField(max_length=250, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'sms_loc_tmp'
 
 
 class SmsReg(models.Model):
@@ -469,3 +491,11 @@ class SmsRegTmp(models.Model):
     class Meta:
         managed = False
         db_table = 'sms_reg_tmp'
+
+
+class VoucherCode(models.Model):
+    unique_id = models.CharField(primary_key=True, max_length=10)
+
+    class Meta:
+        managed = False
+        db_table = 'voucher_code'

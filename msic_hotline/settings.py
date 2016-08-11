@@ -124,7 +124,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 
-
+#/Users/patrick/django-projects/msic_hotline
+#STATIC_ROOT = "/Users/patrick/django-projects/msic_hotline/msic_hotline/static/"
 
 STATIC_URL = '/static/'
 

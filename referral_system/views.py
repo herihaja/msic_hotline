@@ -5,8 +5,8 @@ from django.contrib.auth import authenticate, login
 from referral_system.classes.Referral import Referral
 import json
 from referral_system.classes.AjaxFunction import AjaxFunction
-from referral_system.models import SmsFac, Client, Appointment, ReferralService,\
-    OtherServices
+from referral_system.models import SmsFac, Client, Appointment,\
+    ReferralOperation, VoucherCode
 from django.core import serializers
 from referral_system.classes.ReferralFunctions import ReferralFunctions
 
@@ -65,6 +65,10 @@ def notificationPage(request, typenotif):
     if(typenotif == '01'):
         typeNotification = "success"
         notificationMessage = 'Appointment saved successfully !'
+        
+    if(typenotif == '02'):
+        typeNotification = "error"
+        notificationMessage = 'This Referral ID already exist !'
     
     context = {
                'notifications_message': notificationMessage,
@@ -85,7 +89,10 @@ def referralFormOnline(request):
     markerList = referralClass.getFacilityMarkerList()
     infowList = referralClass.getFacilityInfowList()
     
-    garmentProvinces = AjaxFunction.listGarmentProvince()
+    localityProvinces = AjaxFunction.listLocalityProvince()
+    occupations = referralClass.getAllOccupations()
+    listGarment = SmsFac.objects.filter( quest_21="Garment factory infirmary")
+    listAge = range(14, 51);
     
     #notifications
     notif = ''
@@ -96,8 +103,11 @@ def referralFormOnline(request):
     context = {"allServices" : allServices, 
                "allFacilities" : allFacilities, 
                "markerList" : markerList,
-               "garmentProvinces" : garmentProvinces,
+               "localityProvinces" : localityProvinces,
                "menuactive" : "online",
+               "listAge": listAge,
+               "listGarment" : listGarment,
+               "occupations" : occupations,
                "notificationMessage" : notif,
                "infowList" : infowList}
     return render(request, 'referral/form_online.html', context)
@@ -109,21 +119,28 @@ def referralFormExisting(request):
     referralClass = Referral()
     
     allServices = referralClass.getAllServices()
-    allFacilities = referralClass.getAllFacilities()
-    markerList = referralClass.getFacilityMarkerList()
-    infowList = referralClass.getFacilityInfowList()
+    allFacilities = referralClass.getAllFacilities() 
     
-    allProvinces = AjaxFunction.listFacilityProvince()
-    garmentProvinces = AjaxFunction.listGarmentProvince()
+    localityProvinces = AjaxFunction.listLocalityProvince()
+    occupations = referralClass.getAllOccupations()
+    listGarment = SmsFac.objects.filter( quest_21="Garment factory infirmary")
+    listAge = range(14, 51);
         
     context = {"allServices" : allServices, 
                "allFacilities" : allFacilities, 
-               "markerList" : markerList,
-               "allProvinces" : allProvinces,
-               "garmentProvinces" : garmentProvinces,
+               "occupations" : occupations,               
+               "localityProvinces" : localityProvinces,
                "menuactive" : "existing",
-               "infowList" : infowList}
+               "listAge": listAge,
+               "listGarment" : listGarment}
     return render(request, 'referral/form_existing.html', context)
+
+@login_required(login_url='/referral_system/loginPage/')
+def viewReferral(request):
+    context = {
+               "menuactive" : "view"
+               }
+    return render(request, 'referral/view_referral.html', context)
 
 @login_required(login_url='/referral_system/loginPage/')
 @user_passes_test(group_check, login_url='/referral_system/loginPage/access')
@@ -140,7 +157,7 @@ def referralSaveOnlineForm(request):
         client_adr_commune = request.POST['adr_commune']
         client_adr_district = request.POST['adr_district']
         client_adr_province = request.POST['adr_province']
-        services = request.POST.getlist('service')  #should be an array
+        services = request.POST.getlist('service[]')  #should be an array
         searchtype = request.POST['searchtype'] #search by GF or address
         id_selected_facility = request.POST['id_selected_facility']
         referral_date = request.POST['referral_date']
@@ -166,14 +183,17 @@ def referralSaveOnlineForm(request):
                            )
         newClient.save()
         
+        
         #Generate Voucher ID
         referralFunctions = ReferralFunctions()
         uniqueID = referralFunctions.generateUniqueID()
+        
         
         #Save appointment
         appointment = Appointment(
                                  referral_id =  uniqueID,
                                  referral_date = referral_date,
+                                 expiry_date = expiry_date,
                                  language = language_sms,
                                  id_client = newClient.id_client,
                                  id_facility = id_selected_facility,
@@ -181,21 +201,16 @@ def referralSaveOnlineForm(request):
                                   )
         appointment.save()
         
-        #Save Services
-        for itemService in services:
-            objReferralService = ReferralService(
-                                                 id_app = appointment.referral_id,
-                                                 id_service = itemService
-                                                 )
-            objReferralService.save()
-            
-        #Save other service if exists
-        if(service_other.strip() <> ''):
-            otherService = OtherServices(
-                                         other_services_name = service_other.strip(),
-                                         id_appointment = appointment.referral_id
-                                         )
-            otherService.save()
+        #save the operation
+        referralOperation = ReferralOperation(
+                                              referral_id = uniqueID,
+                                              actor_id = request.user.id,
+                                              last_actor_id = request.user.id,
+                                              referred_services = ';'.join(services),
+                                              other_services = service_other,
+                                              status = 1 # 1 = referred                                               
+                                              )
+        referralOperation.save()        
             
         
     return redirect(notificationPage, typenotif = '01')
@@ -217,7 +232,7 @@ def referralSaveExistingForm(request):
         client_adr_commune = request.POST['adr_commune']
         client_adr_district = request.POST['adr_district']
         client_adr_province = request.POST['adr_province']
-        services = request.POST.getlist('service')  #should be an array
+        services = request.POST.getlist('service[]')  #should be an array
         id_selected_facility = request.POST['id_selected_facility']
         referral_date = request.POST['referral_date']
         expiry_date = request.POST['expiry_date']
@@ -226,6 +241,13 @@ def referralSaveExistingForm(request):
         
         #Get selected Garment Factory
         #selectedGF = SmsFac.objects.get(quest_21=id_selected_gf)
+        
+        #Test if inserted unique ID already exist
+        if Appointment.objects.filter(referral_id=referral_id):
+            return redirect(notificationPage, typenotif = '02')
+        
+        #Typed Referral ID        
+        uniqueID = referral_id
         
         #Saving Client
         newClient = Client(
@@ -242,13 +264,13 @@ def referralSaveExistingForm(request):
                            )
         newClient.save()
         
-        #Typed Referral ID        
-        uniqueID = referral_id
+        
         
         #Save appointment
         appointment = Appointment(
                                  referral_id =  uniqueID,
                                  referral_date = referral_date,
+                                 expiry_date = expiry_date,
                                  language = language_sms,
                                  id_client = newClient.id_client,
                                  id_facility = id_selected_facility,
@@ -256,21 +278,17 @@ def referralSaveExistingForm(request):
                                   )
         appointment.save()
         
-        #Save Services
-        for itemService in services:
-            objReferralService = ReferralService(
-                                                 id_app = appointment.referral_id,
-                                                 id_service = itemService
-                                                 )
-            objReferralService.save()
-            
-        #Save other service if exists
-        if(service_other.strip() <> ''):
-            otherService = OtherServices(
-                                         other_services_name = service_other.strip(),
-                                         id_appointment = appointment.referral_id
-                                         )
-            otherService.save()
+        #save the operation
+        referralOperation = ReferralOperation(
+                                              referral_id = uniqueID,
+                                              actor_id = request.user.id,
+                                              last_actor_id = request.user.id,
+                                              referred_services = ';'.join(services),
+                                              other_services = service_other,
+                                              status = 1 # 1 = referred                                               
+                                              )
+        referralOperation.save() 
+        
             
         
     return redirect(notificationPage, typenotif = '01')
@@ -307,46 +325,58 @@ def ajaxListFacilities(request):
 def ajaxSelectFacility(request):
     facility = ''
     if request.method == 'POST':
-        objFacility = SmsFac.objects.get(quest_21=request.POST['quest_21'])
+        objFacility = SmsFac.objects.get(quest_20=request.POST['quest_20'])
         
-        facility += "" + (objFacility.quest_20).replace("'", " ") #name 0
-        facility += "====" + objFacility.quest_25 #coordinnates 1
-        facility += "====" + (objFacility.quest_17).replace("'", " ") #street 2
-        facility += "====" + (objFacility.quest_19).replace("'", " ") #village 3
-        facility += "====" + (objFacility.quest_14).replace("'", " ") #commune 4
-        facility += "====" + (objFacility.quest_31).replace("'", " ") #district 5
-        facility += "====" + (objFacility.quest_16).replace("'", " ") #province 6
-        facility += "====" + (objFacility.quest_13).replace("'", " ") #phone 7
-        facility += "; " + (objFacility.quest_27).replace("'", " ")
-        facility += "; " + (objFacility.quest_32).replace("'", " ")
-        facility += "====" + (objFacility.quest_49).replace("'", " ") #hours 8
-        facility += "====" + (objFacility.quest_28).replace("'", " ") #FP Services 9
-        facility += "====" + (objFacility.quest_29).replace("'", " ") #Safe abortion services 10
-        facility += "====" + (objFacility.quest_38).replace("'", " ") #Safe abortion services 11
+        facility += "" + (objFacility.quest_19).replace("'", " ") #name 0
+        facility += "====" + objFacility.quest_24 #coordinnates 1
+        facility += "====" + (objFacility.quest_16).replace("'", " ") #street 2
+        facility += "====" + (objFacility.quest_18).replace("'", " ") #village 3
+        facility += "====" + (objFacility.quest_13).replace("'", " ") #commune 4
+        facility += "====" + (objFacility.quest_30).replace("'", " ") #district 5
+        facility += "====" + (objFacility.quest_15).replace("'", " ") #province 6
+        facility += "====" + (objFacility.quest_11).replace("'", " ") #phone 7
+        facility += "; " + (objFacility.quest_26).replace("'", " ")
+        facility += "; " + (objFacility.quest_31).replace("'", " ")
+        facility += "====" + (objFacility.quest_48).replace("'", " ") #hours 8
+        facility += "====" + (objFacility.quest_27).replace("'", " ") #FP Services 9
+        facility += "====" + (objFacility.quest_28).replace("'", " ") #Safe abortion services 10
+        facility += "====" + (objFacility.quest_37).replace("'", " ") #Safe abortion services 11
         #khmer version
         facility += "====" + objFacility.quest_12 #name khmer 12
-        facility += "====" + objFacility.quest_35 #street khmer 13
-        facility += "====" + objFacility.quest_44 #village khmer 14
-        facility += "====" + objFacility.quest_40 #commune khmer 15
-        facility += "====" + objFacility.quest_48 #district khmer 16
-        facility += "====" + objFacility.quest_42 #province khmer 17
+        facility += "====" + objFacility.quest_34 #street khmer 13
+        facility += "====" + objFacility.quest_43 #village khmer 14
+        facility += "====" + objFacility.quest_39 #commune khmer 15
+        facility += "====" + objFacility.quest_47 #district khmer 16
+        facility += "====" + objFacility.quest_41 #province khmer 17
+        
+        facility += "====" + objFacility.quest_49 # referred service 18
+        
+        
         
         
     return HttpResponse(facility)
 
 #Ajax functions for Garment factory
-def ajaxListGFDistrict(request):
+def ajaxListLocalityDistrict(request):
     listDistricts = ''
     if request.method == 'POST':
-        allDistricts  = AjaxFunction.listGarmentDistrict(request.POST['province'])
+        allDistricts  = AjaxFunction.listLocalityDistrict(request.POST['province'])
         listDistricts = json.dumps(allDistricts)
         
     return HttpResponse(listDistricts)
 
-def ajaxListGFVillage(request):
+def ajaxListLocalityCommune(request):
+    listCommune = ''
+    if request.method == 'POST':
+        allCommunes  = AjaxFunction.listLocalityCommune(request.POST['district'], request.POST['province'])
+        listCommune = json.dumps(allCommunes)
+        
+    return HttpResponse(listCommune)
+
+def ajaxListLocalityVillage(request):
     listVillage = ''
     if request.method == 'POST':
-        allVillages  = AjaxFunction.listGarmentVillage(request.POST['district'], request.POST['province'])
+        allVillages  = AjaxFunction.listLocalityVillage(request.POST['commune'],request.POST['district'], request.POST['province'])
         listVillage = json.dumps(allVillages)
         
     return HttpResponse(listVillage)

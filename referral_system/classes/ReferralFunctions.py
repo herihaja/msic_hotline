@@ -1,5 +1,5 @@
 from referral_system.classes.AjaxFunction import AjaxFunction
-from referral_system.models import SmsFac, Service, VoucherCode
+from referral_system.models import SmsFac, VoucherCode
 import json
 from django.db import connection
 

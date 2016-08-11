@@ -19,8 +19,9 @@ body, body a, body p { font-size: 12px;}
 
 #map_canvas { width: 100%; height: 100%; }
 
-.list-closest-marker { cursor: pointer; text-decoration: underline; color: #2199e8; }
-.list-closest-marker {  }
+.list-closest-marker { cursor: pointer; text-decoration: underline; color: #2199e8; font-size: 14px; }
+
+#selected-panel h6 { font-size: 22px; }
 
 #direction-panel { height: 400px; overflow: auto; }
 
@@ -30,6 +31,9 @@ body, body a, body p { font-size: 12px;}
 .copyright p { font-size: 10px; }
 .copyright p img { width: 140px; }
 #itineraire-dropdown { border: 2px solid #2199e8; }
+
+.cb-service{ display: inline-block; width: 24%; }
+
 
 
 /*Login page*/

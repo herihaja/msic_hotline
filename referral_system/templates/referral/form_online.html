@@ -16,78 +16,65 @@
     
     <div class="callout secondary">
     <div class="row">
-	      <div class="large-6 columns">	      
+	      <div class="large-4 columns">	      
 	      		<label>Sex
   					<select name="sex">
     					<option value="m">Male</option>
     					<option value="f">Female</option>
   					</select>
-				</label>
-				
-				
-
-				<label> Telephone
-  					<input type="text" name="phone" value="" required>
+				</label>	
+	      </div>
+	      <div class="large-4 columns">	     
+	      		<label> Telephone
+  					<input type="text" name="phone" value="" size="10" maxlength="10" required pattern="number">
   					<span class="form-error">Add a phone number</span>
 				</label>
-				
-				
 	      </div>
-	      <div class="large-6 columns">
+	      <div class="large-4 columns">
 	      		<label> Age
-  					<input type="text" name="age" value="" required pattern="number">
-  					<span class="form-error">Add the client's age</span>
+	      			<select name="age" id="age" onChange="">
+	      				<option value="0">-- Select --</option>
+						{% for itemAge in listAge %}
+							<option value="{{ itemAge }}">{{ itemAge }}</option>
+						{% endfor %}
+						<option value="51">50+</option>
+							
+					</select>
+  					
 				</label>
-				
-				<label> Occupation
-  					<input type="text" name="occupation" value="">
-				</label>
-				
-				
-				
 	      </div>
 	</div>
 	
-	<h6><u>Garment Factory</u></h6>
+	
 	<div class="row">
-		<div class="large-3 columns">
-			<label>Province
-        		<select id="gf-province">
-          			<option value="0">-- Select --</option>
-          			{% for itemProvince in garmentProvinces %}
-          				<option value="{{ itemProvince.province }}" onclick="loadGFDistrict('{{ itemProvince.province }}')">{{ itemProvince.province }} [{{ itemProvince.province_khmer }}]</option>
+		<div class="large-4 columns">
+			<label> Occupation
+					<select name="occupation" id="occupation" onChange="updateGarmentList()">
+						{% for itemOccupation in occupations %}
+          					<option value="{{ itemOccupation.id }}" >{{ itemOccupation.occupation_name }} </option>
+          				{% endfor %}
+					</select>
+			</label>
+		</div>
+      	
+      	
+		<div class="large-4 columns">
+			<label id="garment_section" >Garment Factory
+        		<select id="garment" name="selected_gf" onChange="updateGarmentLocation()">
+          			<option value="0" class="">-- Select --</option>
+          			{% for itemGarment in listGarment %}
+          					<option 
+          					class="gf_{{ itemGarment.quest_24 }}"
+          					value="{{ itemGarment.quest_20 }}" >
+          					{{ itemGarment.quest_19 }} [{{ itemGarment.quest_12 }}] 
+          					</option>
           			{% endfor %}
         		</select>
-      		</label>
-		</div>
-		
-		<div class="large-3 columns">
-			<label>District
-        		<select id="gf-district">
-          			<option value="0">-- Select --</option>
-        		</select>
+        		<input type="hidden" name="gf_gps" id="gf_gps" />
       		</label>
       	</div>
       	
-      	
-		<div class="large-3 columns">
-			<label>Village
-        		<select id="gf-village">
-          			<option value="0">-- Select --</option>
-        		</select>
-      		</label>
-      	</div>
-      	
-      	
-		<div class="large-3 columns">
-			<label>Garment Factory
-        		<select id="garment" name="selected_gf">
-          			<option value="0">-- Select --</option>
-        		</select>
-        		<input type="hidden" name="gf-gps" id="gf-gps" />
-      		</label>
-      	</div>
-      	
+      	<div class="large-4 columns"></div>
       	
       	
 	</div>
@@ -95,37 +82,46 @@
 	<h6><u>Current address</u></h6>
 	<div class="row">
 	      <div class="large-2 columns">
-	      		<label> Street
-  					<input type="text" name="adr_street" id="street" value=""  required>
-  					<span class="form-error">This field is required</span>
-				</label>
+	      	<label>Province
+        		<select id="adr_province" name="adr_province" onchange="updateLocalityDistrict()">
+          			{% for itemProvince in localityProvinces %}
+          				<option value="{{ itemProvince.province }}" >{{ itemProvince.province }}  [{{ itemProvince.province_khmer }}]</option>
+          			{% endfor %}
+        		</select>
+      		</label>
+	      		
 	      </div>
 	      
 	      <div class="large-2 columns">
-	      		<label> Village
-  					<input type="text" name="adr_village" id="village" value=""  required>
-  					<span class="form-error">This field is required</span>
+	      		<label> District
+  					<select id="adr_district" name="adr_district" onchange="updateLocalityCommune()">
+	          			<option value="">-- Select --</option>
+	        		</select>
 				</label>
 	      </div>
 	      
 	      <div class="large-2 columns">
 	      		<label> Commune
-  					<input type="text" name="adr_commune" id="commune" value=""  required>
-  					<span class="form-error">This field is required</span>
+  					<select id="adr_commune" name="adr_commune" onchange="updateLocalityVillage()">
+	          			<option value="">-- Select --</option>
+	        		</select>
 				</label>
 	      </div>	      
 	      
-	      <div class="large-2 columns">
-	      		<label> District
-  					<input type="text" name="adr_district" id="district" value=""  required>
-  					<span class="form-error">This field is required</span>
+	      <div class="large-3 columns">
+	      		<label> Village
+  					<select id="adr_village" name="adr_village" >
+	          			<option value="">-- Select --</option>
+	        		</select>
 				</label>
 	      </div>
+	      	      
+
 	      
-	      <div class="large-2 columns">
-	      		<label> Province
-  					<input type="text" name="adr_province" id="province" value=""  required>
-  					<span class="form-error">This field is required</span>
+	      <div class="large-3 columns">
+	      	<label> Street
+  					<input type="text" name="adr_street" id="adr_street" value=""  >
+  					
 				</label>
 	      </div>
 	      
@@ -139,12 +135,18 @@
 	
 	<div class="callout secondary">
 	{% for itemService in allServices %}
-    <input type="checkbox" 
-    		name="service[]" 
-    		id="service-{{ itemService.id_services }}" value="{{ itemService.id_services }}" />
-    <label for="service-{{ itemService.id_services }}">{{ itemService.service_name }}</label>
+		<div class="cb-service">				
+    		<input type="checkbox" 
+    			onclick="hideOrShowOtherServices()"
+    			class="cb_services"
+    			name="service[]" 
+    			id="{{ itemService.service_name }}" value="{{ itemService.service_name }}" />
+    		<label for="{{ itemService.service_name }}">{{ itemService.service_name }}</label>
+    	</div>
 	{% endfor %}
-	<input type="text" name="service_other" value="" placeholder="Tape here if other ... ">
+	<input 	type="text" id="service_other" name="service_other" 
+			value="" placeholder="Tape here if other ... "
+			style="display: none;" >
 	</div>
 	
 	<h5>3) Health Facility</h5>
@@ -252,18 +254,22 @@
  
  $(function(){
 	 autoSetExpiryDate();
+	 updateLocalityDistrict();
  });
  
  function validateForm(){
 	 if($("#id_selected_facility").val() == '') { alert("Please select a suitable Health Facility !"); return false; }
-	 
+	 if($("#occupation").val() == "1" && $("#garment").val() == "0") { alert("You must select your Garment Factory !"); return false;}
 	 return true;
  }
  
+ 
+ 
 </script>
 <script src="{% static 'referral_system/js/map_functions.js' %}"></script>
-<script src="{% static 'referral_system/js/garment_cascade_select.js' %}"></script>
+<script src="{% static 'referral_system/js/referall.js' %}"></script>
+<script src="{% static 'referral_system/js/new_referral.js' %}"></script>
 <script src="https://use.fontawesome.com/7beb934639.js"></script>
-
+<script type="text/javascript"></script>
 
 {% endblock %}

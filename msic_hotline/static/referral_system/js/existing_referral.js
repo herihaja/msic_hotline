@@ -1,87 +1,50 @@
-	function loadDistrict(_province){
-		$.ajax({
-		    url: '/referral_system/ajaxListDistrict/',
-		    data: { province : _province },
-		    type: 'post', // This is the default though, you don't actually need to always mention it
-		    success: function(data) {
-		    	dataJson = $.parseJSON(data);
-		    	var _html = "<option value='0'>-- Select --</option>";
-				$.each(dataJson, function(index) {
-					_html += "<option onclick=\"loadVillage('" + dataJson[index].district + "')\" value='" + dataJson[index].district + "'> ";
-					_html +=  dataJson[index].district + " [" + dataJson[index].district_khmer + "]" ;
-					_html += "</option> ";
-		        });
-				$("#district").html(_html);
-		    },
-		    failure: function(data) { 
-		        alert('Got an error dude');
-		    }
-		}); 
-	}
+		// Automatic calculation of expiry date
+    function autoSetExpiryDate(){
+    	 var nowTemp = new Date();
+    	 var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+    	 var checkin = $('#referral-date').fdatepicker({
+    		 format: 'yyyy-mm-dd',
+    		 weekStart: 1,
+    	 	 onRender: function (date) {
+    	 		// return date.valueOf() < now.valueOf() ? 'disabled' : '';
+    	 	 }
+    	 }).on('changeDate', function (ev) {
+    	 	if (ev.date.valueOf() > checkout.date.valueOf()) {
+    	 		
+    	 	}
+    	 	var newDate = new Date(ev.date)
+	 		newDate.setDate(newDate.getDate() + 30);
+	 		checkout.update(newDate);
+	 		
+    	 	checkin.hide();
+    	 	$('#expiry-date')[0].focus();
+    	 }).data('datepicker');
+    	 
+    	 var checkout = $('#expiry-date').fdatepicker({
+    		format: 'yyyy-mm-dd',
+    		weekStart: 1,
+    	 	onRender: function (date) {
+    	 		return date.valueOf() <= checkin.date.valueOf() ? 'disabled' : '';
+    	 	}
+    	 }).on('changeDate', function (ev) {
+    	 	checkout.hide();
+    	 }).data('datepicker');
+    	 
+    	
+    }
 	
-	function loadVillage(_district){
-		var _province = $('#province').val();
-		$.ajax({
-		    url: '/referral_system/ajaxListVillage/',
-		    data: { district : _district, province : _province },
-		    type: 'post', // This is the default though, you don't actually need to always mention it
-		    success: function(data) {
-		    	dataJson = $.parseJSON(data);
-		    	var _html = "<option value='0'>-- Select --</option>";
-				$.each(dataJson, function(index) {
-					_html += "<option onclick=\"loadFacilities('" + dataJson[index].village + "')\" value='" + dataJson[index].village + "'> ";
-					_html +=  dataJson[index].village + " [" + dataJson[index].village_khmer + "]" ;
-					_html += "</option> ";
-		        });
-				$("#village").html(_html);
-		    },
-		    failure: function(data) { 
-		        alert('Got an error dude');
-		    }
-		}); 
-	}
-	
-	function loadFacilities(_village){
-		var _province = $('#province').val();
-		var _district = $('#district').val();
-		$.ajax({
-		    url: '/referral_system/ajaxListFacilities/',
-		    data: { village : _village, province : _province, district : _district  },
-		    type: 'post', // This is the default though, you don't actually need to always mention it
-		    success: function(data) {
-		    	 dataJson = $.parseJSON(data);
-		    	var _html = "<option value='0'>-- Select --</option>";
-				$.each(dataJson, function(index) {
-					_html += "<option onclick=\"selectFacility('" + dataJson[index].fields.quest_21 + "')\" value='" + dataJson[index].fields.quest_21 + "'> ";
-					_html +=  dataJson[index].fields.quest_20 +  + " [" + dataJson[index].fields.quest_12 + "]" ;
-					_html += "</option> ";
-		        });
-				$("#selected_facility").html(_html);
-		    },
-		    failure: function(data) { 
-		        alert('Got an error dude');
-		    }
-		}); 
-	}
-	
-	function selectFacility(_quest_21){
+	function selectFacility(){
+		_quest_20 = $("#selected_facility").val();
 		$.ajax({
 		    url: '/referral_system/ajaxSelectFacility/',
-		    data: { quest_21 : _quest_21 },
+		    data: { quest_20 : _quest_20 },
 		    type: 'post', // This is the default though, you don't actually need to always mention it
 		    success: function(data) {
 		    	
 		    	data = data.split('====');
 		    	
 		    	var _html = "<div class='callout success'>";
-		    	_html += "<span class='round label warning'><h6>" + data[0] + "<br>" + data[12] + "</h6></span><hr />";
-		    	
-		    	_html += "<h6>Address [EN]</h6>";
-		    	_html += "<p>" + data[2] + " ";
-		    	_html += "" + data[3] + " ";
-		    	_html += "" + data[4] + " ";
-		    	_html += "" + data[5] + " ";
-		    	_html += "" + data[6] + "</p> ";
+		    	_html += "<span class='round label warning'><h6>" + data[12] + "<br>" + data[0] + "</h6></span><hr />";
 		    	
 		    	_html += "<h6>Address [KHMER]</h6>";
 		    	_html += "<p>" + data[13] + " ";
@@ -90,11 +53,19 @@
 		    	_html += "" + data[16] + " ";
 		    	_html += "" + data[17] + "</p> ";
 		    	
+		    	_html += "<h6>Address [EN]</h6>";
+		    	_html += "<p>" + data[2] + " ";
+		    	_html += "" + data[3] + " ";
+		    	_html += "" + data[4] + " ";
+		    	_html += "" + data[5] + " ";
+		    	_html += "" + data[6] + "</p> ";		    			    
+		    	
 		    	_html += "<h6>Contact Telephone</h6>";
 		    	_html += "<p>" + data[7] + "</p>";
 		    	_html += "<h6>Opening Hours</h6>";
 		    	_html += "<p>" + data[8] + "</p>";
 		    	_html += "<h6>Available Services</h6>";
+		    	_html += "<p><b>Referred Services: </b>" + data[18] + "</p>";
 		    	_html += "<p><b>FP Services: </b>" + data[9] + "</p>";
 		    	_html += "<p><b>Safe abortion services: </b>" + data[10] + ", " + data[11] + "</p>";
 		    	_html += "</div>";
