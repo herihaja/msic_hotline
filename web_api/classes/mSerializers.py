@@ -1,4 +1,4 @@
-from referral_system.models import SmsFac, Appointment, Client, Service
+from referral_system.models import SmsFac, Appointment, Client, AuthUser
 
 class MSerializers:
 
@@ -12,27 +12,27 @@ class MSerializers:
         db_facilities = SmsFac.objects.all().extra(where=[" UPPER(quest_26) = 'YES' "])
         for objFacility in db_facilities :
             facility = {}
-            facility["id"] = objFacility.quest_21
-            facility["name"] = objFacility.quest_20
+            facility["id"] = objFacility.quest_20
+            facility["name"] = objFacility.quest_29
             facility["name_khmer"] = objFacility.quest_12
-            facility["coordinates"] = objFacility.quest_25
-            facility["street"] = objFacility.quest_17
+            facility["coordinates"] = objFacility.quest_24
+            facility["street"] = objFacility.quest_16
             facility["street_khmer"] = objFacility.quest_12
-            facility["village"] = objFacility.quest_19
+            facility["village"] = objFacility.quest_18
             facility["village_khmer"] = objFacility.quest_35
-            facility["commune"] = objFacility.quest_14
+            facility["commune"] = objFacility.quest_13
             facility["commune_khmer"] = objFacility.quest_40
-            facility["district"] = objFacility.quest_31
+            facility["district"] = objFacility.quest_30
             facility["district_khmer"] = objFacility.quest_48
-            facility["province"] = objFacility.quest_16
+            facility["province"] = objFacility.quest_15
             facility["province_khmer"] = objFacility.quest_42
-            facility["phone1"] = objFacility.quest_13
-            facility["phone2"] = objFacility.quest_27
-            facility["phone3"] = objFacility.quest_32
+            facility["phone1"] = objFacility.quest_12
+            facility["phone2"] = objFacility.quest_26
+            facility["phone3"] = objFacility.quest_31
             facility["hours"] = objFacility.quest_49
-            facility["fp_services"] = objFacility.quest_28
-            facility["abortion_services1"] = objFacility.quest_29
-            facility["abortion_services2"] = objFacility.quest_38
+            facility["fp_services"] = objFacility.quest_27
+            facility["abortion_services1"] = objFacility.quest_26
+            facility["abortion_services2"] = objFacility.quest_37
 
             facility["created"] = str(objFacility.date_soumission)
             facility["last_updated"] = str(objFacility.date_soumission)
@@ -78,6 +78,7 @@ class MSerializers:
                 appointment["appointment_client"] = client
                 
             appointment["id_facility"] = objAppointment.id_facility
+            appointment["id_garment"] = "whgf4"
             appointments.append(appointment)
         return appointments
 
@@ -90,3 +91,15 @@ class MSerializers:
             service["name"] = objService.service_name
             services.append(service)
         return services
+
+    def getUser(self,username):
+        auth_user = AuthUser.objects.get(username=username)
+        res_user = {}
+        res_user["username"] = auth_user.username
+        res_user["first_name"] = auth_user.first_name
+        res_user["last_name"] = auth_user.last_name
+        res_user["email"] = auth_user.email
+#        res_user["facility_id"] = auth_user.facility_id whgf4
+        res_user["facility_id"] = "whgf4"
+        res_user["group_id"] = 2
+        return res_user;

@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'referral_system',
-    'wep_api'
+    'web_api',
 ]
 
 MIDDLEWARE_CLASSES = [
