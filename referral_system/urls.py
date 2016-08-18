@@ -20,7 +20,7 @@ urlpatterns = [
     url(r'^referralSaveExistingForm/$', views.referralSaveExistingForm, name='referralSaveExistingForm'),   
     
      
-    url(r'^notificationPage/(?P<typenotif>[0-9]{2})/$', views.notificationPage, name='notificationPage'),
+    url(r'^notificationPage/(?P<typenotif>.+)/$', views.notificationPage, name='notificationPage'),
     
     url(r'^logout/$', 'django.contrib.auth.views.logout',{'next_page': '/referral_system/loginPage/logout'}),
     #ajax url

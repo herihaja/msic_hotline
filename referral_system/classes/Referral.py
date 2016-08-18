@@ -7,9 +7,9 @@ from django.db.models import Q
 
 class Referral:
     allFacilities = ''
-    facilityMarkerList = "";
+    facilityMarkerList = ""
     allServices = ''
-    facilityInfowList = "";
+    facilityInfowList = ""
     
     def __init__(self):
         self.populateFacilities()

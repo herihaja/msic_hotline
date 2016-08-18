@@ -6,9 +6,10 @@ from referral_system.classes.Referral import Referral
 import json
 from referral_system.classes.AjaxFunction import AjaxFunction
 from referral_system.models import SmsFac, Client, Appointment,\
-    ReferralOperation, VoucherCode
+    ReferralOperation, VoucherCode, ReferredServices
 from django.core import serializers
 from referral_system.classes.ReferralFunctions import ReferralFunctions
+from referral_system.classes.Reports import Reports
 
 
 # Create your views here.
@@ -61,18 +62,28 @@ def authenticateMsicHotline(request):
 def notificationPage(request, typenotif):
     notificationMessage = ""
     typeNotification = ""
+    descriptionText = ""
+    reports = Reports()
     
-    if(typenotif == '01'):
+    
+    if(typenotif[:3] == 'ok_'):
+        tReferralID = typenotif.split("_")
+        referralId = tReferralID[1]
         typeNotification = "success"
-        notificationMessage = 'Appointment saved successfully !'
+        notificationMessage = 'Appointment saved successfully ! <br> Referral ID: ' + referralId
         
-    if(typenotif == '02'):
+        descriptionText = reports.smsTextNewReferral(referralId)
+        
+    elif(typenotif[:4] == 'nok_'):
+        tReferralID = typenotif.split("_")
+        referralId = tReferralID[2]
         typeNotification = "error"
-        notificationMessage = 'This Referral ID already exist !'
+        notificationMessage = 'The Referral ID <' + referralId + '> already exist !'
     
     context = {
                'notifications_message': notificationMessage,
-               'type_notification': typeNotification
+               'type_notification': typeNotification,
+               'descriptionText' : descriptionText
                }
     
     return render(request, 'referral/notification_page.html', context)
@@ -137,8 +148,92 @@ def referralFormExisting(request):
 
 @login_required(login_url='/referral_system/loginPage/')
 def viewReferral(request):
+    reports = Reports()
+    
+    ### CLIENTS
+    referralReports = reports.clientsPerStatus()
+    """
+    {
+                    name: 'Microsoft Internet Explorer',
+                    y: 56.33,
+                    drilldown: 'Microsoft Internet Explorer'
+                }
+    """
+    status = ['','referred','redeemed','give up','re-referred']
+    listClientData = []
+    listClientObject = []
+    numberClients = 0
+    for itemReport in referralReports:
+        numberClients = numberClients + itemReport["number_client"]
+    
+    for itemReport in referralReports:
+        itemObj = []
+        _name = status[itemReport["status"]]
+        _y = (itemReport["number_client"] * 100) / numberClients
+        _y = str(_y)
+        
+        itemObj.append(_name)
+        itemObj.append(_y)
+        itemObj.append(itemReport["number_client"])
+        
+        listClientObject.append(itemObj)
+        
+        listClientData.append("{name:'" + _name + "',y:" + _y + ",drilldown:'" + _name + "'}")
+    strData = ",".join(listClientData)
+    
+    ## SERVICES DELIVERED
+    servicesDelivered = reports.servicesDelivered()
+    allServices = ReferredServices.objects.all()
+    
+    reportServices = {}
+    listService = []
+    listObjectService = []
+    numberServices = 0
+    for itemServiceDelivered in servicesDelivered:
+        listServicesDelivered = itemServiceDelivered['referred_services'].split(";")
+        for itemS in listServicesDelivered:
+            if itemS.strip() != "":
+                numberServices = numberServices + 1
+            
+    for itemService in allServices:
+        itemObj = []
+        nb = 0
+        for itemServiceDelivered in servicesDelivered:
+            listServicesDelivered = itemServiceDelivered['referred_services'].split(";")
+            for itemS in listServicesDelivered:
+                if itemS.strip() == itemService.service_name.strip():
+                    nb = nb + 1
+                    
+                    
+        reportServices[itemService.service_name] = nb
+        listService.append("{name:'" + itemService.service_name + "',y:" + str(nb) + ",drilldown:'" + itemService.service_name + "'}")
+        
+        
+        if numberServices == 0:
+            _percentage = 0
+        else:
+            _percentage = (nb * 100) / numberServices
+            _percentage = str(_percentage)
+        
+        itemObj.append(itemService.service_name)
+        itemObj.append(_percentage)
+        itemObj.append(nb)
+        listObjectService.append(itemObj)
+        
+    jsonService = ",".join(listService)
+    
+    
+        
+    
     context = {
-               "menuactive" : "view"
+               "listObject" : listClientObject ,
+               "listObjectService" : listObjectService ,
+               "reportServices" : reportServices ,
+               "jsonService" : jsonService ,
+               "menuactive" : "view",
+               "jsonData" : strData,
+               "numberClients" : numberClients,
+               "numberServices" : numberServices
                }
     return render(request, 'referral/view_referral.html', context)
 
@@ -210,10 +305,14 @@ def referralSaveOnlineForm(request):
                                               other_services = service_other,
                                               status = 1 # 1 = referred                                               
                                               )
-        referralOperation.save()        
+        referralOperation.save()  
+        
+        #Notification format: ok_referalid
+        notifParam = "ok_" + uniqueID
+              
             
         
-    return redirect(notificationPage, typenotif = '01')
+    return redirect(notificationPage, typenotif = notifParam)
 
 @login_required(login_url='/referral_system/loginPage/')
 @user_passes_test(group_check, login_url='/referral_system/loginPage/access')
@@ -244,7 +343,9 @@ def referralSaveExistingForm(request):
         
         #Test if inserted unique ID already exist
         if Appointment.objects.filter(referral_id=referral_id):
-            return redirect(notificationPage, typenotif = '02')
+            #Notification format: nok_uniqueiderror_id
+            notifParam = "nok_uniqueiderror_" + referral_id
+            return redirect(notificationPage, typenotif = notifParam)
         
         #Typed Referral ID        
         uniqueID = referral_id
