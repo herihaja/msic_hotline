@@ -17,7 +17,7 @@ $(function($) {
     // Asynchronously Load the map API 
     var script = document.createElement('script');
 
-    script.src = "//maps.googleapis.com/maps/api/js?key=AIzaSyChwOoz0ZXqQS6EAVcdngeb_17KMLW3eTM&sensor=false&callback=initialize&libraries=geometry,places";
+    script.src = "//maps.googleapis.com/maps/api/js?key=AIzaSyDA3bMv4Elg98PcjCZkd5LiqqbzoaQ5e1Y&sensor=false&callback=initialize&libraries=geometry,places";
     document.body.appendChild(script);
 });
 
@@ -279,7 +279,7 @@ function displaySelectedFacility(_index){
 	_html_selected += "" + _selectedMarker[6] + " ";
 	_html_selected += "" + _selectedMarker[7] + "</p> ";
 	
-	_html_selected += "<h6>Contact Telephone</h6>";
+	_html_selected += "<h6>Contact Telephones</h6>";
 	_html_selected += "<p>" + _selectedMarker[8] + "</p>";
 	_html_selected += "<h6>Opening Hours</h6>";
 	_html_selected += "<p>" + _selectedMarker[9] + "</p>";

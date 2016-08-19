@@ -3,7 +3,10 @@ from referral_system.classes.AjaxFunction import AjaxFunction
 
 class Reports:
     
-    def clientsPerStatus(self):
+    def clientsPerStatus(self, date_period = '', province = '', id_referrer = ''):
+        
+        tDatePeriod = date_period.split("-") #2015-10
+        
         sqlReport = """ 
         SELECT 
         DISTINCT ro.status ,
@@ -16,21 +19,49 @@ class Reports:
             FROM    referral_operation
             GROUP BY referral_id
         ) MaxId ON a.referral_id = MaxId.referral_id 
+        INNER JOIN client cli ON cli.id_client = a.id_client
         INNER JOIN referral_operation ro 
         ON   MaxId.referral_id = ro.referral_id AND MaxId.max_id = ro.id 
-        GROUP BY ro.status
+        
+        WHERE 1 = 1 
         """
+        
+        if date_period != '':
+            sqlReport += " AND EXTRACT(MONTH FROM a.referral_date) = " + str(int(tDatePeriod[1]))
+            sqlReport += " AND EXTRACT(YEAR FROM a.referral_date)  = " + tDatePeriod[0]
+            
+        if province != '':
+            sqlReport += " AND cli.adr_province = '" + province + "' "
+            
+        if id_referrer != '':
+            sqlReport += " AND ro.actor_id = '" + id_referrer + "' "
+            
+        sqlReport += "GROUP BY ro.status"
                     
         return AjaxFunction.runSQL(sqlReport)
     
-    def servicesDelivered(self):
+    def servicesDelivered(self, date_period = '', province = '', id_referrer = ''):
+        
+        tDatePeriod = date_period.split("-") #2015-10-05 
+        
         sqlReport = """ 
         SELECT 
-        referred_services
+        ro.referred_services
         FROM    
-        referral_operation 
+        referral_operation ro
+        INNER JOIN appointment a ON a.referral_id = ro.referral_id 
+        INNER JOIN client cli ON cli.id_client = a.id_client
         WHERE status = 2
         """
+        if date_period != '':
+            sqlReport += " AND EXTRACT(MONTH FROM a.referral_date) = " + str(int(tDatePeriod[1]))
+            sqlReport += " AND EXTRACT(YEAR FROM a.referral_date)  = " + tDatePeriod[0]
+            
+        if province != '':
+            sqlReport += " AND cli.adr_province = '" + province + "' "
+            
+        if id_referrer != '':
+            sqlReport += " AND ro.actor_id = '" + id_referrer + "' "
                     
         return AjaxFunction.runSQL(sqlReport)
     
@@ -57,12 +88,13 @@ class Reports:
         resSms = AjaxFunction.runSQL(sqlSms)
         objSms = resSms[0]
         
-        strSms = "The sms below is sent to the client: "
+        strSms = "The sms below is sent to the client: <br><br><i>\""
         strSms = strSms + objSms['facility_name']
         strSms = strSms + ", " +objSms['adr_street']
         strSms = strSms + ", " +objSms['adr_village']
         strSms = strSms + ", " +objSms['adr_commune']
         strSms = strSms + ", " +objSms['phone']
         strSms = strSms + ", " + str(objSms['expiry_date'])
+        strSms = strSms + "</i>\""
         
         return strSms

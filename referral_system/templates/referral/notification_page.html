@@ -4,8 +4,10 @@
 {% block content %}
 
 	<div class="callout {{type_notification}}">
-		{{notifications_message}}<br />
-		{{descriptionText}}
+		 {% autoescape off %}
+		 	{{notifications_message}}<br />
+			{{descriptionText}}
+		 {% endautoescape %}
 	</div>
 	
 

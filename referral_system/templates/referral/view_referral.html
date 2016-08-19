@@ -2,26 +2,62 @@
 {% load staticfiles%}
 
 {% block content %}
-<div class="callout warning">
-    <div class="row">
-	      <div class="large-6 columns">
-	      		<label> Date period
-  					<input type="text" name="date_period" value="" id="date_period"   />
-				</label>
-				<label> Province
-				  <select>
-				    <option value="prov1">Province 1</option>
-				    <option value="prov2">Province 2</option>
-				  </select>
-				</label>
-				<label> Referrers
-				  <select>
-				    <option value="prov1">Province 1</option>
-				    <option value="prov2">Province 2</option>
-				  </select>
-				</label>
-	      </div>
-	</div>
+<div class="callout success">
+	<form method="post" action="/referral_system/viewReferral/">
+	    <div class="row">
+		      <div class="large-2 columns">
+		      
+		      		<label> Date period
+		      			
+	  					<div class="input-group date" id="dpMonths" 
+	  						 data-date-format="yyyy-mm" data-start-view="year" 
+	  						 data-min-view="year" style="max-width:200px;">
+							
+							  <span class="input-group-label prefix"><i class="fa fa-calendar"></i></span>
+							  <input class="input-group-field" size="16" type="text" value="{{datePeriod}}" name="date_period" readonly>							  
+							
+						</div>
+					</label>
+			  </div>
+			  <div class="large-4 columns">
+					<label> Province
+					   <select id="adr_province" name="adr_province" onchange="">
+					   			<option value=''>--select--</option>
+		          			{% for itemProvince in localityProvinces %}
+		          				<option 
+		          				{% if itemProvince.province = adr_province %}
+		          					selected
+		          				{% endif %}
+		          				value="{{ itemProvince.province }}" 
+		          				>{{ itemProvince.province }}  [{{ itemProvince.province_khmer }}]</option>
+		          			{% endfor %}
+		        	   </select>
+					</label>
+			  </div>
+			  <div class="large-4 columns">
+					<label> Referred by
+					  <select id="id_referrer"  name="id_referrer" onchange="">
+					  	<option value=''>--select--</option>
+		          			{% for itemReferrer in listReferrers %}
+		          				<option 
+		          				{% if itemReferrer.id = id_ref %}
+		          					selected
+		          				{% endif %}
+		          				value="{{ itemReferrer.id }}" 
+		          				>{{ itemReferrer.first_name }}  {{ itemReferrer.last_name }}</option>
+		          			{% endfor %}
+		        	   </select>
+					</label>
+		      </div>
+		      
+			  <div class="large-2 columns">
+			  
+			  <button type="submit" class="success button" style="margin-top: 25px;">FILTER</button>
+			  
+			  </div>
+		</div>
+		
+	</form>
 </div>
 
 <div class="row">
@@ -34,20 +70,20 @@
    		<div id="chart-client-table">
    			<table>
    				<tr>
-   					<td>Status</td>
-   					<td>Percentage</td>
-   					<td>Clients</td>
+   					<td style="text-align: right;">Status</td>
+   					<td style="text-align: right;">Percentage</td>
+   					<td style="text-align: right;">Clients</td>
    				</tr>
    				{% for listTD in listObject %}
    				<tr>
    					{% for itemTD in listTD %}
-   					<td> {{itemTD}}</td>
+   					<td style="text-align: right;"> {{itemTD}}</td>
    					{% endfor %}
    				</tr>
    				{% endfor %}
    				<tr>
    					<td colspan="2" style="text-align: right;">Total Clients</td>
-   					<td>{{numberClients}}</td>
+   					<td style="text-align: right;">{{numberClients}}</td>
    				</tr>
    			</table>
    		</div>
@@ -61,20 +97,20 @@
    		<div id="chart-services-table">
    			<table>
    				<tr>
-   					<td>Services</td>
-   					<td>Percentage</td>
-   					<td>Number of services</td>
+   					<td style="text-align: right;">Services</td>
+   					<td style="text-align: right;">Percentage</td>
+   					<td style="text-align: right;">Number of services</td>
    				</tr>
    				{% for itemService in listObjectService %}
    				<tr>
    					{% for itemTD in itemService %}
-   					<td> {{itemTD}}</td>
+   					<td style="text-align: right;"> {{itemTD}}</td>
    					{% endfor %}
    				</tr>
    				{% endfor %}
    				<tr>
    					<td colspan="2" style="text-align: right;">Total Services</td>
-   					<td>{{numberServices}}</td>
+   					<td style="text-align: right;">{{numberServices}}</td>
    				</tr>
    			</table>
    		</div>
@@ -88,6 +124,7 @@
 
 <script src="https://code.highcharts.com/modules/data.js"></script>
 <script src="https://code.highcharts.com/modules/drilldown.js"></script>
+<script src="https://use.fontawesome.com/7beb934639.js"></script>
 <script type="text/javascript">
 
 var lData = [{{jsonData|safe}}] ;
@@ -162,13 +199,19 @@ $(function () {
                 allowPointSelect: true,
                 cursor: 'pointer',
                 dataLabels: {
-                    enabled: true,
+                    enabled: false,
                     format: '<b>{point.name}</b>: {point.percentage:.1f} %',
                     style: {
                         color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
                     }
-                }
+                },
+                showInLegend: true
+                
             }
+        },
+        legend: {
+        	layout: "vertical",
+        	labelFormat: '<b>{name}</b>: {percentage:.1f} %'
         },
         series: [{
             name: 'Services',
@@ -176,11 +219,11 @@ $(function () {
             data: serviceData
         }]
     });
+	$('#dpMonths').fdatepicker();
+	$('#id_referrer').val("{{id_ref}}");
 	
-	$('#date_period').fdatepicker({
-		 format: 'yyyy-mm-dd',
-		 weekStart: 1
-	 })
+	
+	 
 });
 
 

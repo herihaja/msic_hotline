@@ -10,6 +10,7 @@ from referral_system.models import SmsFac, Client, Appointment,\
 from django.core import serializers
 from referral_system.classes.ReferralFunctions import ReferralFunctions
 from referral_system.classes.Reports import Reports
+from django.contrib.auth import models
 
 
 # Create your views here.
@@ -18,7 +19,7 @@ def group_check(user):
     return user.groups.filter(name__in=['Hotline Consellor'])
 
 def index(request):
-    context = {'variable': 1234}
+    context = {}
     return render(request, 'referral/index.html', context)
 
 def viewClient(request, client_id):
@@ -70,15 +71,15 @@ def notificationPage(request, typenotif):
         tReferralID = typenotif.split("_")
         referralId = tReferralID[1]
         typeNotification = "success"
-        notificationMessage = 'Appointment saved successfully ! <br> Referral ID: ' + referralId
+        notificationMessage = '<h4>Appointment saved successfully ! </h4><br> Referral ID: ' + referralId
         
         descriptionText = reports.smsTextNewReferral(referralId)
         
     elif(typenotif[:4] == 'nok_'):
         tReferralID = typenotif.split("_")
         referralId = tReferralID[2]
-        typeNotification = "error"
-        notificationMessage = 'The Referral ID <' + referralId + '> already exist !'
+        typeNotification = "alert"
+        notificationMessage = '<h4>Could not save the appointment ! </h4><br> The Referral ID <b>' + referralId + '</b> already exist !'
     
     context = {
                'notifications_message': notificationMessage,
@@ -148,10 +149,24 @@ def referralFormExisting(request):
 
 @login_required(login_url='/referral_system/loginPage/')
 def viewReferral(request):
+    
+    datePeriod = ''
+    adr_province = ''
+    id_referrer = ''
+    group = models.Group.objects.get(name='Hotline Consellor')
+    listReferrers = group.user_set.all()
+    
+    if request.method == 'POST':
+        #here function
+        datePeriod = request.POST['date_period']
+        adr_province = request.POST['adr_province']
+        id_referrer = request.POST['id_referrer']
+    
     reports = Reports()
+    localityProvinces = AjaxFunction.listLocalityProvince()
     
     ### CLIENTS
-    referralReports = reports.clientsPerStatus()
+    referralReports = reports.clientsPerStatus(datePeriod, adr_province, id_referrer)
     """
     {
                     name: 'Microsoft Internet Explorer',
@@ -182,7 +197,7 @@ def viewReferral(request):
     strData = ",".join(listClientData)
     
     ## SERVICES DELIVERED
-    servicesDelivered = reports.servicesDelivered()
+    servicesDelivered = reports.servicesDelivered(datePeriod, adr_province, id_referrer)
     allServices = ReferredServices.objects.all()
     
     reportServices = {}
@@ -233,7 +248,12 @@ def viewReferral(request):
                "menuactive" : "view",
                "jsonData" : strData,
                "numberClients" : numberClients,
-               "numberServices" : numberServices
+               "numberServices" : numberServices,
+               "localityProvinces" : localityProvinces,
+               "datePeriod" : datePeriod,
+               "adr_province" : adr_province,
+               "id_ref" : id_referrer,
+               "listReferrers" : listReferrers
                }
     return render(request, 'referral/view_referral.html', context)
 
@@ -390,9 +410,10 @@ def referralSaveExistingForm(request):
                                               )
         referralOperation.save() 
         
-            
+        #Notification format: ok_referalid
+        notifParam = "ok_" + uniqueID  
         
-    return redirect(notificationPage, typenotif = '01')
+    return redirect(notificationPage, typenotif = notifParam)
 
 #Ajax functions for facilities
 def ajaxListDistrict(request):
