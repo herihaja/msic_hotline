@@ -1,4 +1,4 @@
-from referral_system.models import SmsFac, Appointment, Client, AuthUser
+from referral_system.models import SmsFac, Appointment, Client, AuthUser, ReferredServices, ReferralOperation, Occupation, SmsLoc
 
 class MSerializers:
 
@@ -9,7 +9,8 @@ class MSerializers:
 
     def select_all_facilities(self, date_last_update =None):
         facilities =[];
-        db_facilities = SmsFac.objects.all().extra(where=[" UPPER(quest_26) = 'YES' "])
+#        db_facilities = SmsFac.objects.all().extra(where=[" UPPER(quest_26) = 'YES' "])
+        db_facilities = SmsFac.objects.all();
         for objFacility in db_facilities :
             facility = {}
             facility["id"] = objFacility.quest_20
@@ -33,6 +34,7 @@ class MSerializers:
             facility["fp_services"] = objFacility.quest_27
             facility["abortion_services1"] = objFacility.quest_26
             facility["abortion_services2"] = objFacility.quest_37
+            facility["facility_type"] = objFacility.quest_21
 
             facility["created"] = str(objFacility.date_soumission)
             facility["last_updated"] = str(objFacility.date_soumission)
@@ -84,11 +86,11 @@ class MSerializers:
 
     def select_all_services(self, date_last_updated=None):
         services =[];
-        db_services = Service.objects.all()
+        db_services = ReferredServices.objects.all()
         for objService in db_services :
             service = {}
-            service["id"] = objService.id_services
             service["name"] = objService.service_name
+            service["created"] = objService.created
             services.append(service)
         return services
 
@@ -103,3 +105,48 @@ class MSerializers:
         res_user["facility_id"] = "whgf4"
         res_user["group_id"] = 2
         return res_user;
+
+    def select_all_operation(self):
+        referOperations=[];
+        db_operations = ReferralOperation.objects.all()
+        for objOperation in db_operations :
+            referOperation = {}
+            referOperation["referral_id"] = objOperation.referral_id
+            referOperation["actor_id"] = objOperation.actor_id
+            referOperation["referred_services"] = objOperation.referred_services
+            referOperation["other_services"] = objOperation.other_services
+            referOperation["status"] = objOperation.status
+            referOperation["last_updated"] = objOperation.last_updated
+            referOperations.append(referOperation)
+        return referOperations
+
+    def select_all_occupations(self):
+        occupations = []
+        db_occupations = Occupation.objects.all()
+        i = 1;
+        for objOccupation in db_occupations :
+            occupation = {}
+            occupation["occupation_id"] = i
+            occupation["occupation_name"] = objOccupation.occupation_name
+            occupations.append(occupation)
+            i=i+1;
+        return occupations
+
+    def select_all_locations(self):
+        referLocations = []
+        db_locations = SmsLoc.objects.all()
+        for objLocation in db_locations :
+            referLocation = {}
+            referLocation["id_location"] = objLocation.quest_5
+            referLocation["village"] = objLocation.quest_3
+            referLocation["village_khmer"] = objLocation.quest_7
+            referLocation["commune"] = objLocation.quest_9
+            referLocation["commune_khmer"] = objLocation.quest_2
+            referLocation["district"] = objLocation.quest_4
+            referLocation["district_khmer"] = objLocation.quest_8
+            referLocation["province"] = objLocation.quest_6
+            referLocation["province_khmer"] = objLocation.quest_1
+            referLocation["created"] = str(objLocation.date_soumission)
+            referLocation["last_updated"] = str(objLocation.date_soumission)
+            referLocations.append(referLocation)
+        return referLocations

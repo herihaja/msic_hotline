@@ -19,14 +19,20 @@ def getFacilities(request):
     facilities = mSerializer.select_all_facilities()
     appointments = mSerializer.select_all_appointments()
     services = mSerializer.select_all_services()
+    referOperations = mSerializer.select_all_operation()
+    occupations = mSerializer.select_all_occupations()
+    referLocations = mSerializer.select_all_locations()
     return HttpResponse(
         content_type='application/json',
         content=json.dumps({
                 'success': 1,
-                'error_msg': "OK",
+                'error_msg': "Data Pull SUCCESSFUL",
                 "facilities": facilities,
                 "appointments": appointments,
-                "services":services
+                "services":services,
+                "operations":referOperations,
+                "occupations":occupations,
+                "locations":referLocations
         },default=_json_serial))
 
 def auth(request):
