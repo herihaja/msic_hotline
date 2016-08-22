@@ -73,14 +73,21 @@ class Reports:
         SELECT 
         facility.quest_19 AS facility_name,
         cli.adr_street,
+        cli.adr_street AS adr_street_khmer,
         cli.adr_village,
+        loc_village.quest_7 AS adr_village_khmer,
         cli.adr_commune,
+        loc_commune.quest_2 AS adr_commune_khmer,
         cli.phone,
-        app.expiry_date
+        facility.quest_12 AS facility_name_khmer,
+        app.expiry_date,
+        app.language AS ref_lang
         FROM 
         appointment app
         INNER JOIN sms_fac facility ON  facility.quest_20 = app.id_facility
         INNER JOIN client cli ON cli.id_client = app.id_client
+        LEFT JOIN sms_loc loc_village ON loc_village.quest_3 = cli.adr_village
+        LEFT JOIN sms_loc loc_commune ON loc_commune.quest_9 = cli.adr_commune
         WHERE 
         app.referral_id = '""" + referralId + """'
         """
@@ -89,11 +96,19 @@ class Reports:
         objSms = resSms[0]
         
         strSms = "The sms below is sent to the client: <br><br><i>\""
-        strSms = strSms + objSms['facility_name']
-        strSms = strSms + ", " +objSms['adr_street']
-        strSms = strSms + ", " +objSms['adr_village']
-        strSms = strSms + ", " +objSms['adr_commune']
-        strSms = strSms + ", " +objSms['phone']
+        
+        if objSms['ref_lang'] == 'english':
+            strSms = strSms + objSms['facility_name']
+            strSms = strSms + ", " +objSms['adr_street']
+            strSms = strSms + ", " +objSms['adr_village']
+            strSms = strSms + ", " +objSms['adr_commune']                    
+        else:
+            strSms = strSms + objSms['facility_name_khmer']
+            strSms = strSms + ", " +objSms['adr_street']
+            strSms = strSms + ", " +objSms['adr_village_khmer']
+            strSms = strSms + ", " +objSms['adr_commune_khmer']
+        
+        strSms = strSms + ", " +objSms['phone']    
         strSms = strSms + ", " + str(objSms['expiry_date'])
         strSms = strSms + "</i>\""
         
