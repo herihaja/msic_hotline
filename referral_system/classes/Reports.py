@@ -97,18 +97,19 @@ class Reports:
         
         strSms = "The sms below is sent to the client: <br><br><i>\""
         
-        if objSms['ref_lang'] == 'english':
-            strSms = strSms + objSms['facility_name']
-            strSms = strSms + ", " +objSms['adr_street']
-            strSms = strSms + ", " +objSms['adr_village']
-            strSms = strSms + ", " +objSms['adr_commune']                    
-        else:
-            strSms = strSms + objSms['facility_name_khmer']
-            strSms = strSms + ", " +objSms['adr_street']
-            strSms = strSms + ", " +objSms['adr_village_khmer']
-            strSms = strSms + ", " +objSms['adr_commune_khmer']
         
-        strSms = strSms + ", " +objSms['phone']    
+        if objSms['ref_lang'] == 'english':
+            strSms = strSms + str(objSms['facility_name'])
+            strSms = strSms + ", " + str(objSms['adr_street'])
+            strSms = strSms + ", " + str(objSms['adr_village'])
+            strSms = strSms + ", " + str(objSms['adr_commune'] )                   
+        else:
+            strSms = strSms + str(objSms['facility_name_khmer'])
+            strSms = strSms + ", " + str(objSms['adr_street'])
+            strSms = strSms + ", " + str(objSms['adr_village_khmer'])
+            strSms = strSms + ", " + str(objSms['adr_commune_khmer'])
+        
+        strSms = strSms + ", " + str(objSms['phone'])    
         strSms = strSms + ", " + str(objSms['expiry_date'])
         strSms = strSms + "</i>\""
         

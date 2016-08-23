@@ -134,3 +134,5 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
     './msic_hotline/static/',
 ]
+
+DW_SMS_API_URL = 'https://msicapi:ms1cap1dw@app.datawinners.com/sms'
