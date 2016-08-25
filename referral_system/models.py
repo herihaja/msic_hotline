@@ -10,6 +10,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from datetime import datetime
 
 
 class Appointment(models.Model):
@@ -22,8 +23,8 @@ class Appointment(models.Model):
     notification_client_id = models.IntegerField(blank=True, null=True)
     notification_facility_id = models.IntegerField(blank=True, null=True)
     mode = models.IntegerField(blank=True, null=True)
-    created = models.DateTimeField(blank=True, null=True)
-    last_updated = models.DateTimeField(blank=True, null=True)
+    created = models.DateTimeField(default=datetime.now, blank=True, null=True)
+    last_updated = models.DateTimeField(default=datetime.now, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -197,6 +198,20 @@ class DwQuestionnaire(models.Model):
         managed = False
         db_table = 'dw_questionnaire'
         
+class MessagesLog(models.Model):
+    id_message = models.AutoField(primary_key=True)
+    date_sent = models.DateTimeField(default=datetime.now, blank=True, null=True)
+    status = models.CharField(max_length=250, blank=True, null=True)
+    content_sms = models.TextField(blank=True, null=True)
+    from_number = models.CharField(max_length=100, blank=True, null=True)
+    to_number = models.CharField(max_length=100, blank=True, null=True)
+    id_actor = models.IntegerField(blank=True, null=True)
+    id_recipient = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'messages_log'
+        
 class Occupation(models.Model):
     occupation_name = models.CharField(max_length=100, blank=True, null=True)
 
@@ -212,7 +227,7 @@ class ReferralOperation(models.Model):
     referred_services = models.TextField(blank=True, null=True)
     other_services = models.TextField(blank=True, null=True)
     status = models.IntegerField(blank=True, null=True)
-    last_updated = models.DateTimeField(blank=True, null=True)
+    last_updated = models.DateTimeField(default=datetime.now, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -221,7 +236,7 @@ class ReferralOperation(models.Model):
 
 class ReferredServices(models.Model):
     service_name = models.CharField(primary_key=True, max_length=250)
-    created = models.DateTimeField(blank=True, null=True)
+    created = models.DateTimeField(default=datetime.now, blank=True, null=True)
 
     class Meta:
         managed = False

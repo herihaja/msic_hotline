@@ -1,4 +1,9 @@
 from referral_system.classes.AjaxFunction import AjaxFunction
+import requests
+from django.conf import settings
+import json
+from datetime import datetime
+from referral_system.models import MessagesLog
 
 
 class Reports:
@@ -65,7 +70,7 @@ class Reports:
                     
         return AjaxFunction.runSQL(sqlReport)
     
-    def smsTextNewReferral(self, referralId):
+    def smsTextNewReferral(self, referralId, actorId):
         # <Health facility name>, <house #>, <street>, <village>, 
         # <commune>, telephone number-<code> <expiry date>
         
@@ -73,11 +78,12 @@ class Reports:
         SELECT 
         facility.quest_19 AS facility_name,
         cli.adr_street,
+        cli.id_client,
         cli.adr_street AS adr_street_khmer,
         cli.adr_village,
-        loc_village.quest_7 AS adr_village_khmer,
+        CASE WHEN loc_village.quest_7 IS NULL THEN '' ELSE loc_village.quest_7 END AS adr_village_khmer,
         cli.adr_commune,
-        loc_commune.quest_2 AS adr_commune_khmer,
+        CASE WHEN loc_commune.quest_2 IS NULL THEN '' ELSE loc_commune.quest_2 END AS adr_commune_khmer,
         cli.phone,
         facility.quest_12 AS facility_name_khmer,
         app.expiry_date,
@@ -97,20 +103,79 @@ class Reports:
         
         strSms = "The sms below is sent to the client: <br><br><i>\""
         
+        sms = ''
+        if objSms['ref_lang'] == 'english':
+            sms = sms + str(objSms['facility_name'])
+            sms = sms + ", " + str(objSms['adr_street'])
+            sms = sms + ", " + str(objSms['adr_village'])
+            sms = sms + ", " + str(objSms['adr_commune'] )                   
+        else:
+            sms = sms + objSms['facility_name_khmer']
+            sms = sms + ", " + objSms['adr_street']
+            sms = sms + ", " + objSms['adr_village_khmer']
+            sms = sms + ", " + objSms['adr_commune_khmer']
+        
+        sms = sms + ", " + str(objSms['phone'])    
+        sms = sms + ", " + str(objSms['expiry_date'])
+        strSms = strSms + " " + sms + "</i>\""
         
         if objSms['ref_lang'] == 'english':
-            strSms = strSms + str(objSms['facility_name'])
-            strSms = strSms + ", " + str(objSms['adr_street'])
-            strSms = strSms + ", " + str(objSms['adr_village'])
-            strSms = strSms + ", " + str(objSms['adr_commune'] )                   
-        else:
-            strSms = strSms + str(objSms['facility_name_khmer'])
-            strSms = strSms + ", " + str(objSms['adr_street'])
-            strSms = strSms + ", " + str(objSms['adr_village_khmer'])
-            strSms = strSms + ", " + str(objSms['adr_commune_khmer'])
+            self.sendMessage("261340341893", sms, actorId, objSms['id_client'])
+        #    self.sendMessage(objSms['phone'], sms, actorId, objSms['id_client'])
+        #else:
+        #    self.sendMessage(objSms['phone'], sms, actorId, objSms['id_client'])
         
-        strSms = strSms + ", " + str(objSms['phone'])    
-        strSms = strSms + ", " + str(objSms['expiry_date'])
-        strSms = strSms + "</i>\""
+        
         
         return strSms
+    
+    def sendMessage(self, toNumber, message_content, actorId, recipientId):
+        # number_list = [ num1, num2, ...]
+        # message_content <= 160 car
+        # discussion_id : for log
+        
+        corrected_list = self.set_as_valid_list(toNumber)
+        data_dict = {}
+        data_dict['numbers'] = corrected_list['string']
+        data_dict['message'] = message_content
+        
+        data_string = '{"numbers":[%s],"message":"%s "}' %(corrected_list['string'], message_content.encode("cp874"))
+        data_direct = '{"numbers":' + corrected_list['string'] + ',"message":"' + message_content.encode("UTF-8") + '"}'
+        
+        headers = {'Content-Type': 'Content-Type: text/html; charset=UTF-8'}
+        ssl_verify = False
+        response = requests.post(settings.DW_SMS_API_URL,
+                                 verify=ssl_verify,
+                                 data=data_string)
+        
+        self.saveSmsLog(response, toNumber, message_content.encode("UTF-8"), actorId, recipientId)
+        
+        return response
+    
+    def set_as_valid_list (self, number_string_list):
+        # number_string_list may be like 261xxxx, 261xxx
+        # hard correct to "261xxxx", "261xxx" 
+        number_list = [n.strip() for n in number_string_list.split(",")] #remove "spaces" 
+        cl =  '", "'.join(map(str, number_list))
+        return {'string' : '"' + cl + '"',
+            'list' : number_list}
+        
+    def saveSmsLog(self, response, to_number, msg_content, actor_id, recipient_id):        
+        response_status = response.status_code
+        
+        if response.status_code == requests.codes.ok:# status_code=200
+            msg_status = "%s, %s" %(response_status, response.json()[str(to_number)])
+        else:
+            msg_status = response_status
+        
+        msg = MessagesLog(
+                                  status = msg_status,
+                                  content_sms = msg_content,
+                                  from_number = '',
+                                  to_number = to_number,
+                                  id_actor = actor_id,
+                                  id_recipient = recipient_id
+                                  )
+        msg.save()
+        
+        

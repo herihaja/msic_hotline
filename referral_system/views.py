@@ -13,6 +13,7 @@ from referral_system.classes.Reports import Reports
 from django.contrib.auth import models
 
 
+
 # Create your views here.
 
 def group_check(user):
@@ -73,7 +74,7 @@ def notificationPage(request, typenotif):
         typeNotification = "success"
         notificationMessage = '<h4>Appointment saved successfully ! </h4><br> Referral ID: ' + referralId
         
-        descriptionText = reports.smsTextNewReferral(referralId)
+        descriptionText = reports.smsTextNewReferral(referralId, request.user.id)
         
     elif(typenotif[:4] == 'nok_'):
         tReferralID = typenotif.split("_")
@@ -409,6 +410,7 @@ def referralSaveExistingForm(request):
                                               status = 1 # 1 = referred                                               
                                               )
         referralOperation.save() 
+        
         
         #Notification format: ok_referalid
         notifParam = "ok_" + uniqueID  
