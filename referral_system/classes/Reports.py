@@ -119,8 +119,8 @@ class Reports:
         sms = sms + ", " + str(objSms['expiry_date'])
         strSms = strSms + " " + sms + "</i>\""
         
-        if objSms['ref_lang'] == 'english':
-            self.sendMessage("261340341893", sms, actorId, objSms['id_client'])
+        #if objSms['ref_lang'] == 'english':
+        #    self.sendMessage("261340341893", sms, actorId, objSms['id_client'])
         #    self.sendMessage(objSms['phone'], sms, actorId, objSms['id_client'])
         #else:
         #    self.sendMessage(objSms['phone'], sms, actorId, objSms['id_client'])
