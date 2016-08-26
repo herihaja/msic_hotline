@@ -1,3 +1,4 @@
+from django.db.models.query_utils import Q
 from referral_system.models import SmsFac, Appointment, Client, AuthUser, ReferredServices, ReferralOperation, Occupation, SmsLoc
 
 class MSerializers:
@@ -10,11 +11,16 @@ class MSerializers:
     def select_all_facilities(self, date_last_update =None):
         facilities =[];
 #        db_facilities = SmsFac.objects.all().extra(where=[" UPPER(quest_26) = 'YES' "])
-        db_facilities = SmsFac.objects.all();
+        db_facilities = SmsFac.objects.all().filter(
+            (Q(quest_50 = "Both (Referral System and Public Facing Platform)")|
+            Q(quest_50 = "Referral System only"))|
+            Q(quest_21 = "Garment factory infirmary")
+        )
+
         for objFacility in db_facilities :
             facility = {}
             facility["id"] = objFacility.quest_20
-            facility["name"] = objFacility.quest_29
+            facility["name"] = objFacility.quest_19
             facility["name_khmer"] = objFacility.quest_12
             facility["coordinates"] = objFacility.quest_24
             facility["street"] = objFacility.quest_16
@@ -27,13 +33,11 @@ class MSerializers:
             facility["district_khmer"] = objFacility.quest_48
             facility["province"] = objFacility.quest_15
             facility["province_khmer"] = objFacility.quest_42
-            facility["phone1"] = objFacility.quest_12
+            facility["phone1"] = objFacility.quest_11
             facility["phone2"] = objFacility.quest_26
             facility["phone3"] = objFacility.quest_31
             facility["hours"] = objFacility.quest_49
-            facility["fp_services"] = objFacility.quest_27
-            facility["abortion_services1"] = objFacility.quest_26
-            facility["abortion_services2"] = objFacility.quest_37
+            facility["services"] = objFacility.quest_49
             facility["facility_type"] = objFacility.quest_21
 
             facility["created"] = str(objFacility.date_soumission)
@@ -49,6 +53,7 @@ class MSerializers:
             appointment = {}
             appointment["id"] = objAppointment.referral_id
             appointment["referral_date"] = str(objAppointment.referral_date)
+            appointment["expiry_date"] = str(objAppointment.expiry_date)
             appointment["language"] = objAppointment.language
             appointment["notification_client_id"] = objAppointment.notification_client_id
             appointment["notification_facility_id"] = objAppointment.notification_facility_id
