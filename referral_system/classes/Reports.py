@@ -119,11 +119,12 @@ class Reports:
         sms = sms + ", " + str(objSms['expiry_date'])
         strSms = strSms + " " + sms + "</i>\""
         
-        #if objSms['ref_lang'] == 'english':
-        #    self.sendMessage("261340341893", sms, actorId, objSms['id_client'])
-        #    self.sendMessage(objSms['phone'], sms, actorId, objSms['id_client'])
-        #else:
-        #    self.sendMessage(objSms['phone'], sms, actorId, objSms['id_client'])
+        if objSms['ref_lang'] == 'english':
+            self.sendMessage("261340341893", sms, actorId, objSms['id_client'])
+            #self.sendMessage(objSms['phone'], sms, actorId, objSms['id_client'])
+        else:
+            #self.sendMessage(objSms['phone'], sms, actorId, objSms['id_client'])
+            self.sendMessage("85510530777", sms, actorId, objSms['id_client'])
         
         
         
@@ -139,9 +140,8 @@ class Reports:
         data_dict['numbers'] = corrected_list['string']
         data_dict['message'] = message_content
         
-        data_string = '{"numbers":[%s],"message":"%s "}' %(corrected_list['string'], message_content.encode("cp874"))
-        data_direct = '{"numbers":' + corrected_list['string'] + ',"message":"' + message_content.encode("UTF-8") + '"}'
-        
+        data_string = '{"numbers":[%s],"message":"%s "}' %(corrected_list['string'], message_content.encode("UTF-8"))
+         
         headers = {'Content-Type': 'Content-Type: text/html; charset=UTF-8'}
         ssl_verify = False
         response = requests.post(settings.DW_SMS_API_URL,

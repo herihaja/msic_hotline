@@ -136,3 +136,5 @@ STATICFILES_DIRS = [
 ]
 
 DW_SMS_API_URL = 'https://msicapi:ms1cap1dw@app.datawinners.com/sms'
+
+DW_SMS_API_KH  = 'http://apimsic:apimsic@192.168.1.225:8000/sms'
