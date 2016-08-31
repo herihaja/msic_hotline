@@ -228,6 +228,10 @@ class ReferralOperation(models.Model):
     other_services = models.TextField(blank=True, null=True)
     status = models.IntegerField(blank=True, null=True)
     last_updated = models.DateTimeField(default=datetime.now, blank=True, null=True)
+    is_completed = models.CharField(max_length=4, blank=True, null=True)
+    has_alternative = models.CharField(max_length=4, blank=True, null=True)
+    provider = models.CharField(max_length=255, blank=True, null=True)
+    redeem_date = models.DateField(blank=True, null=True)
 
     class Meta:
         managed = False

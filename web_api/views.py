@@ -19,7 +19,8 @@ def getFacilities(request):
     facilities = mSerializer.select_all_facilities()
     appointments = mSerializer.select_all_appointments()
     services = mSerializer.select_all_services()
-    referOperations = mSerializer.select_all_operation()
+#    referOperations = mSerializer.select_all_operation()
+    referOperations = mSerializer.update_operations()
     occupations = mSerializer.select_all_occupations()
     referLocations = mSerializer.select_all_locations()
     return HttpResponse(
@@ -36,6 +37,49 @@ def getFacilities(request):
         },default=_json_serial))
 
 def auth(request):
+    username = request.POST['login']
+    password = request.POST['password']
+    user = authenticate(username=username, password=password)
+
+    if user is not None:
+        if user.is_active:
+            login(request, user)
+            mSerializer = MSerializers()
+            user = mSerializer.getUser(username)
+
+            return HttpResponse(
+                content_type='application/json',
+                content=json.dumps({
+                        'success': 1,
+                        'error_msg': "SUCCESSFUL",
+                        "error_msg": "You're Logged Successfully",
+                        "user": user
+                },default=_json_serial))
+        else:
+            # Return a 'disabled account' error message
+#            return redirect(loginPage, error="inactive")
+            return HttpResponse(
+                content_type='application/json',
+                content=json.dumps({
+                        'success': -1,
+                        'error_msg': "ERROR_INACTIVE",
+                },default=_json_serial))
+
+    else:
+        # Return an 'invalid login' error message.
+#        return redirect(loginPage, error="wrong")
+        return HttpResponse(
+            content_type='application/json',
+            content=json.dumps({
+                    'success': -2,
+                    'error_msg': "ERROR_WRONG",
+            },default=_json_serial))
+
+def saveReferral(request):
+
+
+
+
     username = request.POST['login']
     password = request.POST['password']
     user = authenticate(username=username, password=password)
