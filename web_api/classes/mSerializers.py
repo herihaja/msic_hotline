@@ -1,3 +1,4 @@
+from collections import Counter
 from django.db.models.query_utils import Q
 from referral_system.models import SmsFac, Appointment, \
     Client, AuthUser, ReferredServices, ReferralOperation, \
@@ -87,8 +88,8 @@ class MSerializers:
                 client["last_updated"] = str(objAppointment.referral_date)
                 appointment["appointment_client"] = client
                 
-            appointment["id_facility"] = objAppointment.id_facility
-            appointment["id_garment"] = "whgf4"
+#            appointment["id_facility"] = objAppointment.id_facility
+#            appointment["id_garment"] = "whgf4"
             appointments.append(appointment)
         return appointments
 
@@ -110,7 +111,7 @@ class MSerializers:
         res_user["last_name"] = auth_user.last_name
         res_user["email"] = auth_user.email
 #        res_user["facility_id"] = auth_user.facility_id whgf4
-        res_user["facility_id"] = "whgf4"
+#        res_user["facility_id"] = "whgf4"
         res_user["group_id"] = 2
         return res_user;
 
@@ -179,6 +180,7 @@ class MSerializers:
                 referOperation["op_redeem_date"] = objOperation["redeem_date"].strftime('%Y/%m/%d')
             else:
                 referOperation["op_redeem_date"] = ""
+            referOperation["op_facility_id"] = objOperation["facility_id"]
             referOperations.append(referOperation)
         return referOperations
 
@@ -212,3 +214,78 @@ class MSerializers:
             referLocation["last_updated"] = str(objLocation.date_soumission)
             referLocations.append(referLocation)
         return referLocations
+
+    def update_garment_report(self):
+        report_garment = {}
+        sql = '''
+            SELECT
+                (SELECT count(*)
+                FROM referral_operation pa
+                WHERE pa.actor_id = 3 and pa.status=1) as grep_all_referred
+                ,(SELECT count(*)
+                FROM referral_operation rp
+                WHERE rp.last_actor_id = 3 and rp.status=2) as grep_redeemed
+                ,(SELECT array_to_string(array(SELECT rp.referred_services
+                FROM referral_operation rp
+                WHERE rp.actor_id = 3 and rp.status=1
+                ),';')) as grep_all_services
+                , op.last_updated
+                FROM referral_operation op
+                ORDER BY op.last_updated DESC
+                LIMIT 1;
+            '''
+        list_report = StaticTools.run_sql(sql)
+        res_report = list_report[0]
+        report_garment["grep_all_referred"] = res_report["grep_all_referred"]
+        report_garment["grep_redeemed"] = res_report["grep_redeemed"]
+        report_garment["grep_not_redeemed"] = res_report["grep_all_referred"] - res_report["grep_redeemed"]
+        all_services = res_report["grep_all_services"]
+        list_services = all_services.split(';')
+        report_garment["grep_all_services"] = len(list_services)
+        report_garment["grep_services_dispatched"] = Counter(list_services)
+        report_garment["grep_last_updated"] = res_report["last_updated"]
+        return report_garment
+
+    def update_facility_report(self):
+        report_garment = {}
+        sql = '''
+            SELECT
+            (SELECT count(*)
+            FROM referral_operation pa
+            WHERE pa.facility_id = 'whpf8' and pa.status=1) as frep_all_referred
+            ,(SELECT count(*)
+            FROM referral_operation rp
+            WHERE rp.actor_id = 4 and rp.status=2) as frep_redeemed
+            ,(SELECT count(*)
+            FROM referral_operation rp
+            WHERE rp.actor_id = 4 and rp.status=4) as frep_re_referred
+            ,(SELECT count(*)
+            FROM referral_operation rp
+            WHERE rp.last_actor_id = 4 and rp.status=2) as frep_re_referred_redeemed
+            ,(SELECT array_to_string(array(SELECT rp.referred_services
+            FROM referral_operation rp
+            WHERE rp.actor_id = 3 and rp.status=1
+            ),';')) as frep_all_services
+            , op.last_updated
+            FROM referral_operation op
+            ORDER BY op.last_updated DESC
+            LIMIT 1;
+            '''
+        list_report = StaticTools.run_sql(sql)
+        res_report = list_report[0]
+        report_garment["frep_re_referred"] = res_report["frep_re_referred"]
+        re_referred_redeemed = res_report["frep_re_referred_redeemed"]
+        report_garment["frep_no_show"] = report_garment["frep_re_referred"] - re_referred_redeemed
+        report_garment["frep_all_referred"] = res_report["frep_all_referred"] + report_garment["frep_re_referred"]
+        report_garment["frep_all_referred"] = res_report["frep_all_referred"]
+        report_garment["frep_redeemed"] = res_report["frep_redeemed"] + re_referred_redeemed
+        report_garment["frep_not_redeemed"] = res_report["frep_all_referred"] - res_report["frep_redeemed"]
+
+        all_services = res_report["frep_all_services"]
+        list_services = all_services.split(';')
+        report_garment["frep_all_services"] = len(list_services)
+        report_garment["frep_services_dispatched"] = Counter(list_services)
+        report_garment["frep_last_updated"] = res_report["last_updated"]
+        return report_garment
+
+

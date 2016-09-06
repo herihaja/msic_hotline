@@ -312,7 +312,7 @@ def referralSaveOnlineForm(request):
                                  expiry_date = expiry_date,
                                  language = language_sms,
                                  id_client = newClient.id_client,
-                                 id_facility = id_selected_facility,
+#                                 id_facility = id_selected_facility,
                                  mode = 1 #1=new ; 2=existing
                                   )
         appointment.save()
@@ -321,6 +321,7 @@ def referralSaveOnlineForm(request):
         referralOperation = ReferralOperation(
                                               referral_id = uniqueID,
                                               actor_id = request.user.id,
+                                              facility_id = id_selected_facility,
                                               last_actor_id = request.user.id,
                                               referred_services = ';'.join(services),
                                               other_services = service_other,
@@ -395,7 +396,7 @@ def referralSaveExistingForm(request):
                                  expiry_date = expiry_date,
                                  language = language_sms,
                                  id_client = newClient.id_client,
-                                 id_facility = id_selected_facility,
+#                                 id_facility = id_selected_facility,
                                  mode = 2 #1=new ; 2=existing
                                   )
         appointment.save()
@@ -404,6 +405,7 @@ def referralSaveExistingForm(request):
         referralOperation = ReferralOperation(
                                               referral_id = uniqueID,
                                               actor_id = request.user.id,
+                                              facility_id = id_selected_facility,
                                               last_actor_id = request.user.id,
                                               referred_services = ';'.join(services),
                                               other_services = service_other,

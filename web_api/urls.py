@@ -8,4 +8,6 @@ urlpatterns = [
     url(r'^auth/$', views.auth, name='auth'),
     url(r'^facility/$', views.getFacilities, name='getFacilities'),
     url(r'^refer/$', views.saveReferral, name='saveReferral'),
+    url(r'^redeem/$', views.saveRedeem, name='saveRedeem'),
+    url(r'^garment_report/$', views.updateGarmentReport, name='updateGarmentReport'),
 ]

@@ -19,7 +19,7 @@ class Appointment(models.Model):
     expiry_date = models.DateField(blank=True, null=True)
     language = models.CharField(max_length=20, blank=True, null=True)
     id_client = models.IntegerField(blank=True, null=True)
-    id_facility = models.CharField(max_length=20, blank=True, null=True)
+#    id_facility = models.CharField(max_length=20, blank=True, null=True)
     notification_client_id = models.IntegerField(blank=True, null=True)
     notification_facility_id = models.IntegerField(blank=True, null=True)
     mode = models.IntegerField(blank=True, null=True)
@@ -71,7 +71,7 @@ class AuthUser(models.Model):
     is_staff = models.BooleanField()
     is_active = models.BooleanField()
     date_joined = models.DateTimeField()
-    facility_id = models.IntegerField(blank=True, null=True)
+    facility_id = models.CharField(max_length=30,null=True)
 
     class Meta:
         managed = False
@@ -100,7 +100,7 @@ class AuthUserUserPermissions(models.Model):
 
 class Client(models.Model):
     id_client = models.AutoField(primary_key=True)
-    sex = models.CharField(max_length=1, blank=True, null=True)
+    sex = models.CharField(max_length=10, blank=True, null=True)
     age = models.IntegerField(blank=True, null=True)
     phone = models.CharField(max_length=100, blank=True, null=True)
     occupation = models.CharField(max_length=250, blank=True, null=True)
@@ -232,6 +232,7 @@ class ReferralOperation(models.Model):
     has_alternative = models.CharField(max_length=4, blank=True, null=True)
     provider = models.CharField(max_length=255, blank=True, null=True)
     redeem_date = models.DateField(blank=True, null=True)
+    facility_id = models.CharField(max_length=20, blank=True, null=True)
 
     class Meta:
         managed = False
