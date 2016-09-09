@@ -2,7 +2,7 @@ from collections import Counter
 from django.db.models.query_utils import Q
 from referral_system.models import SmsFac, Appointment, \
     Client, AuthUser, ReferredServices, ReferralOperation, \
-    Occupation, SmsLoc
+    Occupation, SmsLoc, AuthUserGroups
 from web_api.classes.StaticTools import StaticTools
 
 class MSerializers:
@@ -110,10 +110,13 @@ class MSerializers:
         res_user["first_name"] = auth_user.first_name
         res_user["last_name"] = auth_user.last_name
         res_user["email"] = auth_user.email
-#        res_user["facility_id"] = auth_user.facility_id whgf4
+        res_user["facility_id"] = auth_user.facility_id #whgf4
 #        res_user["facility_id"] = "whgf4"
-        res_user["group_id"] = 2
-        return res_user;
+        authUserGroup = AuthUserGroups.objects.get(user=auth_user)
+        group = authUserGroup.group
+        res_user["group_id"] = group.id
+        res_user["group_name"] = group.name
+        return res_user
 
     def select_all_operation(self):
         referOperations=[];
