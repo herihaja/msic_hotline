@@ -279,7 +279,7 @@ function displaySelectedFacility(_index){
 	_html_selected += "" + _selectedMarker[6] + " ";
 	_html_selected += "" + _selectedMarker[7] + "</p> ";
 	
-	_html_selected += "<h6>Contact Telephones</h6>";
+	_html_selected += "<h6>Telephones</h6>";
 	_html_selected += "<p>" + _selectedMarker[8] + "</p>";
 	_html_selected += "<h6>Opening Hours</h6>";
 	_html_selected += "<p>" + _selectedMarker[9] + "</p>";

@@ -189,7 +189,7 @@ def viewReferral(request):
         _y = str(_y)
         
         itemObj.append(_name)
-        itemObj.append(_y)
+        itemObj.append("%d%s" % (int(_y), "%"))
         itemObj.append(itemReport["number_client"])
         
         listClientObject.append(itemObj)
@@ -232,7 +232,7 @@ def viewReferral(request):
             _percentage = str(_percentage)
         
         itemObj.append(itemService.service_name)
-        itemObj.append(_percentage)
+        itemObj.append("%d%s" % (int(_percentage), "%"))
         itemObj.append(nb)
         listObjectService.append(itemObj)
         

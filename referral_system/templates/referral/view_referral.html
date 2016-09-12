@@ -82,7 +82,7 @@
    				</tr>
    				{% endfor %}
    				<tr>
-   					<td colspan="2" style="text-align: right;">Total Clients</td>
+   					<td colspan="2" style="text-align: right;">100%</td>
    					<td style="text-align: right;">{{numberClients}}</td>
    				</tr>
    			</table>
@@ -109,7 +109,7 @@
    				</tr>
    				{% endfor %}
    				<tr>
-   					<td colspan="2" style="text-align: right;">Total Services</td>
+   					<td colspan="2" style="text-align: right;">100%</td>
    					<td style="text-align: right;">{{numberServices}}</td>
    				</tr>
    			</table>
@@ -170,7 +170,7 @@ $(function () {
 	            headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
 	            pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
 	        },
-	        series: 
+	        series:
 	       	[{
 	            name: 'Status',
 	            colorByPoint: true,
@@ -205,7 +205,7 @@ $(function () {
                         color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
                     }
                 },
-                showInLegend: true
+                showInLegend: false
                 
             }
         },
