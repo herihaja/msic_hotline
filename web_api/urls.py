@@ -7,7 +7,9 @@ urlpatterns = [
     # ex: /referral_system/5/ referralFormOnline
     url(r'^auth/$', views.auth, name='auth'),
     url(r'^facility/$', views.getFacilities, name='getFacilities'),
+    url(r'^update/$', views.getAllUpdate, name='getAllUpdate'),
     url(r'^refer/$', views.saveReferral, name='saveReferral'),
+    url(r'^refer4/$', views.saveReRefer, name='saveReRefer'),
     url(r'^redeem/$', views.saveRedeem, name='saveRedeem'),
     url(r'^garment_report/$', views.updateGarmentReport, name='updateGarmentReport'),
 ]

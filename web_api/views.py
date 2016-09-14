@@ -40,6 +40,63 @@ def getFacilities(request):
                 "facility_report":garment_facility
         },default=_json_serial))
 
+def getAllUpdate(request):
+    user_id = request.POST['user_id']
+    user_name = request.POST['user_name']
+    facility_last_date = request.POST['facility_last_date']
+    appointment_last_date = request.POST['appointment_last_date']
+    location_last_date = request.POST['location_last_date']
+    referral_status_last_date = request.POST['referral_status_last_date']
+    nb_service = request.POST['nb_service']
+    nb_occupation = request.POST['nb_occupation']
+
+    mSerializer = MSerializers()
+    user = mSerializer.getUser(user_name)
+    facilities = mSerializer.select_all_facilities(facility_last_date)
+    appointments = mSerializer.select_all_appointments(user,appointment_last_date)
+    services = mSerializer.select_all_services(nb_service)
+#    referOperations = mSerializer.select_all_operation()
+    referOperations = mSerializer.update_operations(user,referral_status_last_date)
+    occupations = mSerializer.select_all_occupations(nb_occupation)
+    referLocations = mSerializer.select_all_locations(location_last_date)
+
+    if(user["group_id"] == 2):
+        garment_report = mSerializer.update_garment_report(user)
+        return HttpResponse(
+        content_type='application/json',
+        content=json.dumps({
+                'success': 1,
+                'error_msg': "Data Pull SUCCESSFUL",
+                "facilities": facilities,
+                "appointments": appointments,
+                "referred_services":services,
+                "operations":referOperations,
+                "occupations":occupations,
+                "locations":referLocations,
+                "garment_report":garment_report,
+                "facility_report":{}
+        },default=_json_serial))
+    else:
+        facility_report = mSerializer.update_facility_report(user)
+        return HttpResponse(
+        content_type='application/json',
+        content=json.dumps({
+                'success': 1,
+                'error_msg': "Data Pull SUCCESSFUL",
+                "facilities": facilities,
+                "appointments": appointments,
+                "referred_services":services,
+                "operations":referOperations,
+                "occupations":occupations,
+                "locations":referLocations,
+                "garment_report":{},
+                "facility_report":facility_report
+        },default=_json_serial))
+
+
+
+
+    
 def updateGarmentReport(request):
     mSerializer = MSerializers()
     garment_report = mSerializer.update_garment_report()
@@ -93,7 +150,7 @@ def auth(request):
 def saveReferral(request):
     if request.method == 'POST':
         #here function
-        mode = request.POST['mode']
+        mode = int(request.POST['mode'])
         client_sex = request.POST['sex']
         client_phone = request.POST['phone']
         client_age = request.POST['age']
@@ -138,6 +195,15 @@ def saveReferral(request):
             uniqueID = referralFunctions.generateUniqueID()
         else:
             uniqueID = request.POST['referral_id']
+            appoint = Appointment.objects.get(referral_id=uniqueID)
+            if(appoint is not None):
+                return HttpResponse(
+                content_type='application/json',
+                content=json.dumps({
+                        'success': 4,
+                        'error_msg': "The Referral ID is Duplicated,\nPlease Update it and Submit again",
+                        "referral_id": uniqueID
+                },default=_json_serial))
 
 
         #Save appointment
@@ -157,7 +223,7 @@ def saveReferral(request):
                                               referral_id = uniqueID,
                                               actor_id = actor_id,
                                               facility_id = id_selected_facility,
-                                              last_actor_id = request.user.id,
+                                              last_actor_id = 0,
                                               referred_services = ';'.join(services),
                                               other_services = service_other,
                                               status = 1 # 1 = referred
@@ -208,6 +274,43 @@ def saveRedeem(request):
                 'error_msg': "Client Referral created SUCCESSFUL",
                 "operation_id": referralOperation.id
         },default=_json_serial))
+def saveReRefer(request):
+    if request.method == 'POST':
+        #here function
+        referral_id = request.POST['referral_id']
+        actor_id = int(request.POST['actor_id'])
+        last_actor_id = int(request.POST['last_actor_id'])
+        referred_services = request.POST['referred_services']
+        service_other = request.POST['service_other']
+        status = int(request.POST['status'])
+        is_completed = ''
+        has_alternative = ''
+        provider = ''
+        redeem_date = None
+        id_selected_facility = request.POST['id_selected_facility']
+
+        #save the operation
+        referralOperation = ReferralOperation(
+                                              referral_id = referral_id,
+                                              actor_id = actor_id,
+                                              last_actor_id = last_actor_id,
+                                              referred_services = referred_services,
+                                              other_services = service_other,
+                                              status = status,
+                                              is_completed = is_completed,
+                                              has_alternative = has_alternative,
+                                              provider = provider,
+                                              redeem_date = redeem_date,
+                                              facility_id = id_selected_facility
+                                              )
+        referralOperation.save()
+        return HttpResponse(
+            content_type='application/json',
+            content=json.dumps({
+                    'success': 1,
+                    'error_msg': "Client Referral created SUCCESSFUL",
+                    "operation_id": referralOperation.id
+            },default=_json_serial))
 
 def _json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""

@@ -12,13 +12,15 @@ class MSerializers:
     def __init__(self):
         pass
 
-    def select_all_facilities(self, date_last_update =None):
+    def select_all_facilities(self, date_last_update=None):
+        date_last_update = self.my_format_date(date_last_update)
         facilities =[];
 #        db_facilities = SmsFac.objects.all().extra(where=[" UPPER(quest_26) = 'YES' "])
         db_facilities = SmsFac.objects.all().filter(
             (Q(quest_50 = "Both (Referral System and Public Facing Platform)")|
             Q(quest_50 = "Referral System only"))|
-            Q(quest_21 = "Garment factory infirmary")
+            Q(quest_21 = "Garment factory infirmary"),
+            date_soumission__gt=date_last_update
         )
 
         for objFacility in db_facilities :
@@ -44,29 +46,54 @@ class MSerializers:
             facility["services"] = objFacility.quest_49
             facility["facility_type"] = objFacility.quest_21
 
-            facility["created"] = str(objFacility.date_soumission)
-            facility["last_updated"] = str(objFacility.date_soumission)
+            facility["created"] = objFacility.date_soumission.strftime('%Y-%m-%d %H:%M:%S.%f')
+            facility["last_updated"] = objFacility.date_soumission.strftime('%Y-%m-%d %H:%M:%S.%f')
 
             facilities.append(facility)
         return facilities
 
-    def select_all_appointments(self, date_last_updated=None):
+    def select_all_appointments(self, user=None, date_last_updated=None):
         appointments =[];
-        db_appointments = Appointment.objects.all()
+        if(user["group_id"] == 2):
+#            db_appointments = Appointment.objects.all().filter(date_soumission__gt=date_last_updated)
+            sql = '''
+            select
+            ap.*
+            from referral_operation op
+            inner join appointment ap on ap.referral_id = op.referral_id
+            where 1=1
+            and (op.actor_id = '%s')
+            and op.status = 1
+            and ap.last_updated > '%s';
+            '''%(user["user_id"],date_last_updated)
+            db_appointments = StaticTools.run_sql(sql)
+        else:
+            sql = '''
+            select
+            ap.*
+            from referral_operation op
+            inner join appointment ap on ap.referral_id = op.referral_id
+            where 1=1
+            and (op.facility_id = '%s' or op.actor_id = '%s')
+            and op.status = 1
+            and ap.last_updated > '%s';
+            '''%(user["facility_id"],user["user_id"],date_last_updated)
+            db_appointments = StaticTools.run_sql(sql)
+
         for objAppointment in db_appointments :
             appointment = {}
-            appointment["id"] = objAppointment.referral_id
-            appointment["referral_date"] = str(objAppointment.referral_date)
-            appointment["expiry_date"] = str(objAppointment.expiry_date)
-            appointment["language"] = objAppointment.language
-            appointment["notification_client_id"] = objAppointment.notification_client_id
-            appointment["notification_facility_id"] = objAppointment.notification_facility_id
-            appointment["mode"] = objAppointment.mode
+            appointment["id"] = objAppointment['referral_id']
+            appointment["referral_date"] = objAppointment["referral_date"].strftime('%Y-%m-%d')
+            appointment["expiry_date"] = objAppointment["expiry_date"].strftime('%Y-%m-%d')
+            appointment["language"] = objAppointment["language"]
+            appointment["notification_client_id"] = objAppointment["notification_client_id"]
+            appointment["notification_facility_id"] = objAppointment["notification_facility_id"]
+            appointment["mode"] = objAppointment["mode"]
             
-            appointment["created"] = str(objAppointment.referral_date)
-            appointment["last_updated"] = str(objAppointment.referral_date)
+            appointment["created"] = objAppointment["created"].strftime('%Y-%m-%d %H:%M:%S.%f')
+            appointment["last_updated"] = objAppointment["last_updated"].strftime('%Y-%m-%d %H:%M:%S.%f')
 
-            client_id = objAppointment.id_client
+            client_id = objAppointment["id_client"]
             appointment["appointment_client_id"] = client_id
             db_client = Client.objects.get(pk=client_id)
             if db_client is not None:
@@ -84,28 +111,30 @@ class MSerializers:
                 client["adr_province"] = db_client.adr_province
     #            client["created"] = db_client.created
     #            client["last_updated"] = db_client.last_updated
-                client["created"] = str(objAppointment.referral_date)
-                client["last_updated"] = str(objAppointment.referral_date)
+                client["created"] = objAppointment["last_updated"].strftime('%Y-%m-%d %H:%M:%S.%f')
+                client["last_updated"] = objAppointment["last_updated"].strftime('%Y-%m-%d %H:%M:%S.%f')
                 appointment["appointment_client"] = client
                 
-#            appointment["id_facility"] = objAppointment.id_facility
+#            appointment["id_facility"] = objAppointment["id_facility
 #            appointment["id_garment"] = "whgf4"
             appointments.append(appointment)
         return appointments
 
-    def select_all_services(self, date_last_updated=None):
+    def select_all_services(self, nb_service=None):
         services =[];
         db_services = ReferredServices.objects.all()
-        for objService in db_services :
-            service = {}
-            service["name"] = objService.service_name
-            service["created"] = objService.created
-            services.append(service)
+        if len(db_services) > int(nb_service) :
+            for objService in db_services :
+                service = {}
+                service["name"] = objService.service_name
+                service["created"] = objService.created.strftime('%Y-%m-%d %H:%M:%S.%f')
+                services.append(service)
         return services
 
     def getUser(self,username):
         auth_user = AuthUser.objects.get(username=username)
         res_user = {}
+        res_user["user_id"] = auth_user.id
         res_user["username"] = auth_user.username
         res_user["first_name"] = auth_user.first_name
         res_user["last_name"] = auth_user.last_name
@@ -136,9 +165,11 @@ class MSerializers:
             referOperations.append(referOperation)
         return referOperations
 
-    def update_operations(self):
+    def update_operations(self, user=None, date_last_updated=None):
         referOperations = []
-        sql = '''
+        listOperations = []
+        if(user["group_id"] == 2):
+            sql = '''
             SELECT op.*
             ,u.username as u_user_name
             ,u.first_name as u_first_name
@@ -152,9 +183,32 @@ class MSerializers:
             INNER JOIN auth_user_groups ug on ug.user_id = u.id
             INNER JOIN auth_group gr on gr.id = ug.group_id
             WHERE 1=1
+            and (actor_id = %s or last_actor_id = %s)
+            and op.last_updated > '%s'
             ORDER BY op.last_updated
-            '''
-        listOperations = StaticTools.run_sql(sql)
+            '''%(user["user_id"],user["user_id"],date_last_updated)
+            listOperations = StaticTools.run_sql(sql)
+        else:
+            sql = '''
+            SELECT op.*
+            ,u.username as u_user_name
+            ,u.first_name as u_first_name
+            ,u.last_name as u_last_name
+            ,f.quest_20 as f_id
+            ,gr.id as group_id
+            ,gr.name as group_name
+            from referral_operation as op
+            INNER JOIN auth_user as u on u.id = op.actor_id
+            LEFT JOIN sms_fac as f on f.quest_20 = u.facility_id
+            INNER JOIN auth_user_groups ug on ug.user_id = u.id
+            INNER JOIN auth_group gr on gr.id = ug.group_id
+            WHERE 1=1
+            and (op.actor_id = %s or op.facility_id = '%s')
+            and op.last_updated > '%s'
+            ORDER BY op.last_updated
+            '''%(user["user_id"],user["facility_id"],date_last_updated)
+            listOperations = StaticTools.run_sql(sql)
+
         for objOperation in listOperations :
             referOperation = {}
             referOperation["op_id"] = objOperation["id"]
@@ -172,7 +226,7 @@ class MSerializers:
             referOperation["op_other_services"] = objOperation["other_services"]
             referOperation["op_status"] = objOperation["status"]
             if(objOperation["last_updated"] is not None):
-                referOperation["op_last_updated"] = objOperation["last_updated"].strftime('%Y/%m/%d %H:%M:%S %Z')
+                referOperation["op_last_updated"] = objOperation["last_updated"].strftime('%Y-%m-%d %H:%M:%S.%f')
             else:
                 referOperation["op_last_updated"] = ""
 
@@ -180,28 +234,30 @@ class MSerializers:
             referOperation["op_has_alternative"] = objOperation["has_alternative"]
             referOperation["op_provider"] = objOperation["provider"]
             if(objOperation["redeem_date"] is not None):
-                referOperation["op_redeem_date"] = objOperation["redeem_date"].strftime('%Y/%m/%d')
+                referOperation["op_redeem_date"] = objOperation["redeem_date"].strftime('%Y-%m-%d')
             else:
                 referOperation["op_redeem_date"] = ""
             referOperation["op_facility_id"] = objOperation["facility_id"]
             referOperations.append(referOperation)
         return referOperations
 
-    def select_all_occupations(self):
+    def select_all_occupations(self,nb_occupation):
         occupations = []
         db_occupations = Occupation.objects.all()
-        i = 1;
-        for objOccupation in db_occupations :
-            occupation = {}
-            occupation["occupation_id"] = i
-            occupation["occupation_name"] = objOccupation.occupation_name
-            occupations.append(occupation)
-            i=i+1;
+        if(len(db_occupations) > int(nb_occupation)):
+            i = 1;
+            for objOccupation in db_occupations :
+                occupation = {}
+                occupation["occupation_id"] = i
+                occupation["occupation_name"] = objOccupation.occupation_name
+                occupations.append(occupation)
+                i=i+1;
         return occupations
 
-    def select_all_locations(self):
+    def select_all_locations(self, date_last_updated=None):
+        date_last_updated = self.my_format_date(date_last_updated)
         referLocations = []
-        db_locations = SmsLoc.objects.all()
+        db_locations = SmsLoc.objects.all().filter(date_soumission__gt=date_last_updated)
         for objLocation in db_locations :
             referLocation = {}
             referLocation["id_location"] = objLocation.quest_5
@@ -213,30 +269,30 @@ class MSerializers:
             referLocation["district_khmer"] = objLocation.quest_8
             referLocation["province"] = objLocation.quest_6
             referLocation["province_khmer"] = objLocation.quest_1
-            referLocation["created"] = str(objLocation.date_soumission)
-            referLocation["last_updated"] = str(objLocation.date_soumission)
+            referLocation["created"] = objLocation.date_soumission.strftime('%Y-%m-%d %H:%M:%S.%f')
+            referLocation["last_updated"] = objLocation.date_soumission.strftime('%Y-%m-%d %H:%M:%S.%f')
             referLocations.append(referLocation)
         return referLocations
 
-    def update_garment_report(self):
+    def update_garment_report(self,user=None):
         report_garment = {}
         sql = '''
             SELECT
                 (SELECT count(*)
                 FROM referral_operation pa
-                WHERE pa.actor_id = 3 and pa.status=1) as grep_all_referred
+                WHERE pa.actor_id = %s and pa.status=1) as grep_all_referred
                 ,(SELECT count(*)
                 FROM referral_operation rp
-                WHERE rp.last_actor_id = 3 and rp.status=2) as grep_redeemed
+                WHERE rp.last_actor_id = %s and rp.status=2) as grep_redeemed
                 ,(SELECT array_to_string(array(SELECT rp.referred_services
                 FROM referral_operation rp
-                WHERE rp.actor_id = 3 and rp.status=1
+                WHERE rp.actor_id = %s and rp.status=1
                 ),';')) as grep_all_services
                 , op.last_updated
                 FROM referral_operation op
                 ORDER BY op.last_updated DESC
                 LIMIT 1;
-            '''
+            '''%(user["user_id"],user["user_id"],user["user_id"])
         list_report = StaticTools.run_sql(sql)
         res_report = list_report[0]
         report_garment["grep_all_referred"] = res_report["grep_all_referred"]
@@ -249,31 +305,31 @@ class MSerializers:
         report_garment["grep_last_updated"] = res_report["last_updated"]
         return report_garment
 
-    def update_facility_report(self):
+    def update_facility_report(self,user=None):
         report_garment = {}
         sql = '''
             SELECT
             (SELECT count(*)
             FROM referral_operation pa
-            WHERE pa.facility_id = 'whpf8' and pa.status=1) as frep_all_referred
+            WHERE pa.facility_id = '%s' and pa.status=1) as frep_all_referred
             ,(SELECT count(*)
             FROM referral_operation rp
-            WHERE rp.actor_id = 4 and rp.status=2) as frep_redeemed
+            WHERE rp.actor_id = %s and rp.status=2) as frep_redeemed
             ,(SELECT count(*)
             FROM referral_operation rp
-            WHERE rp.actor_id = 4 and rp.status=4) as frep_re_referred
+            WHERE rp.actor_id = %s and rp.status=4) as frep_re_referred
             ,(SELECT count(*)
             FROM referral_operation rp
-            WHERE rp.last_actor_id = 4 and rp.status=2) as frep_re_referred_redeemed
+            WHERE rp.last_actor_id = %s and rp.status=2) as frep_re_referred_redeemed
             ,(SELECT array_to_string(array(SELECT rp.referred_services
             FROM referral_operation rp
-            WHERE rp.actor_id = 3 and rp.status=1
+            WHERE rp.facility_id = '%s' and rp.status=1
             ),';')) as frep_all_services
             , op.last_updated
             FROM referral_operation op
             ORDER BY op.last_updated DESC
             LIMIT 1;
-            '''
+            '''%(user["facility_id"],user["user_id"],user["user_id"],user["user_id"],user["facility_id"])
         list_report = StaticTools.run_sql(sql)
         res_report = list_report[0]
         report_garment["frep_re_referred"] = res_report["frep_re_referred"]
@@ -290,5 +346,14 @@ class MSerializers:
         report_garment["frep_services_dispatched"] = Counter(list_services)
         report_garment["frep_last_updated"] = res_report["last_updated"]
         return report_garment
+
+#    def my_format_date(self, date_str="", format="%Y-%m-%d %H:%M:%S"):
+#        from datetime import datetime
+#        if not date_str:
+#            return datetime.today().date()
+#        return datetime.strptime(date_str, format).date().strftime('%Y-%m-%d')
+    def my_format_date(self, date_str="", format="%Y-%m-%d %H:%M:%S"):
+        dates = date_str.split()
+        return dates[0]
 
 
