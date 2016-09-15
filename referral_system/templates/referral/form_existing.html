@@ -15,7 +15,7 @@
 	<div class="callout secondary">
     	<div class="row">
 	    	<div class="large-6 columns">
-	    		<label> Referral ID
+	    		<label class="mandatory"> <span>Referral ID</span>
   					<input type="text" name="referral_id" value="" placeholder="M000001">
   					<span class="form-error">The Referral ID field is required !</span>
 				</label>
@@ -23,12 +23,12 @@
 	    </div>
 	</div>
 	
-    <h5>2) Client informations</h5>
+    <h5>2) Client information</h5>
     
     <div class="callout secondary">
     <div class="row">
 	      <div class="large-4 columns">	      
-	      		<label>Sex
+	      		<label class="mandatory"><span>Sex</span>
   					<select name="sex">
   						<option value="f">Female</option>
     					<option value="m">Male</option>    					
@@ -36,13 +36,13 @@
 				</label>	
 	      </div>
 	      <div class="large-4 columns">	     
-	      		<label> Telephone
+	      		<label class="mandatory"><span>Telephone</span>
   					<input type="text" name="phone" value="" size="10" maxlength="10" required pattern="number">
   					<span class="form-error">Add a phone number</span>
 				</label>
 	      </div>
 	      <div class="large-4 columns">
-	      		<label> Age
+	      		<label class="mandatory"><span>Age</span>
 	      			<select name="age" id="age" onChange="">
 	      				<option value="0">-- Select --</option>
 						{% for itemAge in listAge %}
@@ -59,7 +59,7 @@
 	
 	<div class="row">
 		<div class="large-4 columns">
-			<label> Occupation
+			<label class="mandatory"><span>Occupation</span>
 					<select name="occupation" id="occupation" onChange="updateGarmentList()">
 						{% for itemOccupation in occupations %}
           					<option value="{{ itemOccupation.id }}" >{{ itemOccupation.occupation_name }} </option>
@@ -70,7 +70,7 @@
       	
       	
 		<div class="large-4 columns">
-			<label id="garment_section" >Garment Factory
+			<label id="garment_section" class="mandatory"><span>Garment Factory</span>
         		<select id="garment" name="selected_gf" onChange="updateGarmentLocation()">
           			<option value="0" class="">-- Select --</option>
           			{% for itemGarment in listGarment %}
@@ -90,10 +90,10 @@
       	
 	</div>
 	
-	<h6><u>Current address</u></h6>
+	<h6><u>Client's current address</u></h6>
 	<div class="row">
 	      <div class="large-2 columns">
-	      	<label>Province
+	      	<label class="mandatory"><span>Province</span>
         		<select id="adr_province" name="adr_province" onchange="updateLocalityDistrict()">
           			{% for itemProvince in localityProvinces %}
           				<option value="{{ itemProvince.province }}" >{{ itemProvince.province }}  [{{ itemProvince.province_khmer }}]</option>
@@ -193,7 +193,7 @@
 	    </div>
 	    -->
 	    <div class="large-12 columns res-col">
-	    	<h5>Find Facility</h5>
+	    	<!--<h5>Find Facility</h5>-->
 	    	<div class="callout secondary">
 	    	<label>Health Facility
         		<select id="selected_facility" name="id_selected_facility" onchange="selectFacility()">
@@ -234,8 +234,8 @@
 	<div class="row">
 	      <div class="large-12 columns">
 	      		<p>What language do you want to use in the referral SMS ?</p>
-	      		<input type="radio" name="language_sms" value="khmer" id="lang-khmer"><label for="lang-khmer">Khmer</label>
-	      		<input type="radio" name="language_sms" value="english" id="lang-english" checked="checked"><label for="lang-english">English</label>
+	      		<input type="radio" name="language_sms" value="khmer" id="lang-khmer" checked="checked"><label for="lang-khmer">Khmer</label>
+	      		<input type="radio" name="language_sms" value="english" id="lang-english"><label for="lang-english">English</label>
 	      </div>
 	</div>
 	</div>

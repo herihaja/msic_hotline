@@ -2,8 +2,10 @@
 	function updateGarmentList(){
 		 if($("#occupation").val() != "1") {		 
 			 $("#garment").val('0');	
-			 updateGarmentLocation()
+			 $("#garment").trigger("change");
 			 $("#garment_section").hide();
+             $("#search-type-gf").prop('disabled', 'disabled');
+             $('#search-type-ca').prop('checked', true);
 		 } else {
 		  $("#garment_section").show();
 		 }
@@ -18,10 +20,6 @@
 		 }
 	 }
 	 
-	 function updateGarmentLocation() {
-			var _gps = $("#garment option:selected").attr("class").substring(3);
-			$("#gf_gps").val(_gps);
-	}
 
     
 
@@ -94,5 +92,25 @@
 		    }
 		}); 
 	}
-	
-	
+
+
+function textToBulletList(input){
+    var text = input.split(',');
+    text = text.join('</li><li>');
+    return '<ul><li>' + text +'</li></ul>';
+}
+
+$(document).ready(function(){
+    updateGarmentList();
+
+    $("#garment").change(function(){
+        var _gps = $("#garment option:selected").attr("class").substring(3);
+		$("#gf_gps").val(_gps);
+        if ($(this).val() != "0") {
+		    $("#search-type-gf").removeAttr('disabled');
+            $("#name-selected-gf").html($(this).find("option:selected").text());
+        } else {
+            $("#name-selected-gf").html('<>');
+        }
+    });
+});

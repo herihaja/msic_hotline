@@ -72,7 +72,7 @@ def notificationPage(request, typenotif):
         tReferralID = typenotif.split("_")
         referralId = tReferralID[1]
         typeNotification = "success"
-        notificationMessage = '<h4>Appointment saved successfully ! </h4><br> Referral ID: ' + referralId
+        notificationMessage = '<h4>Referral was saved successfully ! </h4><br> Referral ID: ' + referralId
         
         descriptionText = reports.smsTextNewReferral(referralId, request.user.id)
         
@@ -80,7 +80,7 @@ def notificationPage(request, typenotif):
         tReferralID = typenotif.split("_")
         referralId = tReferralID[2]
         typeNotification = "alert"
-        notificationMessage = '<h4>Could not save the appointment ! </h4><br> The Referral ID <b>' + referralId + '</b> already exist !'
+        notificationMessage = '<h4>Could not save the referral ! </h4><br> The Referral ID <b>' + referralId + '</b> already exist !'
     
     context = {
                'notifications_message': notificationMessage,
@@ -104,7 +104,7 @@ def referralFormOnline(request):
     
     localityProvinces = AjaxFunction.listLocalityProvince()
     occupations = referralClass.getAllOccupations()
-    listGarment = SmsFac.objects.filter( quest_21="Garment factory infirmary")
+    listGarment = SmsFac.objects.filter( quest_21="Garment factory infirmary").order_by('quest_19')
     listAge = range(14, 51);
     
     #notifications
@@ -342,7 +342,7 @@ def referralSaveExistingForm(request):
     if request.method == 'POST':
         #here function
         
-        referral_id = request.POST['referral_id']
+        referral_id = request.POST['referral_id'].upper()
         client_sex = request.POST['sex']
         client_phone = request.POST['phone']
         client_age = request.POST['age']

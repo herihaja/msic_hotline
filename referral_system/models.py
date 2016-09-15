@@ -209,7 +209,8 @@ class MessagesLog(models.Model):
     id_recipient = models.IntegerField(blank=True, null=True)
 
     class Meta:
-        managed = False
+        managed = True
+        app_label = 'referral_system'
         db_table = 'messages_log'
         
 class Occupation(models.Model):

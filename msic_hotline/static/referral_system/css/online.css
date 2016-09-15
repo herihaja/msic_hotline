@@ -70,5 +70,20 @@ body, body a, body p { font-size: 12px;}
   margin-left: 35%;
 }
 
+.mandatory span::after {
+    content:" *";
+    color: red;
+    font-size: 16px;
+}
 
+.adp-summary > span{
+    font-weight: bold;
+}
 
+#selected-panel > p, #selected-panel > ul > li, #selected-facility-div > div > p, #selected-facility-div > div > ul > li {
+    font-size: 14px;
+}
+
+input[name='referral_id']{
+    text-transform: uppercase;
+}

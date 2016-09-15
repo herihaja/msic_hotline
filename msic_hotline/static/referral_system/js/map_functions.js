@@ -131,10 +131,14 @@ function codeAddress() {
 		address += " " + document.getElementById('adr_province').value;
 	} else {
 		address = document.getElementById('gf_gps').value;
+        if (!address) {
+            alert("Please select a Garment Factory");
+            return false;
+        }
 	}
     
     geocoder.geocode({
-        'address': address
+        'address': address //start point of the itinerary
     }, function (results, status) {
         if (status == google.maps.GeocoderStatus.OK) {
             map.setCenter(results[0].geometry.location);
@@ -220,10 +224,10 @@ function selectClickedMarker(_index){
 		markers[i].setAnimation(null);
     }
 	markers[_index].setAnimation(google.maps.Animation.BOUNCE);
-	//calculate(markers[_index].getPosition());
-	clearRoute();
+	calculate(markers[_index].getPosition());
+	//clearRoute();
 	displaySelectedFacility(_index);
-	
+	$("#btn-itineraire").show();
 }
 
 function animateSpecificMarker(_distance) {
@@ -284,8 +288,8 @@ function displaySelectedFacility(_index){
 	_html_selected += "<h6>Opening Hours</h6>";
 	_html_selected += "<p>" + _selectedMarker[9] + "</p>";
 	_html_selected += "<h6>Available Services</h6>";
-	_html_selected += "<p><b>Referred Services: </b>" + _selectedMarker[20] + "</p>";
-	_html_selected += "<p><b>FP Services: </b>" + _selectedMarker[10] + "</p>";
+	_html_selected += "<p><b>Referred Services: </b>" + textToBulletList(_selectedMarker[20]) + "</p>";
+	_html_selected += "<p><b>FP Services: </b>" + textToBulletList(_selectedMarker[10]) + "</p>";
 	_html_selected += "<p><b>Safe abortion services: </b>" + _selectedMarker[11] + ", " + _selectedMarker[12] + "</p>";
 	
 	//alert(_selectedMarker[13]);
@@ -293,3 +297,5 @@ function displaySelectedFacility(_index){
 	$("#selected-panel").html(_html_selected);
 	
 }
+
+

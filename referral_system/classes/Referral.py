@@ -35,7 +35,7 @@ class Referral:
                                                          Q(quest_50 = "Both (Referral System and Public Facing Platform)")                                                         
                                                          |
                                                          Q(quest_50 = "Referral System only")
-                                                         ) #show on GIS ? Yes or No
+                                                         ).order_by('quest_12') #show on GIS ? Yes or No
         
     def populateServices(self):
         self.allServices = ReferredServices.objects.all()
