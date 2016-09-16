@@ -135,6 +135,4 @@ STATICFILES_DIRS = [
     './msic_hotline/static/',
 ]
 
-DW_SMS_API_URL = 'https://msicapi:ms1cap1dw@app.datawinners.com/sms'
-
-DW_SMS_API_KH  = 'http://apimsic:apimsic@192.168.1.225:8000/sms'
+SMS_API_URL = "http://tool.plasgate.com:11040/cgi-bin/sendsms"
