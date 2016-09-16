@@ -177,7 +177,8 @@ function codeAddress() {
             map.fitBounds(bounds_2);
             // map.setZoom(16);
         } else {
-            alert('Geocode was not successful for the following reason: ' + status);
+            alert("Please select at least a Province")
+            //alert('Geocode was not successful for the following reason: ' + status);
         }
     });
 }
@@ -289,8 +290,6 @@ function displaySelectedFacility(_index){
 	_html_selected += "<p>" + _selectedMarker[9] + "</p>";
 	_html_selected += "<h6>Available Services</h6>";
 	_html_selected += "<p><b>Referred Services: </b>" + textToBulletList(_selectedMarker[20]) + "</p>";
-	_html_selected += "<p><b>FP Services: </b>" + textToBulletList(_selectedMarker[10]) + "</p>";
-	_html_selected += "<p><b>Safe abortion services: </b>" + _selectedMarker[11] + ", " + _selectedMarker[12] + "</p>";
 	
 	//alert(_selectedMarker[13]);
 	$("#id_selected_facility").val(_selectedMarker[13]);

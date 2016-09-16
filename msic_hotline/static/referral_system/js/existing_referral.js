@@ -66,8 +66,6 @@
 		    	_html += "<p>" + data[8] + "</p>";
 		    	_html += "<h6>Available Services</h6>";
 		    	_html += "<p><b>Referred Services: </b>" + textToBulletList(data[18]) + "</p>";
-		    	_html += "<p><b>FP Services: </b>" + textToBulletList(data[9]) + "</p>";
-		    	_html += "<p><b>Safe abortion services: </b>" + data[10] + ", " + data[11] + "</p>";
 		    	_html += "</div>";
 				
 		    	//$("#id_selected_facility").val(_quest_21);

@@ -8,46 +8,59 @@ from referral_system.models import MessagesLog
 
 class Reports:
     
-    def clientsPerStatus(self, date_period = '', province = '', id_referrer = ''):
+    def clientsPerStatus(self, start_date='', end_date = '', province = '', id_referrer = ''):
         
-        tDatePeriod = date_period.split("-") #2015-10
+        start_date = self.validate_date(start_date)
+        end_date = self.validate_date(end_date)
         
         sqlReport = """ 
         SELECT 
-        DISTINCT ro.status ,
-        count(a.referral_id) AS number_client
-        FROM    appointment a 
+        DISTINCT status ,
+        count(referral_id) AS number_client
+        FROM (SELECT
+                CASE
+                        WHEN ro.status = 1 and a.expiry_date > CURRENT_DATE THEN 5
+                        ELSE ro.status END
+                     as status,
+                    a.referral_id,
+                    a.referral_date,
+                    a.id_client,
+                    ro.actor_id
+                FROM  appointment a
         INNER JOIN
         (
             SELECT  referral_id,
                     MAX(id) max_id
             FROM    referral_operation
             GROUP BY referral_id
-        ) MaxId ON a.referral_id = MaxId.referral_id 
-        INNER JOIN client cli ON cli.id_client = a.id_client
-        INNER JOIN referral_operation ro 
-        ON   MaxId.referral_id = ro.referral_id AND MaxId.max_id = ro.id 
+        ) MaxId ON a.referral_id = MaxId.referral_id
+        INNER JOIN referral_operation ro
+        ON   MaxId.referral_id = ro.referral_id AND MaxId.max_id = ro.id
+        ) as t
+        INNER JOIN client cli ON cli.id_client = t.id_client
+        WHERE 1 = 1
         
-        WHERE 1 = 1 
         """
         
-        if date_period != '':
-            sqlReport += " AND EXTRACT(MONTH FROM a.referral_date) = " + str(int(tDatePeriod[1]))
-            sqlReport += " AND EXTRACT(YEAR FROM a.referral_date)  = " + tDatePeriod[0]
+        if start_date :
+            sqlReport += " AND t.referral_date >= '%s' " % start_date
+
+        if end_date :
+            sqlReport += " AND t.referral_date <= '%s' " % end_date
             
         if province != '':
             sqlReport += " AND cli.adr_province = '" + province + "' "
             
         if id_referrer != '':
-            sqlReport += " AND ro.actor_id = '" + id_referrer + "' "
+            sqlReport += " AND t.actor_id = '" + id_referrer + "' "
             
-        sqlReport += "GROUP BY ro.status"
-                    
+        sqlReport += "GROUP BY t.status"
         return AjaxFunction.runSQL(sqlReport)
     
-    def servicesDelivered(self, date_period = '', province = '', id_referrer = ''):
+    def servicesDelivered(self, start_date='', end_date= '', province = '', id_referrer = ''):
         
-        tDatePeriod = date_period.split("-") #2015-10-05 
+        start_date = self.validate_date(start_date)
+        end_date = self.validate_date(end_date)
         
         sqlReport = """ 
         SELECT 
@@ -58,10 +71,13 @@ class Reports:
         INNER JOIN client cli ON cli.id_client = a.id_client
         WHERE status = 2
         """
-        if date_period != '':
-            sqlReport += " AND EXTRACT(MONTH FROM a.referral_date) = " + str(int(tDatePeriod[1]))
-            sqlReport += " AND EXTRACT(YEAR FROM a.referral_date)  = " + tDatePeriod[0]
-            
+
+        if start_date:
+            sqlReport += " and a.referral_date >= '%s'" % start_date
+
+        if end_date:
+            sqlReport += " and a.referral_date <= '%s'" % end_date
+
         if province != '':
             sqlReport += " AND cli.adr_province = '" + province + "' "
             
@@ -84,7 +100,7 @@ class Reports:
             CASE WHEN loc_village.quest_7 IS NULL THEN '' ELSE loc_village.quest_7 END AS adr_village_khmer,
             cli.adr_commune,
             CASE WHEN loc_commune.quest_2 IS NULL THEN '' ELSE loc_commune.quest_2 END AS adr_commune_khmer,
-            cli.phone,
+            facility.quest_26 as phone,
             facility.quest_12 AS facility_name_khmer,
             app.expiry_date,
             app.language AS ref_lang
@@ -120,13 +136,16 @@ class Reports:
         sms = sms + ", " + str(objSms['expiry_date'])
         strSms = strSms + " " + sms + "</i>\""
 
-        #self.sendMessage(objSms['phone'], sms, actorId, objSms['id_client'], objSms['ref_lang'])
+        self.sendMessage(objSms['phone'], sms, actorId, objSms['id_client'], objSms['ref_lang'])
         return strSms
     
     def sendMessage(self, toNumber, message_content, actorId, recipientId, language="english"):
         # number_list = [ num1, num2, ...]
         # message_content <= 160 car
         # discussion_id : for log
+
+        if toNumber[0] == "0":
+            toNumber = "855%s" % toNumber[1:]
         
         if language == 'english':
             data_string_sample = "gw-text=%s&gw-username=mscambodia&gw-password=msckh2016&gw-from=mariestopes&gw-to=%s"
@@ -138,8 +157,9 @@ class Reports:
         data_string = data_string_sample % (conversion_method(message_content), toNumber)
         response = requests.post(settings.SMS_API_URL, verify=False, data=data_string)
 
-        self.saveSmsLog(response, toNumber, message_content.encode("UTF-8"), actorId, recipientId)
-        return response.content
+        status = self.saveSmsLog(response, toNumber, message_content.encode("UTF-8"), actorId, recipientId)
+        return message_content, status
+
         
     def saveSmsLog(self, response, to_number, msg_content, actor_id, recipient_id):
         query_string = urlparse.parse_qs(response.content)
@@ -157,6 +177,14 @@ class Reports:
                                   id_recipient = recipient_id
                                   )
         msg.save()
+        return query_string.get('status')[0] == '0'
+
+    def validate_date(self, date_text):
+        try:
+            datetime.strptime(date_text, '%Y-%m-%d')
+            return date_text
+        except Exception:
+            return ''
         
 
 def english_conversion(input_text):
@@ -167,3 +195,4 @@ def khmer_conversion(input_text):
     for char in input_text:
         output += str("0x%0.4X" % ord(char))[2:]
     return output
+

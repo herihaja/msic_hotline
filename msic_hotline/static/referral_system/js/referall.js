@@ -32,12 +32,14 @@
 		    success: function(data) {
 		    	dataJson = $.parseJSON(data);
 		    	var _html = "<option value='0'>-- Select --</option>";
+                var _html_default_val = _html;
 				$.each(dataJson, function(index) {
 					_html += "<option  value='" + dataJson[index].district + "'> ";
 					_html +=  dataJson[index].district + " [" + dataJson[index].district_khmer + "]" ;
 					_html += "</option> ";
 		        });
 				$("#adr_district").html(_html);
+                $("#adr_commune, #adr_village").html(_html_default_val);
 		    },
 		    failure: function(data) { 
 		        alert('Got an error dude');
@@ -55,6 +57,8 @@
 		    success: function(data) {
 		    	dataJson = $.parseJSON(data);
 		    	var _html = "<option value='0'>-- Select --</option>";
+                $("#adr_village").html(_html);
+                
 				$.each(dataJson, function(index) {
 					_html += "<option value='" + dataJson[index].commune + "'> ";
 					_html +=  dataJson[index].commune + " [" + dataJson[index].commune_khmer + "]" ;

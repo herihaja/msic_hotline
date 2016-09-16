@@ -5,21 +5,33 @@
 <div class="callout success">
 	<form method="post" action="/referral_system/viewReferral/">
 	    <div class="row">
-		      <div class="large-2 columns">
+		      <div class="large-3 columns">
 		      
-		      		<label> Date period
+		      		<label> Start Date
 		      			
-	  					<div class="input-group date" id="dpMonths" 
-	  						 data-date-format="yyyy-mm" data-start-view="year" 
-	  						 data-min-view="year" style="max-width:200px;">
+	  					<div class="input-group date" id="startDate"
+	  						  style="max-width:200px;">
 							
 							  <span class="input-group-label prefix"><i class="fa fa-calendar"></i></span>
-							  <input class="input-group-field" size="16" type="text" value="{{datePeriod}}" name="date_period" readonly>							  
+							  <input class="input-group-field" size="16" type="text" value="{{startDate}}" name="start_date" readonly/>
+
 							
 						</div>
 					</label>
+              </div>
+              <div class="large-3 columns">
+                    <label> End Date
+
+	  					<div class="input-group date" id="endDate"
+	  						  style="max-width:200px;">
+
+							  <span class="input-group-label prefix"><i class="fa fa-calendar"></i></span>
+							  <input class="input-group-field" size="16" type="text" value="{{endDate}}" name="end_date" readonly/>
+
+						</div>
+					</label>
 			  </div>
-			  <div class="large-4 columns">
+			  <div class="large-3 columns">
 					<label> Province
 					   <select id="adr_province" name="adr_province" onchange="">
 					   			<option value=''>--select--</option>
@@ -34,27 +46,40 @@
 		        	   </select>
 					</label>
 			  </div>
-			  <div class="large-4 columns">
+              <div class="large-3 columns">
 					<label> Referred by
 					  <select id="id_referrer"  name="id_referrer" onchange="">
 					  	<option value=''>--select--</option>
 		          			{% for itemReferrer in listReferrers %}
-		          				<option 
+		          				<option
 		          				{% if itemReferrer.id = id_ref %}
 		          					selected
 		          				{% endif %}
-		          				value="{{ itemReferrer.id }}" 
+		          				value="{{ itemReferrer.id }}"
 		          				>{{ itemReferrer.first_name }}  {{ itemReferrer.last_name }}</option>
 		          			{% endfor %}
 		        	   </select>
 					</label>
 		      </div>
+        </div>
+        <div class="row">
+              <div class="large-6 columns">&nbsp;</div>
+
+              <div class="large-3 columns">
+
+			      <button type="submit" class="success button" style="margin-top: 25px;" name="action" value="export">XLS EXPORT</button>
+
+
+			  </div>
 		      
-			  <div class="large-2 columns">
+			  <div class="large-3 columns">
 			  
-			  <button type="submit" class="success button" style="margin-top: 25px;">FILTER</button>
+			      <button type="submit" class="success button" style="margin-top: 25px;" name="action" value="filter">FILTER</button>
+
 			  
 			  </div>
+
+
 		</div>
 		
 	</form>
@@ -82,7 +107,7 @@
    				</tr>
    				{% endfor %}
    				<tr>
-   					<td colspan="2" style="text-align: right;">100%</td>
+   					<td colspan="2" style="text-align: right;" >{{ totalReferrals }}%</td>
    					<td style="text-align: right;">{{numberClients}}</td>
    				</tr>
    			</table>
@@ -109,7 +134,7 @@
    				</tr>
    				{% endfor %}
    				<tr>
-   					<td colspan="2" style="text-align: right;">100%</td>
+   					<td colspan="2" style="text-align: right;">{{ totalServices }}%</td>
    					<td style="text-align: right;">{{numberServices}}</td>
    				</tr>
    			</table>
@@ -219,7 +244,14 @@ $(function () {
             data: serviceData
         }]
     });
-	$('#dpMonths').fdatepicker();
+    
+	$('#startDate, #endDate').fdatepicker({
+        format: 'yyyy-mm-dd',
+        initialDate: $(this).val(),
+        onRender: function (date) {
+            
+        }
+    });
 	$('#id_referrer').val("{{id_ref}}");
 	
 	

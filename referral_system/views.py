@@ -1,9 +1,10 @@
+from __future__ import division
 from django.shortcuts import render, redirect
 from django.http.response import HttpResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import authenticate, login
 from referral_system.classes.Referral import Referral
-import json
+import json, xlwt
 from referral_system.classes.AjaxFunction import AjaxFunction
 from referral_system.models import SmsFac, Client, Appointment,\
     ReferralOperation, VoucherCode, ReferredServices
@@ -11,6 +12,7 @@ from django.core import serializers
 from referral_system.classes.ReferralFunctions import ReferralFunctions
 from referral_system.classes.Reports import Reports
 from django.contrib.auth import models
+
 
 
 
@@ -151,15 +153,17 @@ def referralFormExisting(request):
 @login_required(login_url='/referral_system/loginPage/')
 def viewReferral(request):
     
-    datePeriod = ''
+    startDate, endDate = '', ''
     adr_province = ''
     id_referrer = ''
     group = models.Group.objects.get(name='Hotline Consellor')
     listReferrers = group.user_set.all()
+    export = request.method == 'POST' and request.POST.get('action') == 'export'
     
     if request.method == 'POST':
         #here function
-        datePeriod = request.POST['date_period']
+        startDate = request.POST['start_date']
+        endDate = request.POST['end_date']
         adr_province = request.POST['adr_province']
         id_referrer = request.POST['id_referrer']
     
@@ -167,7 +171,7 @@ def viewReferral(request):
     localityProvinces = AjaxFunction.listLocalityProvince()
     
     ### CLIENTS
-    referralReports = reports.clientsPerStatus(datePeriod, adr_province, id_referrer)
+    referralReports = reports.clientsPerStatus(startDate, endDate, adr_province, id_referrer)
     """
     {
                     name: 'Microsoft Internet Explorer',
@@ -175,30 +179,40 @@ def viewReferral(request):
                     drilldown: 'Microsoft Internet Explorer'
                 }
     """
-    status = ['','referred','redeemed','give up','re-referred']
+    status = ['','','Redeemed','Give up','Re-referred', 'Expired']
     listClientData = []
     listClientObject = []
     numberClients = 0
-    for itemReport in referralReports:
-        numberClients = numberClients + itemReport["number_client"]
+
+    numberClients = sum([itemReport["number_client"] for itemReport in referralReports if itemReport["status"] != 1])
     
     for itemReport in referralReports:
+        if itemReport["status"] == 1: continue
         itemObj = []
         _name = status[itemReport["status"]]
-        _y = (itemReport["number_client"] * 100) / numberClients
-        _y = str(_y)
+        status[itemReport["status"]] = ''
         
+        _y = (itemReport["number_client"] * 100) / numberClients
+
         itemObj.append(_name)
-        itemObj.append("%d%s" % (int(_y), "%"))
+        itemObj.append("%.2f%s" % (_y, "%"))
         itemObj.append(itemReport["number_client"])
         
         listClientObject.append(itemObj)
         
-        listClientData.append("{name:'" + _name + "',y:" + _y + ",drilldown:'" + _name + "'}")
+        listClientData.append("{name:'" + _name + "',y:" + str(_y) + ",drilldown:'" + _name + "'}")
+
+    for _name in status:
+        if not _name: continue
+        itemObj = [_name, "0%", 0]
+        listClientObject.append(itemObj)
+
+        listClientData.append("{name:'" + _name + "',y:0,drilldown:'" + _name + "'}")
+
     strData = ",".join(listClientData)
     
     ## SERVICES DELIVERED
-    servicesDelivered = reports.servicesDelivered(datePeriod, adr_province, id_referrer)
+    servicesDelivered = reports.servicesDelivered(startDate, endDate, adr_province, id_referrer)
     allServices = ReferredServices.objects.all()
     
     reportServices = {}
@@ -229,17 +243,14 @@ def viewReferral(request):
             _percentage = 0
         else:
             _percentage = (nb * 100) / numberServices
-            _percentage = str(_percentage)
         
         itemObj.append(itemService.service_name)
-        itemObj.append("%d%s" % (int(_percentage), "%"))
+        itemObj.append("%.2f%s" % (_percentage, "%"))
         itemObj.append(nb)
         listObjectService.append(itemObj)
         
     jsonService = ",".join(listService)
     
-    
-        
     
     context = {
                "listObject" : listClientObject ,
@@ -251,11 +262,18 @@ def viewReferral(request):
                "numberClients" : numberClients,
                "numberServices" : numberServices,
                "localityProvinces" : localityProvinces,
-               "datePeriod" : datePeriod,
+               "startDate" : startDate,
+               "endDate": endDate,
                "adr_province" : adr_province,
                "id_ref" : id_referrer,
-               "listReferrers" : listReferrers
+               "listReferrers" : listReferrers,
+               "totalReferrals": "100" if numberClients > 0 else "0",
+               "totalServices": "100" if numberServices > 0 else "0",
                }
+
+    if export:
+        return exportExcel(request, context)
+
     return render(request, 'referral/view_referral.html', context)
 
 @login_required(login_url='/referral_system/loginPage/')
@@ -520,3 +538,44 @@ def ajaxListGarment(request):
         #listFacilities = json.dumps(listFacilities)
         
     return HttpResponse(listGarment)
+
+
+def exportExcel(request, context):
+    book = xlwt.Workbook(encoding="utf-8")
+    row = 1
+    
+    referral_sheet = book.add_sheet("Referral")
+    referral_sheet.write(0,0, "Status")
+    referral_sheet.write(0,1, "Percentage")
+    referral_sheet.write(0,2, "Referral")
+
+    for object in context.get('listObject'):
+        referral_sheet.write(row, 0, object[0].capitalize())
+        referral_sheet.write(row, 1, object[1])
+        referral_sheet.write(row, 2, int(object[2]))
+        row += 1
+
+
+    referral_sheet.write(row, 1, "%s%s" % (context.get('totalReferrals'), "%"))
+    referral_sheet.write(row, 2, context.get('numberClients'))
+
+    services_sheet = book.add_sheet("Services delivered")
+    services_sheet.write(0,0, "Services")
+    services_sheet.write(0,1, "Percentage")
+    services_sheet.write(0,2, "Number of services")
+
+    row = 1
+    for service in context.get('listObjectService'):
+        services_sheet.write(row,0, service[0].capitalize())
+        services_sheet.write(row,1, service[1])
+        services_sheet.write(row,2, service[2])
+        row += 1
+
+    services_sheet.write(row, 2, context.get("numberServices"))
+    services_sheet.write(row, 1, "%s%s" % (context.get("totalServices"),"%"))
+
+        
+    response = HttpResponse(content_type="application/ms-excel")
+    response['Content-Disposition'] = 'attachment; filename=report.xls'
+    book.save(response)
+    return response

@@ -95,6 +95,7 @@
 	      <div class="large-2 columns">
 	      	<label class="mandatory"><span>Province</span>
         		<select id="adr_province" name="adr_province" onchange="updateLocalityDistrict()">
+                    <option value='0' disabled="disabled" selected="selected">-- Select --</option>
           			{% for itemProvince in localityProvinces %}
           				<option value="{{ itemProvince.province }}" >{{ itemProvince.province }}  [{{ itemProvince.province_khmer }}]</option>
           			{% endfor %}
