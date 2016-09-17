@@ -51,8 +51,11 @@ class Reports:
         if province != '':
             sqlReport += " AND cli.adr_province = '" + province + "' "
             
-        if id_referrer != '':
+        if id_referrer == 'all_counsellors':
+            sqlReport += " AND t.actor_id IN (select u.id as actor_id FROM auth_user u inner join auth_user_groups ug on ug.user_id = u.id and ug.group_id = 1)"
+        elif id_referrer != '' and str(int(id_referrer)) == id_referrer:
             sqlReport += " AND t.actor_id = '" + id_referrer + "' "
+            
             
         sqlReport += "GROUP BY t.status"
         return AjaxFunction.runSQL(sqlReport)
@@ -81,7 +84,9 @@ class Reports:
         if province != '':
             sqlReport += " AND cli.adr_province = '" + province + "' "
             
-        if id_referrer != '':
+        if id_referrer == 'all_counsellors':
+            sqlReport += " AND ro.actor_id IN (select u.id as actor_id FROM auth_user u inner join auth_user_groups ug on ug.user_id = u.id and ug.group_id = 1)"
+        elif id_referrer != '' and str(int(id_referrer)) == id_referrer:
             sqlReport += " AND ro.actor_id = '" + id_referrer + "' "
                     
         return AjaxFunction.runSQL(sqlReport)

@@ -48,16 +48,11 @@
 			  </div>
               <div class="large-3 columns">
 					<label> Referred by
-					  <select id="id_referrer"  name="id_referrer" onchange="">
+					  <select name="referrer">
 					  	<option value=''>--select--</option>
-		          			{% for itemReferrer in listReferrers %}
-		          				<option
-		          				{% if itemReferrer.id = id_ref %}
-		          					selected
-		          				{% endif %}
-		          				value="{{ itemReferrer.id }}"
-		          				>{{ itemReferrer.first_name }}  {{ itemReferrer.last_name }}</option>
-		          			{% endfor %}
+                        <option {% ifequal referrer user_id %}selected{% endifequal %} value="{{ user_id }}" >My referral</option>
+                        <option {% if referrer == 'all_counsellors' %}selected{% endif %} value="all_counsellors">All counsellors</option>
+		          			
 		        	   </select>
 					</label>
 		      </div>
@@ -252,7 +247,7 @@ $(function () {
             
         }
     });
-	$('#id_referrer').val("{{id_ref}}");
+	
 	
 	
 	 

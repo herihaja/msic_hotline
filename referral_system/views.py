@@ -155,9 +155,7 @@ def viewReferral(request):
     
     startDate, endDate = '', ''
     adr_province = ''
-    id_referrer = ''
-    group = models.Group.objects.get(name='Hotline Consellor')
-    listReferrers = group.user_set.all()
+    referrer = ''
     export = request.method == 'POST' and request.POST.get('action') == 'export'
     
     if request.method == 'POST':
@@ -165,13 +163,13 @@ def viewReferral(request):
         startDate = request.POST['start_date']
         endDate = request.POST['end_date']
         adr_province = request.POST['adr_province']
-        id_referrer = request.POST['id_referrer']
+        referrer = request.POST['referrer']
     
     reports = Reports()
     localityProvinces = AjaxFunction.listLocalityProvince()
     
     ### CLIENTS
-    referralReports = reports.clientsPerStatus(startDate, endDate, adr_province, id_referrer)
+    referralReports = reports.clientsPerStatus(startDate, endDate, adr_province, referrer)
     """
     {
                     name: 'Microsoft Internet Explorer',
@@ -182,7 +180,6 @@ def viewReferral(request):
     status = ['','','Redeemed','Give up','Re-referred', 'Expired']
     listClientData = []
     listClientObject = []
-    numberClients = 0
 
     numberClients = sum([itemReport["number_client"] for itemReport in referralReports if itemReport["status"] != 1])
     
@@ -212,7 +209,7 @@ def viewReferral(request):
     strData = ",".join(listClientData)
     
     ## SERVICES DELIVERED
-    servicesDelivered = reports.servicesDelivered(startDate, endDate, adr_province, id_referrer)
+    servicesDelivered = reports.servicesDelivered(startDate, endDate, adr_province, referrer)
     allServices = ReferredServices.objects.all()
     
     reportServices = {}
@@ -265,8 +262,8 @@ def viewReferral(request):
                "startDate" : startDate,
                "endDate": endDate,
                "adr_province" : adr_province,
-               "id_ref" : id_referrer,
-               "listReferrers" : listReferrers,
+               "user_id" : str(request.user.id),
+               "referrer" : referrer,
                "totalReferrals": "100" if numberClients > 0 else "0",
                "totalServices": "100" if numberServices > 0 else "0",
                }
