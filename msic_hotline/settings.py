@@ -79,11 +79,11 @@ WSGI_APPLICATION = 'msic_hotline.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'msic3',
-        'USER': 'mangrover',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
+        'NAME': 'msic',
+        'USER': 'postgres',
+        'PASSWORD': 'admin',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
