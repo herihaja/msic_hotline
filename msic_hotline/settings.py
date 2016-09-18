@@ -35,10 +35,10 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.messages',
     'django.contrib.staticfiles',
     'referral_system',
     'web_api',
+
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -79,14 +79,15 @@ WSGI_APPLICATION = 'msic_hotline.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'msic',
-        'USER': 'postgres',
-        'PASSWORD': 'admin',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': 'msic3',
+        'USER': 'mangrover',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
     }
 }
 
+AUTH_USER_MODEL = 'referral_system.AuthUser'
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
