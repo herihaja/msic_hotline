@@ -347,7 +347,7 @@ class MSerializers:
         report_garment["frep_last_updated"] = res_report["last_updated"]
         return report_garment
 
-#    def my_format_date(self, date_str="", format="%Y-%m-%d %H:%M:%S"):
+#    def my_format_date(self, date_str="", format="%Y-%m-%d %H:%M:%S"):frep_all_referred
 #        from datetime import datetime
 #        if not date_str:
 #            return datetime.today().date()

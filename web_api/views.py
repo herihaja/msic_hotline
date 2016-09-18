@@ -1,4 +1,6 @@
 from datetime import datetime
+from django.contrib.auth.hashers import make_password
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 from django.http.response import HttpResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -6,7 +8,7 @@ from django.contrib.auth import authenticate, login
 from referral_system.classes.Referral import Referral
 import json
 from referral_system.classes.AjaxFunction import AjaxFunction
-from referral_system.models import SmsFac, Client, Appointment, ReferralOperation
+from referral_system.models import SmsFac, Client, Appointment, ReferralOperation, AuthUser
 from django.core import serializers
 from referral_system.classes.ReferralFunctions import ReferralFunctions
 
@@ -161,7 +163,8 @@ def saveReferral(request):
         client_adr_commune = request.POST['adr_commune']
         client_adr_district = request.POST['adr_district']
         client_adr_province = request.POST['adr_province']
-        services = request.POST.getlist('services')  #should be an array
+        services = request.POST['services']  #should be an array
+#        services = request.POST.getlist('services')  #should be an array
 #        searchtype = request.POST['searchtype'] #search by GF or address
         id_selected_facility = request.POST['id_selected_facility']
         referral_date = request.POST['referral_date']
@@ -195,7 +198,10 @@ def saveReferral(request):
             uniqueID = referralFunctions.generateUniqueID()
         else:
             uniqueID = request.POST['referral_id']
-            appoint = Appointment.objects.get(referral_id=uniqueID)
+            try:
+                appoint = Appointment.objects.get(referral_id=uniqueID)
+            except ObjectDoesNotExist:
+                appoint = None
             if(appoint is not None):
                 return HttpResponse(
                 content_type='application/json',
@@ -204,7 +210,6 @@ def saveReferral(request):
                         'error_msg': "The Referral ID is Duplicated,\nPlease Update it and Submit again",
                         "referral_id": uniqueID
                 },default=_json_serial))
-
 
         #Save appointment
         appointment = Appointment(
@@ -224,17 +229,24 @@ def saveReferral(request):
                                               actor_id = actor_id,
                                               facility_id = id_selected_facility,
                                               last_actor_id = 0,
-                                              referred_services = ';'.join(services),
+                                              referred_services = services,
                                               other_services = service_other,
                                               status = 1 # 1 = referred
                                               )
         referralOperation.save()
+
+        sms_status = "19"
+        sms_content = """It is Just a SMS Sample which should be displayed here!
+                    """
+
         return HttpResponse(
         content_type='application/json',
         content=json.dumps({
                 'success': 1,
                 'error_msg': "Client Referral created SUCCESSFUL",
-                "referral_id": uniqueID
+                "referral_id": uniqueID,
+                "sms_status" : sms_status,
+                "sms_content" : sms_content
         },default=_json_serial))
 
 def saveRedeem(request):
@@ -267,12 +279,13 @@ def saveRedeem(request):
                                               facility_id = id_selected_facility
                                               )
         referralOperation.save()
+        
         return HttpResponse(
         content_type='application/json',
         content=json.dumps({
                 'success': 1,
                 'error_msg': "Client Referral created SUCCESSFUL",
-                "operation_id": referralOperation.id
+                "referral_id": referral_id
         },default=_json_serial))
 def saveReRefer(request):
     if request.method == 'POST':
@@ -304,13 +317,58 @@ def saveReRefer(request):
                                               facility_id = id_selected_facility
                                               )
         referralOperation.save()
+
+        sms_status = "19"
+        sms_content = """It is Just a SMS Sample which should be displayed here!
+                    """
+
         return HttpResponse(
             content_type='application/json',
             content=json.dumps({
                     'success': 1,
                     'error_msg': "Client Referral created SUCCESSFUL",
-                    "operation_id": referralOperation.id
+                    "referral_id": referralOperation.referral_id,
+                    "sms_status" : sms_status,
+                    "sms_content" : sms_content
             },default=_json_serial))
+
+def resetPassword(request):
+    if request.method == 'POST':
+        current_password = request.POST['current_password']
+        new_password = request.POST['new_password']
+        confirm_password = request.POST['confirm_password']
+        user_id = request.POST['user_id']
+        user_name = request.POST['user_name']
+        user = authenticate(username=user_name, password=current_password)
+
+        if user is not None:
+#            user = AuthUser.objects.get(id=user_id)
+            new_password = make_password(new_password)
+            user.password = new_password
+            user.save()
+            return HttpResponse(
+                content_type='application/json',
+                content=json.dumps({
+                        'success': 1,
+                        "error_msg": "Operation Successful",
+                },default=_json_serial))
+        else:
+            return HttpResponse(
+                content_type='application/json',
+                content=json.dumps({
+                        'success': 2,
+                        "error_msg": "Wrong Password entered",
+                },default=_json_serial))
+
+def myPing(request):
+    return HttpResponse(
+        content_type='application/json',
+        content=json.dumps({
+                'sacasaca': 1,
+                "piso messanga": "Written by Human Network International (hni.org)",
+        },default=_json_serial))
+
+
 
 def _json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
