@@ -46,7 +46,7 @@ class MsicUserChangeForm(UserChangeForm):
     def facility_id_field(self):
         choices = [('', '-- Select --')]
         try:
-            facilities = [(facility.quest_19, facility.quest_20) for facility in SmsFac.objects.all()]
+            facilities = [(facility.quest_20, facility.quest_19) for facility in SmsFac.objects.all()]
             choices.extend(facilities)
             group = self.instance.groups.all()[0]
             self.fields['group'].initial = group
