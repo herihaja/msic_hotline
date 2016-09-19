@@ -113,7 +113,12 @@ def updateGarmentReport(request):
 def auth(request):
     username = request.POST['login']
     password = request.POST['password']
-    user = authenticate(username=username, password=password)
+#    user = authenticate(username=username, password=password)
+    user = None
+    try:
+        user = authenticate(username=username, password=password)
+    except ObjectDoesNotExist:
+        user = None
 
     if user is not None:
         if user.is_active:

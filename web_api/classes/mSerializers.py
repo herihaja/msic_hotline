@@ -141,10 +141,11 @@ class MSerializers:
         res_user["email"] = auth_user.email
         res_user["facility_id"] = auth_user.facility_id #whgf4
 #        res_user["facility_id"] = "whgf4"
-        group = auth_user.groups.all()[0]#AuthUserGroups.objects.get(user=auth_user)
-        #group = authUserGroup.group
-        res_user["group_id"] = group.id
-        res_user["group_name"] = group.name
+#        group = auth_user.groups.all()[0]#AuthUserGroups.objects.get(user=auth_user)
+        res_user["group_id"] = 2
+#        res_user["group_id"] = group.id
+        res_user["group_name"] = "Garment Factory"
+#        res_user["group_name"] = group.name
         return res_user
 
     def select_all_operation(self):
@@ -180,7 +181,7 @@ class MSerializers:
             from referral_operation as op
             INNER JOIN auth_user as u on u.id = op.actor_id
             LEFT JOIN sms_fac as f on f.quest_20 = u.facility_id
-            INNER JOIN auth_user_groups ug on ug.user_id = u.id
+            INNER JOIN auth_user_groups ug on ug.authuser_id = u.id
             INNER JOIN auth_group gr on gr.id = ug.group_id
             WHERE 1=1
             and (actor_id = %s or last_actor_id = %s)
@@ -200,7 +201,7 @@ class MSerializers:
             from referral_operation as op
             INNER JOIN auth_user as u on u.id = op.actor_id
             LEFT JOIN sms_fac as f on f.quest_20 = u.facility_id
-            INNER JOIN auth_user_groups ug on ug.user_id = u.id
+            INNER JOIN auth_user_groups ug on ug.authuser_id = u.id
             INNER JOIN auth_group gr on gr.id = ug.group_id
             WHERE 1=1
             and (op.actor_id = %s or op.facility_id = '%s')
