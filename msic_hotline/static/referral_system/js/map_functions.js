@@ -10,6 +10,8 @@ var closest = [];
 var referredServices = [];
 var map;
 var address_icon = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
+var countryName = "Cambodia";
+var garment_icon = "/static/referral_system/css/pointer_factory green_2.png";
 
 var address = "";
 
@@ -17,7 +19,7 @@ $(function($) {
     // Asynchronously Load the map API 
     var script = document.createElement('script');
 
-    script.src = "//maps.googleapis.com/maps/api/js?key=AIzaSyDA3bMv4Elg98PcjCZkd5LiqqbzoaQ5e1Y&sensor=false&callback=initialize&libraries=geometry,places";
+    script.src = "//maps.googleapis.com/maps/api/js?key=AIzaSyDA3bMv4Elg98PcjCZkd5LiqqbzoaQ5e1Y&callback=initialize&libraries=geometry,places";
     document.body.appendChild(script);
 });
 
@@ -32,6 +34,14 @@ function initialize() {
     // Display a map on the page
     map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
     map.setTilt(45);
+    
+    geocoder.geocode( { 'address': countryName }, function(results, status) {
+        if (status == google.maps.GeocoderStatus.OK) {
+            map.setCenter(results[0].geometry.location);
+        } else {
+            alert("Could not find location: " + location);
+        }
+    });
         
     // Multiple Markers
                         
@@ -45,11 +55,21 @@ function initialize() {
     for( i = 0; i < listeMarkers.length; i++ ) {
         var position = new google.maps.LatLng(listeMarkers[i][1], listeMarkers[i][2]);
         bounds.extend(position);
-        marker = new google.maps.Marker({
-            position: position,
-            map: map,
-            title: listeMarkers[i][19]
-        });
+        if(listeMarkers[i][21] == 'Garment factory infirmary' ) {
+        	marker = new google.maps.Marker({
+                position: position,
+                map: map,
+                icon: garment_icon,
+                title: listeMarkers[i][19]
+            });
+        } else {
+        	marker = new google.maps.Marker({
+                position: position,
+                map: map,
+                title: listeMarkers[i][19]
+            });
+        }
+        
         /*
         marker = new google.maps.Marker({
             position: pt,
@@ -74,7 +94,7 @@ function initialize() {
         
 
         // Automatically center the map fitting all markers on the screen
-        map.fitBounds(bounds);
+         map.fitBounds(bounds);
     }
 
     // Override our map zoom level once our fitBounds function runs (Make sure it only runs once)
@@ -82,6 +102,7 @@ function initialize() {
         //this.setZoom(16);
         //google.maps.event.removeListener(boundsListener);
     });
+    
     
     
     
@@ -102,7 +123,8 @@ function clearRouteAndFacility(){
 	clearRoute();
 	direction = new google.maps.DirectionsRenderer({
         map   : map, 
-        panel : panel 
+        panel : panel,
+        suppressMarkers: true
     });
 }
 
@@ -122,6 +144,8 @@ function codeAddress() {
 	// cr = client residence
 	// gf = garment factory
 	var search_type = $( "input:radio[name='searchtype']:checked" ).val();
+	var infoWindow = new google.maps.InfoWindow();
+	
 	
 	if(search_type == 'cr') {
 		address = document.getElementById('adr_street').value;
@@ -144,11 +168,28 @@ function codeAddress() {
             map.setCenter(results[0].geometry.location);
             if (customerMarker) customerMarker.setMap(null);
             
+            if(search_type == 'gf') {
+            	iconAddress = garment_icon;
+            } else {
+            	iconAddress = address_icon;
+            }
             customerMarker = new google.maps.Marker({
                 map: map,
-                icon: address_icon,
+                icon: iconAddress,
                 position: results[0].geometry.location
             });
+            
+            if(search_type == 'gf') {
+            	var garment_name = $("#garment option:selected"). text();
+            	google.maps.event.addListener(customerMarker, 'click', (function(customerMarker, i) {
+                    return function() {
+                        infoWindow.setContent(garment_name);
+                        infoWindow.open(map, customerMarker);
+                    }
+                })(customerMarker, i));
+            }
+            
+            
             for (var i = 0; i < markers.length; i++) {
                 markers[i].setMap(null);
             }
@@ -225,10 +266,10 @@ function selectClickedMarker(_index){
 		markers[i].setAnimation(null);
     }
 	markers[_index].setAnimation(google.maps.Animation.BOUNCE);
-	calculate(markers[_index].getPosition());
+	//calculate(markers[_index].getPosition());
 	//clearRoute();
 	displaySelectedFacility(_index);
-	$("#btn-itineraire").show();
+	//$("#btn-itineraire").show();
 }
 
 function animateSpecificMarker(_distance) {

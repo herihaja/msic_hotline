@@ -120,6 +120,8 @@ class Referral:
         marker += "','" + (facility.quest_12).replace("'", " ") #name khmer 19
         
         marker += "','" + (facility.quest_49).replace("'", " ") # referred service 20
+        marker += "','" + (facility.quest_21).replace("'", " ") # HF type 21
+        
 
         marker += "']"
         return marker
