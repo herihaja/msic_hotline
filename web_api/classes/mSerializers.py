@@ -141,11 +141,11 @@ class MSerializers:
         res_user["email"] = auth_user.email
         res_user["facility_id"] = auth_user.facility_id #whgf4
 #        res_user["facility_id"] = "whgf4"
-#        group = auth_user.groups.all()[0]#AuthUserGroups.objects.get(user=auth_user)
-        res_user["group_id"] = 2
-#        res_user["group_id"] = group.id
-        res_user["group_name"] = "Garment Factory"
-#        res_user["group_name"] = group.name
+        group = auth_user.groups.all()[0]#AuthUserGroups.objects.get(user=auth_user)
+#        res_user["group_id"] = 2
+        res_user["group_id"] = group.id
+#        res_user["group_name"] = "Garment Factory"
+        res_user["group_name"] = group.name
         return res_user
 
     def select_all_operation(self):
