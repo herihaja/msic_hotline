@@ -32,17 +32,17 @@ class MSerializers:
             facility["street"] = objFacility.quest_16
             facility["street_khmer"] = objFacility.quest_12
             facility["village"] = objFacility.quest_18
-            facility["village_khmer"] = objFacility.quest_35
+            facility["village_khmer"] = objFacility.quest_34
             facility["commune"] = objFacility.quest_13
-            facility["commune_khmer"] = objFacility.quest_40
+            facility["commune_khmer"] = objFacility.quest_39
             facility["district"] = objFacility.quest_30
-            facility["district_khmer"] = objFacility.quest_48
+            facility["district_khmer"] = objFacility.quest_41
             facility["province"] = objFacility.quest_15
             facility["province_khmer"] = objFacility.quest_42
             facility["phone1"] = objFacility.quest_11
             facility["phone2"] = objFacility.quest_26
             facility["phone3"] = objFacility.quest_31
-            facility["hours"] = objFacility.quest_49
+            facility["hours"] = objFacility.quest_48
             facility["services"] = objFacility.quest_49
             facility["facility_type"] = objFacility.quest_21
 
