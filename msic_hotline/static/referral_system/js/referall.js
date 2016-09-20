@@ -104,6 +104,18 @@ function textToBulletList(input){
     return '<ul><li>' + text +'</li></ul>';
 }
 
+function cleanTelephone(input){
+    var listPhone = input.split(";");
+    var return_value = [];
+    for (var i=0; i < listPhone.length; i ++) {
+        var phone = listPhone[i].trim();
+        if (phone.substring(0, 3) == "855" && [11, 12].indexOf(phone.length) != -1) {
+            return_value.push("0" + phone.substring(3, phone.length));
+        }
+    }
+    return '<ul><li>' + return_value.join('</li><li>') +'</li></ul>';
+}
+
 $(document).ready(function(){
     updateGarmentList();
 

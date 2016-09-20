@@ -38,7 +38,8 @@ class Referral:
                                                          ).order_by('quest_12') #show on GIS ? Yes or No
         
     def populateServices(self):
-        self.allServices = ReferredServices.objects.all()
+        self.allServices = ReferredServices.get_all_in_customized_order()
+
     
     def createFacilitiesMarkers(self):
         markers = [self.createMarker(facility) for facility in self.allFacilities if facility.quest_24 != '' ]
@@ -100,11 +101,11 @@ class Referral:
         marker += "','" + (facility.quest_15).replace("'", " ") #province 7
         marker += "','<ul>"  #phone 8
         if(facility.quest_11.replace("'", " ").strip() != ''):
-            marker += "<li>" + (facility.quest_11).replace("'", " ") + "</li>" #phone 0st
+            marker += self.clean_phone_number(facility.quest_11) + "</li>" #phone 0st
         if(facility.quest_26.replace("'", " ").strip() != ''):
-            marker += "<li>" + (facility.quest_26).replace("'", " ") + "</li>" #phone 1st
+            marker += self.clean_phone_number(facility.quest_26) + "</li>" #phone 1st
         if(facility.quest_31.replace("'", " ").strip() != ''):
-            marker += "<li>" + (facility.quest_31).replace("'", " ") + "</li>" #phone 2nd
+            marker += self.clean_phone_number(facility.quest_31) + "</li>" #phone 2nd
         marker += "</ul>','" + (facility.quest_48).replace("'", " ") #hours 9
         marker += "','" + (facility.quest_27).replace("'", " ") #FP Services 10
         marker += "','" + (facility.quest_28).replace("'", " ") #Safe abortion services 11
@@ -126,6 +127,11 @@ class Referral:
         marker += "']"
         return marker
                 
-    
+    def clean_phone_number(self, input):
+        input = input.replace("'", " ")
+        input = input.strip()
+        if input[:3] == "855":
+            input = "0%s" % input[3:]
+        return "<li>%s</li>" % input
                 
                 

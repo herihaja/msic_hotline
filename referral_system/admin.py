@@ -91,5 +91,5 @@ admin.site.unregister(Group)
 admin.site.register(AuthUser, MsicUserAdmin)
 
 #admin.site.register(Client)
-admin.site.register(SmsFac)
+#admin.site.register(SmsFac)
 #admin.site.register(Appointment)

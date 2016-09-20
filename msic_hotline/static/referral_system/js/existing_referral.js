@@ -60,8 +60,8 @@
 		    	_html += "" + data[5] + " ";
 		    	_html += "" + data[6] + "</p> ";		    			    
 		    	
-		    	_html += "<h6>Contact Telephone</h6>";
-		    	_html += "<p>" + data[7] + "</p>";
+		    	_html += "<h6>Telephones</h6>";
+		    	_html += "<p>" + cleanTelephone(data[7]) + "</p>";
 		    	_html += "<h6>Opening Hours</h6>";
 		    	_html += "<p>" + data[8] + "</p>";
 		    	_html += "<h6>Available Services</h6>";

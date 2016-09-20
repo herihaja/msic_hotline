@@ -210,7 +210,7 @@ def viewReferral(request):
     
     ## SERVICES DELIVERED
     servicesDelivered = reports.servicesDelivered(startDate, endDate, adr_province, referrer)
-    allServices = ReferredServices.objects.all()
+    allServices = ReferredServices.get_all_in_customized_order()
     
     reportServices = {}
     listService = []

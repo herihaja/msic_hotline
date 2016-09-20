@@ -135,6 +135,23 @@ class ReferredServices(models.Model):
         managed = True
         db_table = 'referred_services'
 
+    @classmethod
+    def get_all_in_customized_order(cls):
+        allServices = ReferredServices.objects.all()
+        unordered_list = []
+        expected = ["Pills", "Injectable", "Implant insertion", "Implant removal", "IUD Insertion", "IUD removal",
+                    "Voluntary permanent method", "STI screening and testing", "Cervical cancer screening"]
+        dict_order = dict()
+        for index, service in enumerate(allServices):
+            if service.service_name in expected:
+                dict_order.update({service.service_name: index})
+            else:
+                unordered_list.append(service)
+
+        ordered = [allServices[dict_order.get(service_name)] for service_name in expected if dict_order.get(service_name)]
+        ordered.extend(unordered_list)
+        return ordered
+
 
 class Sms(models.Model):
     id_niveau = models.IntegerField()
