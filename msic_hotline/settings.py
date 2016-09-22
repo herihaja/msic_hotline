@@ -137,3 +137,9 @@ STATICFILES_DIRS = [
 ]
 
 SMS_API_URL = "http://tool.plasgate.com:11040/cgi-bin/sendsms"
+
+
+try:
+    from local_settings import *
+except ImportError as e:
+    pass
