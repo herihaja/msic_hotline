@@ -102,9 +102,13 @@ function initialize() {
         //this.setZoom(16);
         //google.maps.event.removeListener(boundsListener);
     });
+
+    google.maps.event.addListenerOnce(map, 'idle', function(){
+        // do something only the first time the map is loaded
+        map.setZoom(7);
+    });
     
-    
-    
+
     
 }
 
@@ -216,7 +220,6 @@ function codeAddress() {
             	$("#closest-fac-div").html("<h6>Closest Facilities</h6><ol>" + _closest_div + "</ol>");
             }
             map.fitBounds(bounds_2);
-            // map.setZoom(16);
         } else {
             alert("Please select at least a Province")
             //alert('Geocode was not successful for the following reason: ' + status);
