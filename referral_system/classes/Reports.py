@@ -100,6 +100,7 @@ class Reports:
             facility.quest_19 AS facility_name,
             cli.adr_street,
             cli.id_client,
+            cli.phone as client_phone,
             cli.adr_street AS adr_street_khmer,
             cli.adr_village,
             CASE WHEN loc_village.quest_7 IS NULL THEN '' ELSE loc_village.quest_7 END AS adr_village_khmer,
@@ -141,7 +142,7 @@ class Reports:
         sms = sms + ", " + str(objSms['expiry_date'])
         strSms = strSms + " " + sms + "</i>\""
 
-        self.sendMessage(objSms['phone'], sms, actorId, objSms['id_client'], objSms['ref_lang'])
+        self.sendMessage(objSms['client_phone'], sms, actorId, objSms['id_client'], objSms['ref_lang'])
         return strSms
     
     def sendMessage(self, toNumber, message_content, actorId, recipientId, language="english"):

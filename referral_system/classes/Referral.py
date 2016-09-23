@@ -42,7 +42,8 @@ class Referral:
 
     
     def createFacilitiesMarkers(self):
-        markers = [self.createMarker(facility) for facility in self.allFacilities if facility.quest_24 != '' ]
+        markers = [self.createMarker(facility) for facility in self.allFacilities if facility.quest_24 != '' and
+                                                                                     facility.quest_21 != 'Garment factory infirmary']
         self.facilityMarkerList = ','.join(markers)
                 
     def createFacilityInfoswindow(self):
