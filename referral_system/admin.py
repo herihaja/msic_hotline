@@ -99,8 +99,11 @@ class MsicUserAdmin(UserAdmin):
         return SmsFac.objects.get(quest_20=obj.facility_id).quest_19
 
     def save_model(self, request, obj, form, change):
-        if obj.groups.all()[0].name == "Garment Factory":
-            obj.facility_id = form.cleaned_data['garment_id']
+        try:
+            if obj.groups.all()[0].name == "Garment Factory":
+                obj.facility_id = form.cleaned_data['garment_id']
+        except:
+            pass
         super(MsicUserAdmin, self).save_model(request, obj, form, change)
 
 
