@@ -129,7 +129,7 @@ USE_TZ = True
 #/Users/patrick/django-projects/msic_hotline
 #STATIC_ROOT = "/Users/patrick/django-projects/msic_hotline/msic_hotline/static/"
 
-STATIC_URL = '/static/'
+STATIC_URL = '/referral_system/static/'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),

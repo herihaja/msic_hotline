@@ -11,7 +11,7 @@ var referredServices = [];
 var map;
 var address_icon = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
 var countryName = "Cambodia";
-var garment_icon = "/static/referral_system/css/pointer_factory green_2.png";
+var garment_icon = "/referral_system/static/referral_system/css/pointer_factory green_2.png";
 
 var address = "";
 
@@ -153,10 +153,10 @@ function codeAddress() {
 	
 	if(search_type == 'cr') {
 		address = document.getElementById('adr_street').value;
-		address += " " + document.getElementById('adr_village').value;
-		address += " " + document.getElementById('adr_commune').value;
-		address += " " + document.getElementById('adr_district').value;
-		address += " " + document.getElementById('adr_province').value;
+        address += checkAndConcat(document.getElementById('adr_village').value);
+        address += checkAndConcat(document.getElementById('adr_commune').value);
+        address += checkAndConcat(document.getElementById('adr_district').value);
+        address += checkAndConcat(document.getElementById('adr_province').value);
 	} else {
 		address = document.getElementById('gf_gps').value;
         if (!address) {
@@ -341,4 +341,9 @@ function displaySelectedFacility(_index){
 	
 }
 
-
+function checkAndConcat(input) {
+    if (input != "0" && input.length) {
+        return " " + input;
+    }
+    return "";
+}
