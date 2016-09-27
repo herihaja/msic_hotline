@@ -17,7 +17,7 @@ from django.conf.urls import url, include
 from django.contrib import admin
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
+    url(r'^referral_system/admin/', admin.site.urls),
     url(r'^referral_system/', include('referral_system.urls')),
-    url(r'^web-api/', include('web_api.urls')),
+    url(r'^referral_system/web-api/', include('web_api.urls')),
 ]
