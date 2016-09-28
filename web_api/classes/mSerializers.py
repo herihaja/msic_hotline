@@ -21,7 +21,9 @@ class MSerializers:
             Q(quest_50 = "Referral System only"))|
             Q(quest_21 = "Garment factory infirmary"),
             date_soumission__gt=date_last_update
-        )
+        )\
+        .distinct('quest_20')\
+        .order_by('quest_20','-date_soumission')
 
         for objFacility in db_facilities :
             facility = {}
@@ -260,8 +262,8 @@ class MSerializers:
         referLocations = []
         db_locations = SmsLoc.objects.all()\
             .filter(date_soumission__gt=date_last_updated)\
-            .order_by('quest_5')\
-            .distinct('quest_5')
+            .distinct('quest_5')\
+            .order_by('quest_5','-date_soumission')
         for objLocation in db_locations :
             referLocation = {}
             referLocation["id_location"] = objLocation.quest_5
