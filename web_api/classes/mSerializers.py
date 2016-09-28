@@ -258,7 +258,10 @@ class MSerializers:
     def select_all_locations(self, date_last_updated=None):
         date_last_updated = self.my_format_date(date_last_updated)
         referLocations = []
-        db_locations = SmsLoc.objects.all().filter(date_soumission__gt=date_last_updated)
+        db_locations = SmsLoc.objects.all()\
+            .filter(date_soumission__gt=date_last_updated)\
+            .order_by('quest_5')\
+            .distinct('quest_5')
         for objLocation in db_locations :
             referLocation = {}
             referLocation["id_location"] = objLocation.quest_5
