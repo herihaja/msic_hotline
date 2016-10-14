@@ -184,10 +184,7 @@ class Reports:
             conversion_method = khmer_conversion
 
         data_string = data_string_sample % (conversion_method(message_content), toNumber)
-        #response = requests.post(settings.SMS_API_URL, verify=False, data=data_string)
-        from mock import Mock
-        response = Mock()
-        response.content = "status=0&msgid=jfkdsaljfdskfjdsko"
+        response = requests.post(settings.SMS_API_URL, verify=False, data=data_string)
 
         status = self.saveSmsLog(response, toNumber, message_content.encode("UTF-8"), actorId, recipientId)
         return message_content, status
