@@ -137,6 +137,7 @@ STATICFILES_DIRS = [
 ]
 
 SMS_API_URL = "http://tool.plasgate.com:11040/cgi-bin/sendsms"
+NOTIFICATION_FCM_API_KEY = "AIzaSyACW4qbzlFfu9OAQqst2CgHE7c_uBJKP5M"
 
 
 try:

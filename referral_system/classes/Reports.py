@@ -142,8 +142,8 @@ class Reports:
         sms = sms + ", " + str(objSms['expiry_date'])
         strSms = strSms + " " + sms + "</i>\""
 
-        self.sendMessage(objSms['client_phone'], sms, actorId, objSms['id_client'], objSms['ref_lang'])
-        return strSms
+        message_content, status = self.sendMessage(objSms['client_phone'], sms, actorId, objSms['id_client'], objSms['ref_lang'])
+        return strSms,status
     
     def sendMessage(self, toNumber, message_content, actorId, recipientId, language="english"):
         # number_list = [ num1, num2, ...]

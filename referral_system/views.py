@@ -76,7 +76,7 @@ def notificationPage(request, typenotif):
         typeNotification = "success"
         notificationMessage = '<h4>Referral was saved successfully ! </h4><br> Referral ID: ' + referralId
         
-        descriptionText = reports.smsTextNewReferral(referralId, request.user.id)
+        descriptionText,status = reports.smsTextNewReferral(referralId, request.user.id)
         
     elif(typenotif[:4] == 'nok_'):
         tReferralID = typenotif.split("_")

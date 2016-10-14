@@ -17,12 +17,18 @@ class Appointment(models.Model):
     created = models.DateTimeField(default=datetime.now, blank=True, null=True)
     last_updated = models.DateTimeField(default=datetime.now, blank=True, null=True)
 
+    def save(self):
+        if self.referral_id:
+            self.last_updated = datetime.now()
+        super(Appointment,self).save()
+
     class Meta:
         managed = True
         db_table = 'appointment'
 
 class AuthUser(AbstractUser):
     facility_id = models.CharField(max_length=30,null=True)
+    fcm_token = models.CharField(max_length=512,null=True)
 
     class Meta:
         managed = True
@@ -34,7 +40,7 @@ class Client(models.Model):
     sex = models.CharField(max_length=10, blank=True, null=True)
     age = models.IntegerField(blank=True, null=True)
     phone = models.CharField(max_length=100, blank=True, null=True)
-    occupation = models.CharField(max_length=250, blank=True, null=True)
+    occupation = models.IntegerField(blank=True, null=True)
     garment_id = models.CharField(max_length=100, blank=True, null=True)
     adr_street = models.CharField(max_length=255, blank=True, null=True)
     adr_village = models.CharField(max_length=255, blank=True, null=True)
@@ -101,6 +107,7 @@ class MessagesLog(models.Model):
         db_table = 'messages_log'
         
 class Occupation(models.Model):
+    id = models.AutoField(primary_key=True)
     occupation_name = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
