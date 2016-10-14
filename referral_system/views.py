@@ -18,6 +18,7 @@ from django.contrib.auth import models
 
 
 # Create your views here.
+from web_api.views import _refer_send_notification
 
 def group_check(user):
     return user.groups.filter(name__in=['Hotline Counselor'])
@@ -356,7 +357,9 @@ def referralSaveOnlineForm(request):
                                               other_services = service_other,
                                               status = 1 # 1 = referred                                               
                                               )
-        referralOperation.save()  
+        referralOperation.save()
+
+        _refer_send_notification(id_selected_facility)
         
         #Notification format: ok_referalid
         notifParam = "ok_" + uniqueID
@@ -440,7 +443,9 @@ def referralSaveExistingForm(request):
                                               other_services = service_other,
                                               status = 1 # 1 = referred                                               
                                               )
-        referralOperation.save() 
+        referralOperation.save()
+
+        _refer_send_notification(id_selected_facility)
         
         
         #Notification format: ok_referalid
