@@ -153,6 +153,24 @@ class MSerializers:
         res_user["group_name"] = group.name
         return res_user
 
+    def getUserById(self,user_id):
+        auth_user = AuthUser.objects.get(pk=user_id)
+        res_user = {}
+        res_user["user_id"] = auth_user.id
+        res_user["username"] = auth_user.username
+        res_user["first_name"] = auth_user.first_name
+        res_user["last_name"] = auth_user.last_name
+        res_user["email"] = auth_user.email
+        res_user["token"] = auth_user.fcm_token
+        res_user["facility_id"] = auth_user.facility_id #whgf4
+#        res_user["facility_id"] = "whgf4"
+        group = auth_user.groups.all()[0]#AuthUserGroups.objects.get(user=auth_user)
+#        res_user["group_id"] = 2
+        res_user["group_id"] = group.id
+#        res_user["group_name"] = "Garment Factory"
+        res_user["group_name"] = group.name
+        return res_user
+
     def select_all_operation(self):
         referOperations=[];
         db_operations = ReferralOperation.objects.all()
