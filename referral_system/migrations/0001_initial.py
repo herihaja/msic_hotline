@@ -30,6 +30,7 @@ class Migration(migrations.Migration):
                 ('is_active', models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', verbose_name='active')),
                 ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
                 ('facility_id', models.CharField(max_length=30, null=True)),
+                ('fcm_token', models.CharField(max_length=512, null=True)),
                 ('groups', models.ManyToManyField(related_query_name='user', related_name='user_set', to='auth.Group', blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', verbose_name='groups')),
                 ('user_permissions', models.ManyToManyField(related_query_name='user', related_name='user_set', to='auth.Permission', blank=True, help_text='Specific permissions for this user.', verbose_name='user permissions')),
             ],
@@ -67,7 +68,7 @@ class Migration(migrations.Migration):
                 ('sex', models.CharField(max_length=10, null=True, blank=True)),
                 ('age', models.IntegerField(null=True, blank=True)),
                 ('phone', models.CharField(max_length=100, null=True, blank=True)),
-                ('occupation', models.CharField(max_length=250, null=True, blank=True)),
+                ('occupation', models.IntegerField(null=True, blank=True)),
                 ('garment_id', models.CharField(max_length=100, null=True, blank=True)),
                 ('adr_street', models.CharField(max_length=255, null=True, blank=True)),
                 ('adr_village', models.CharField(max_length=255, null=True, blank=True)),
@@ -145,7 +146,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Occupation',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(serialize=False, primary_key=True)),
                 ('occupation_name', models.CharField(max_length=100, null=True, blank=True)),
             ],
             options={

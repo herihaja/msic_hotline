@@ -6,4 +6,4 @@ wsgiref==0.1.2
 mock==1.0.1
 xlwt==1.1.2
 requests==2.11.1
-pyfcm-1.0.7
+pyfcm==1.0.7

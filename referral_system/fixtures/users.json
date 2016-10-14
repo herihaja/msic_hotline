@@ -1,0 +1,22 @@
+[{
+    "fields": {
+        "username": "MSIC",
+        "first_name": "Admin",
+        "last_name": "SuperUser",
+        "is_active": true,
+        "is_superuser": true,
+        "facility_id": null,
+        "is_staff": true,
+        "last_login": "2016-09-22T14:28:12.548Z",
+        "groups": [
+            1
+        ],
+        "user_permissions": [],
+        "password": "pbkdf2_sha256$20000$rpTZ3FeGSfPp$pHhG8WDWY02wH3SFLxXxeuBhYaXsqvo79+pHfvVpAgA=",
+        "email": "hery.imiary@gmail.com",
+        "date_joined": "2016-06-28T13:29:10Z"
+    },
+    "model": "referral_system.authuser",
+    "pk": 1
+}
+]

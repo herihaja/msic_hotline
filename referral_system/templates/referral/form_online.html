@@ -3,7 +3,7 @@
 
 {% block content %}
 
-<form method="post" action="/referral_system/referralSaveOnlineForm/" data-abide novalidate> 
+<form method="post" action="/referral_system/referralSaveOnlineForm/" id="referral-form" data-abide novalidate>
 	<input type="hidden" name="form_type" value="online_form" />
 	
 	<!-- Add "display: none" right away -->
@@ -117,7 +117,7 @@
 	<div class="row">
 	      <div class="large-12 columns">
 	      		<a href="/referral_system/online/" class="button alert radius">Cancel</a>
-	      		<button type="submit" class="button success round" onclick="return validateForm();">Save</button>
+	      		<button type="button" class="button success round" onclick="return validateForm();">Save</button>
 	      </div>
 	</div>
 	
@@ -147,7 +147,8 @@
  function validateForm(){
 	 if($("#id_selected_facility").val() == '') { alert("Please select a suitable Health Facility !"); return false; }
 	 if($("#occupation").val() == "1" && $("#garment").val() == "0") { alert("You must select your Garment Factory !"); return false;}
-	 return true;
+	 $("#referral-form").submit();
+     return true;
  }
  
 
