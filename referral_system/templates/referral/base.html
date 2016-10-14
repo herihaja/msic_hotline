@@ -1,4 +1,5 @@
 {% load staticfiles %}
+{% load user_tags %}
 <html>
     <head>
         <title>MSIC Hotline Platform</title>
@@ -28,15 +29,19 @@
         <div class="content-centered">
 	        <div id="msic-header">
 		        <div id="logo">
-		        	<img src="http://www.mariestopes.org.kh/sites/staging.ethiopia.mariestopes.ipproducts.co.uk/files/msi-cambodia-logo-3.png" />
+                    <img id="usaid-logo" src="/referral_system/static/referral_system/images/usaid-logo.png"/>
+		        	<img id="msic-logo" src="/referral_system/static/referral_system/images/msic-logo.png"/>
 		        </div>
 	        </div>
 	        <div id="msic-menu">
 		        <ul class="menu">
+                {% if user|in_group:"Hotline Counselor," %}
 				  <li {% if menuactive == "online" %} class="active" {% endif %}><a href="/referral_system/online/">NEW REFERRAL</a></li>
 				  <li {% if menuactive == "existing" %} class="active" {% endif %}><a href="/referral_system/existing/">RECORD MANUAL REFERRAL</a></li>
+
 				  <li {% if menuactive == "view" %} class="active" {% endif %}><a href="/referral_system/viewReferral/">VIEW MY REFERRAL</a></li>
-				</ul>
+				{% endif %}
+                </ul>
 	        </div>
 	        
 	        <div class="row">

@@ -222,7 +222,7 @@ class SmsFac(models.Model):
     quest_15 = models.CharField(max_length=250, blank=True, null=True)
     quest_16 = models.CharField(max_length=250, blank=True, null=True)
     quest_17 = models.CharField(max_length=250, blank=True, null=True)
-    quest_18 = models.CharField(max_length=250, blank=True, null=True)
+    quest_18 = models.CharField(max_length=250, blank=True, null=True) #village english
     quest_19 = models.CharField(max_length=250, blank=True, null=True)
     quest_20 = models.CharField(max_length=250, blank=True, null=True)
     quest_21 = models.CharField(max_length=250, blank=True, null=True)
@@ -259,6 +259,11 @@ class SmsFac(models.Model):
     class Meta:
         managed = True
         db_table = 'sms_fac'
+
+    @classmethod
+    def get_all_garment_factories(cls):
+        return SmsFac.objects.filter(quest_50__in=["Both (Referral System and Public Facing Platform)",
+                                                   "Referral System only"], quest_21="Garment factory infirmary", ).order_by('quest_19')
 
 
 class SmsFacTmp(models.Model):

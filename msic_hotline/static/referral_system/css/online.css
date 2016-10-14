@@ -87,3 +87,17 @@ body, body a, body p { font-size: 12px;}
 input[name='referral_id']{
     text-transform: uppercase;
 }
+
+div#logo img#usaid-logo{
+    width: 283px;
+}
+
+div#logo img#msic-logo{
+    height: 82px;
+    float: right;
+    padding-right: 42px;
+}
+
+select{
+    height: 45px!important;
+}

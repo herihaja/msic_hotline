@@ -6,6 +6,9 @@
 <style type="text/css">
 body {background: #009fda;}
 .signup-panel {background: #fff;}
+#logo img{
+    height: 63px;
+}
 </style>
 
 <div class="row">
@@ -14,7 +17,7 @@ body {background: #009fda;}
 
       <div class="signup-panel">
 		<div id="logo" style="text-align: center;">
-		        <img src="http://www.mariestopes.org.kh/sites/staging.ethiopia.mariestopes.ipproducts.co.uk/files/msi-cambodia-logo-3.png" />
+		        <img src="/referral_system/static/referral_system/images/msic-logo.png"/>
 		</div>
 		<br />
 		{% if error != '' %}
@@ -22,7 +25,7 @@ body {background: #009fda;}
 				{{error}}
 			</div>
 		{% endif %}
-        <p class="welcome"> Welcome to MSI Cambodia Referral App</p>
+        <p class="welcome">Welcome to Marie Stopes Client Referral App</p>
 		<br />
         <form method="post" action="/referral_system/authenticateMsicHotline/">
         

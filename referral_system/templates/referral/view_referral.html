@@ -1,7 +1,9 @@
 {% extends 'referral/base.html' %}
 {% load staticfiles%}
+{% load user_tags %}
 
 {% block content %}
+    {% if user|in_group:"Project Team," %}<h3>Reports</h3><br/>{% endif %}
 <div class="callout success">
 	<form method="post" action="/referral_system/viewReferral/">
 	    <div class="row">
@@ -31,7 +33,11 @@
 						</div>
 					</label>
 			  </div>
-			  <div class="large-3 columns">
+		{% if user|in_group:"Project Team," %}
+              <div class="large-6 columns">
+        {% else %}
+              <div class="large-3 columns">
+        {% endif %}
 					<label> Province
 					   <select id="adr_province" name="adr_province" onchange="">
 					   			<option value=''>--select--</option>
@@ -46,19 +52,52 @@
 		        	   </select>
 					</label>
 			  </div>
+              {% if user|in_group:"Project Team," %}
+              <div class="large-3 columns">&nbsp;</div>
+              {% else %}
               <div class="large-3 columns">
 					<label> Referred by
 					  <select name="referrer">
 					  	<option value=''>--select--</option>
-                        <option {% ifequal referrer user_id %}selected{% endifequal %} value="{{ user_id }}" >My referral</option>
-                        <option {% if referrer == 'all_counsellors' %}selected{% endif %} value="all_counsellors">All counsellors</option>
+                        {% for value,label in referrerList.items %}
+                            <option {% ifequal value referrer %}selected{% endifequal %} value="{{ value }}" >{{ label }}</option>
+                        {% endfor %}
 		          			
 		        	   </select>
 					</label>
 		      </div>
+              {% endif %}
         </div>
         <div class="row">
+        {% if user|in_group:"Project Team," %}
+
+              <div class="large-3 columns">
+                  <label>Referrer Type
+                      <select name="referrer_type">
+                          <option value=''>--Select--</option>
+                          <option value="hotline_counselors" {% ifequal referrer_type  'hotline_counselors'%} selected {% endifequal %}>Hotline Counselors</option>
+                          <option value="garment_factory" {% ifequal referrer_type  'garment_factory'%} selected {% endifequal %}>Garment Factory Infirmary</option>
+                          <option value="hf" {% ifequal referrer_type  'hf'%} selected {% endifequal %}>Health Facility</option>
+                      </select>
+                  </label>
+              </div>
+
+              <div class="large-3 columns">
+					<label> Referred by
+					  <select name="referrer">
+					  	<option value=''>--select--</option>
+                        {% for value, label in referrerList.items %}
+                            <option {% ifequal value referrer %}selected{% endifequal %} value="{{ value }}" >{{ label }}</option>
+                        {% endfor %}
+
+		        	   </select>
+					</label>
+		      </div>
+        {% else %}
               <div class="large-6 columns">&nbsp;</div>
+        {% endif %}
+
+
 
               <div class="large-3 columns">
 
@@ -102,7 +141,8 @@
    				</tr>
    				{% endfor %}
    				<tr>
-   					<td colspan="2" style="text-align: right;" >{{ totalReferrals }}%</td>
+                    <td style="text-align: right;">Total number of referrals</td>
+   					<td style="text-align: right;" >{{ totalReferrals }}%</td>
    					<td style="text-align: right;">{{numberClients}}</td>
    				</tr>
    			</table>
@@ -111,7 +151,7 @@
    	</div>
    	<div class="large-6 columns">
    	<div class="callout secondary">
-   		<h3>Services delivered</h3>
+   		<h3>Services referred</h3>
    		<div id="chart-services" style="width:100%; height:400px;"></div>
    		<br /><br />
    		<div id="chart-services-table">

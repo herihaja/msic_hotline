@@ -8,7 +8,7 @@ from referral_system.models import MessagesLog
 
 class Reports:
     
-    def clientsPerStatus(self, start_date='', end_date = '', province = '', id_referrer = ''):
+    def clientsPerStatus(self, start_date='', end_date = '', province = '', id_referrer = '', referrer_type=''):
         
         start_date = self.validate_date(start_date)
         end_date = self.validate_date(end_date)
@@ -51,16 +51,21 @@ class Reports:
         if province != '':
             sqlReport += " AND cli.adr_province = '" + province + "' "
             
-        if id_referrer == 'all_counsellors':
-            sqlReport += " AND t.actor_id IN (select u.id as actor_id FROM auth_user u inner join auth_user_groups ug on ug.user_id = u.id and ug.group_id = 1)"
+        if id_referrer == 'all_counselors': #all hotline counsellor
+            sqlReport += " AND t.actor_id IN (select u.id as actor_id FROM auth_user u inner join auth_user_groups ug on ug.authuser_id = u.id and ug.group_id = 1)"
         elif id_referrer != '' and str(int(id_referrer)) == id_referrer:
             sqlReport += " AND t.actor_id = '" + id_referrer + "' "
-            
+
+        dict_referrer_type = {'hotline_counselors': 1, 'hf': 3, 'garment_factory':2}
+        if referrer_type and dict_referrer_type.has_key(referrer_type):
+            sqlReport += " AND t.actor_id IN (select u.id as actor_id FROM auth_user u inner join auth_user_groups " \
+                + "ug on ug.authuser_id = u.id and ug.group_id = %d)" % dict_referrer_type.get(referrer_type)
             
         sqlReport += "GROUP BY t.status"
+        print sqlReport
         return AjaxFunction.runSQL(sqlReport)
     
-    def servicesDelivered(self, start_date='', end_date= '', province = '', id_referrer = ''):
+    def servicesDelivered(self, start_date='', end_date= '', province = '', id_referrer = '', referrer_type=''):
         
         start_date = self.validate_date(start_date)
         end_date = self.validate_date(end_date)
@@ -84,10 +89,17 @@ class Reports:
         if province != '':
             sqlReport += " AND cli.adr_province = '" + province + "' "
             
-        if id_referrer == 'all_counsellors':
-            sqlReport += " AND ro.actor_id IN (select u.id as actor_id FROM auth_user u inner join auth_user_groups ug on ug.user_id = u.id and ug.group_id = 1)"
+        if id_referrer == 'all_counselors':
+            sqlReport += " AND ro.actor_id IN (select u.id as actor_id FROM auth_user u inner join auth_user_groups" + \
+                         " ug on ug.authuser_id = u.id and ug.group_id = 1)"
         elif id_referrer != '' and str(int(id_referrer)) == id_referrer:
             sqlReport += " AND ro.actor_id = '" + id_referrer + "' "
+
+        dict_referrer_type = {'hotline_counselors': 1, 'hf': 3, 'garment_factory':2}
+        if referrer_type and dict_referrer_type.has_key(referrer_type):
+            sqlReport += " AND ro.actor_id IN (select u.id as actor_id FROM auth_user u inner join auth_user_groups" + \
+                         " ug on ug.authuser_id = u.id and ug.group_id = %d)" % dict_referrer_type.get(referrer_type)
+
                     
         return AjaxFunction.runSQL(sqlReport)
     
@@ -101,15 +113,21 @@ class Reports:
             cli.adr_street,
             cli.id_client,
             cli.phone as client_phone,
-            cli.adr_street AS adr_street_khmer,
-            cli.adr_village,
-            CASE WHEN loc_village.quest_7 IS NULL THEN '' ELSE loc_village.quest_7 END AS adr_village_khmer,
-            cli.adr_commune,
-            CASE WHEN loc_commune.quest_2 IS NULL THEN '' ELSE loc_commune.quest_2 END AS adr_commune_khmer,
+            facility.quest_18 as adr_village,
+            facility.quest_43 as adr_village_khmer,
+            facility.quest_13 as adr_commune,
+            facility.quest_39 as adr_commune_khmer,
+            facility.quest_33 as house_number,
+            facility.quest_16 as adr_street,
+            facility.quest_34 as adr_street_khmer,
+            CASE WHEN loc_village.quest_7 IS NULL THEN '' ELSE loc_village.quest_7 END AS client_adr_village_khmer,
+            cli.adr_commune as client_adr_commune,
+            CASE WHEN loc_commune.quest_2 IS NULL THEN '' ELSE loc_commune.quest_2 END AS client_adr_commune_khmer,
             facility.quest_26 as phone,
             facility.quest_12 AS facility_name_khmer,
             app.expiry_date,
-            app.language AS ref_lang
+            app.language AS ref_lang,
+            op.referral_id
             FROM
             appointment app
             INNER JOIN referral_operation op ON op.referral_id = app.referral_id and op.status = 1
@@ -120,31 +138,36 @@ class Reports:
             WHERE
             app.referral_id = '""" + referralId + """'
         """""
-        
+
         resSms = AjaxFunction.runSQL(sqlSms)
         objSms = resSms[0]
         
         strSms = "The SMS below was sent to the client: <br><br><i>\""
         
-        sms = ''
         if objSms['ref_lang'] == 'english':
-            sms = sms + str(objSms['facility_name'])
-            sms = sms + ", " + str(objSms['adr_street'])
-            sms = sms + ", " + str(objSms['adr_village'])
-            sms = sms + ", " + str(objSms['adr_commune'] )                   
+            sms = unicode(objSms["facility_name"])
+            sms += self.cleanSmsContent(objSms["house_number"])
+            sms += self.cleanSmsContent(objSms["adr_street"])
+            sms += self.cleanSmsContent(objSms["adr_village"])
         else:
-            sms = sms + objSms['facility_name_khmer']
-            sms = sms + ", " + objSms['adr_street']
-            sms = sms + ", " + objSms['adr_village_khmer']
-            sms = sms + ", " + objSms['adr_commune_khmer']
-        
-        sms = sms + ", " + str(objSms['phone'])    
-        sms = sms + ", " + str(objSms['expiry_date'])
-        strSms = strSms + " " + sms + "</i>\""
+            sms = objSms["facility_name_khmer"]
+            sms += self.cleanSmsContent(objSms["house_number"])
+            sms += self.cleanSmsContent(objSms["adr_street_khmer"])
+            sms += self.cleanSmsContent(objSms["adr_village_khmer"])
+
+        sms += self.cleanSmsContent(objSms["phone"])
+        sms += self.cleanSmsContent(objSms["expiry_date"])
+        sms += self.cleanSmsContent(objSms["referral_id"])
+        strSms = strSms + sms + "</i>\""
 
         message_content, status = self.sendMessage(objSms['client_phone'], sms, actorId, objSms['id_client'], objSms['ref_lang'])
         return strSms,status
     
+    def cleanSmsContent(self, input):
+        if len(unicode(input)) == 0 or input == 'n/a':
+            return ''
+        return ", %s" % unicode(input)
+
     def sendMessage(self, toNumber, message_content, actorId, recipientId, language="english"):
         # number_list = [ num1, num2, ...]
         # message_content <= 160 car
@@ -161,7 +184,10 @@ class Reports:
             conversion_method = khmer_conversion
 
         data_string = data_string_sample % (conversion_method(message_content), toNumber)
-        response = requests.post(settings.SMS_API_URL, verify=False, data=data_string)
+        #response = requests.post(settings.SMS_API_URL, verify=False, data=data_string)
+        from mock import Mock
+        response = Mock()
+        response.content = "status=0&msgid=jfkdsaljfdskfjdsko"
 
         status = self.saveSmsLog(response, toNumber, message_content.encode("UTF-8"), actorId, recipientId)
         return message_content, status

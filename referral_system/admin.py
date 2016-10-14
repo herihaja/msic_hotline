@@ -14,6 +14,7 @@ def _remove_default_name_fields():
     user_display_fields =  list(UserAdmin.list_display)
     user_display_fields.remove('first_name')
     user_display_fields.remove('last_name')
+    user_display_fields.remove('email')
     return tuple(user_display_fields)
 
 

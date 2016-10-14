@@ -9,9 +9,9 @@ var markers = [];
 var closest = [];
 var referredServices = [];
 var map;
-var address_icon = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
+var address_icon = "/referral_system/static/referral_system/images/pin_client_home.png";
 var countryName = "Cambodia";
-var garment_icon = "/referral_system/static/referral_system/css/pointer_factory green_2.png";
+var garment_icon = "/referral_system/static/referral_system/images/pin_factory.png";
 
 var address = "";
 
@@ -142,7 +142,11 @@ function getCheckedServices(){
 	//alert(JSON.stringify(referredServices));
 }
 function codeAddress() {
-	clearRouteAndFacility();
+    if ($("#occupation").val() == "1" && $("#garment").val() == "0" ) {
+        alert("Please select a Garment Factory");
+        return;
+    }
+    clearRouteAndFacility();
 	getCheckedServices();
 	
 	// cr = client residence

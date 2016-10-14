@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import division
 from django.shortcuts import render, redirect
 from django.http.response import HttpResponse
@@ -7,7 +8,7 @@ from referral_system.classes.Referral import Referral
 import json, xlwt
 from referral_system.classes.AjaxFunction import AjaxFunction
 from referral_system.models import SmsFac, Client, Appointment,\
-    ReferralOperation, VoucherCode, ReferredServices
+    ReferralOperation, VoucherCode, ReferredServices, AuthUser
 from django.core import serializers
 from referral_system.classes.ReferralFunctions import ReferralFunctions
 from referral_system.classes.Reports import Reports
@@ -19,7 +20,7 @@ from django.contrib.auth import models
 # Create your views here.
 
 def group_check(user):
-    return user.groups.filter(name__in=['Hotline Consellor'])
+    return user.groups.filter(name__in=['Hotline Counselor'])
 
 def index(request):
     context = {}
@@ -54,7 +55,9 @@ def authenticateMsicHotline(request):
         if user.is_active:
             login(request, user)
             # Redirect to a success page.
-            return redirect(referralFormOnline)
+            redirect_view = referralFormOnline if user.groups.all()[0].name == 'Hotline Counselor' else viewReferral
+                
+            return redirect(redirect_view)
         else:
             # Return a 'disabled account' error message
             return redirect(loginPage, error="inactive")
@@ -106,7 +109,7 @@ def referralFormOnline(request):
     
     localityProvinces = AjaxFunction.listLocalityProvince()
     occupations = referralClass.getAllOccupations()
-    listGarment = SmsFac.objects.filter( quest_21="Garment factory infirmary").order_by('quest_19')
+    listGarment = SmsFac.get_all_garment_factories()
     listAge = range(14, 51);
     
     #notifications
@@ -138,7 +141,7 @@ def referralFormExisting(request):
     
     localityProvinces = AjaxFunction.listLocalityProvince()
     occupations = referralClass.getAllOccupations()
-    listGarment = SmsFac.objects.filter( quest_21="Garment factory infirmary")
+    listGarment = SmsFac.get_all_garment_factories()
     listAge = range(14, 51);
         
     context = {"allServices" : allServices, 
@@ -156,6 +159,7 @@ def viewReferral(request):
     startDate, endDate = '', ''
     adr_province = ''
     referrer = ''
+    referrer_type = ''
     export = request.method == 'POST' and request.POST.get('action') == 'export'
     
     if request.method == 'POST':
@@ -164,12 +168,13 @@ def viewReferral(request):
         endDate = request.POST['end_date']
         adr_province = request.POST['adr_province']
         referrer = request.POST['referrer']
+        referrer_type = request.POST.get('referrer_type', '')
     
     reports = Reports()
     localityProvinces = AjaxFunction.listLocalityProvince()
     
     ### CLIENTS
-    referralReports = reports.clientsPerStatus(startDate, endDate, adr_province, referrer)
+    referralReports = reports.clientsPerStatus(startDate, endDate, adr_province, referrer, referrer_type)
     """
     {
                     name: 'Microsoft Internet Explorer',
@@ -177,14 +182,13 @@ def viewReferral(request):
                     drilldown: 'Microsoft Internet Explorer'
                 }
     """
-    status = ['','','Redeemed','Give up','Re-referred', 'Expired']
+    status = ['','Not visited yet','Redeemed','Service not taken','Re-referred', 'Expired']
     listClientData = []
     listClientObject = []
 
-    numberClients = sum([itemReport["number_client"] for itemReport in referralReports if itemReport["status"] != 1])
+    numberClients = sum([itemReport["number_client"] for itemReport in referralReports])
     
     for itemReport in referralReports:
-        if itemReport["status"] == 1: continue
         itemObj = []
         _name = status[itemReport["status"]]
         status[itemReport["status"]] = ''
@@ -209,7 +213,7 @@ def viewReferral(request):
     strData = ",".join(listClientData)
     
     ## SERVICES DELIVERED
-    servicesDelivered = reports.servicesDelivered(startDate, endDate, adr_province, referrer)
+    servicesDelivered = reports.servicesDelivered(startDate, endDate, adr_province, referrer, referrer_type)
     allServices = ReferredServices.get_all_in_customized_order()
     
     reportServices = {}
@@ -247,7 +251,15 @@ def viewReferral(request):
         listObjectService.append(itemObj)
         
     jsonService = ",".join(listService)
-    
+
+    from collections import OrderedDict
+    referrerList = OrderedDict({})
+    if request.user.groups.all()[0].name == "Hotline Counselor":
+        referrerList.update({u"%s" % request.user.id:'My Referral', 'all_counselors': 'All counselors'})
+    else:
+        for counselor in AuthUser.objects.exclude(groups__name__in=['Project Team']).order_by('first_name'):
+            referrerList.update({u"%s" % counselor.id:"%s %s" % (counselor.first_name, counselor.last_name)})
+
     
     context = {
                "listObject" : listClientObject ,
@@ -266,6 +278,8 @@ def viewReferral(request):
                "referrer" : referrer,
                "totalReferrals": "100" if numberClients > 0 else "0",
                "totalServices": "100" if numberServices > 0 else "0",
+               "referrerList": referrerList,
+               "referrer_type": referrer_type,
                }
 
     if export:
@@ -556,7 +570,7 @@ def exportExcel(request, context):
     referral_sheet.write(row, 1, "%s%s" % (context.get('totalReferrals'), "%"))
     referral_sheet.write(row, 2, context.get('numberClients'))
 
-    services_sheet = book.add_sheet("Services delivered")
+    services_sheet = book.add_sheet("Services referred")
     services_sheet.write(0,0, "Services")
     services_sheet.write(0,1, "Percentage")
     services_sheet.write(0,2, "Number of services")
@@ -576,3 +590,10 @@ def exportExcel(request, context):
     response['Content-Disposition'] = 'attachment; filename=report.xls'
     book.save(response)
     return response
+
+def send_sms(request):
+    sms_content = "this is a very long sms to test the behavior when the message is longer than one sixty characters, Aimee, Please let me know when you get it, if possible to have a screenshot that will be very helpful, thanks"
+    sms_content = "Hi Aimee, did you get my previous sms from the system? It's Heri."
+    sms_content = unicode("នេះគឺជាការផ្ញើសារជាអក្សរបានយ៉ាងយូរដើម្បីសាកល្បងឥរិយាបថពេលដែលសារនេះគឺជាតួអក្សរហុកសិបយូរជាងមួយរបស់ Aimee, សូមអនុញ្ញាតឱ្យខ្ញុំដឹងថានៅពេលដែលអ្នកទទួលបានវាបើអាចធ្វើទៅបានដើម្បីឱ្យមានរូបថតអេក្រង់ដែលនឹងមានប្រយោជន៍ខ្លាំងណាស់, អរគុណ")
+    Reports().sendMessage("012818614", sms_content, 1, 1, 'khmer')
+    return HttpResponse(sms_content)
