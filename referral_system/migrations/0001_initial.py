@@ -287,7 +287,7 @@ class Migration(migrations.Migration):
                 ('quest_45', models.CharField(max_length=250, null=True, blank=True)),
                 ('quest_46', models.CharField(max_length=250, null=True, blank=True)),
                 ('quest_47', models.CharField(max_length=250, null=True, blank=True)),
-                ('quest_48', models.CharField(max_length=250, null=True, blank=True)),
+                ('quest_48', models.CharField(max_length=1000, null=True, blank=True)),
                 ('quest_49', models.CharField(max_length=250, null=True, blank=True)),
                 ('quest_50', models.CharField(max_length=250, null=True, blank=True)),
             ],

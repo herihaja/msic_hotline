@@ -22,7 +22,7 @@
 {
     "fields": {
         "credential": "pyOo4E9n125g6fD3/zmzc3h6l+uaUY93yuoxY/Ftt5g=",
-        "doublon": "quest_20,  \tquest_19",
+        "doublon": "quest_20",
         "id_type_niveau": 0,
         "type_projet": "S",
         "affiche": 0,
@@ -43,7 +43,7 @@
 {
     "fields": {
         "credential": "pyOo4E9n125g6fD3/zmzc3h6l+uaUY93yuoxY/Ftt5g=",
-        "doublon": null,
+        "doublon": "quest_5",
         "id_type_niveau": 0,
         "type_projet": "S",
         "affiche": 0,
@@ -945,7 +945,7 @@
     "fields": {
         "date_format": null,
         "rang": 48,
-        "data_type": "VARCHAR(250)",
+        "data_type": "VARCHAR(1000)",
         "nom_colonne": "quest_48",
         "libelle_fr": "Private facility: Facility working hour (Type with standard format)",
         "libelle_us": null,

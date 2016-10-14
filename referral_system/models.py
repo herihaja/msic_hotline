@@ -252,7 +252,7 @@ class SmsFac(models.Model):
     quest_45 = models.CharField(max_length=250, blank=True, null=True)
     quest_46 = models.CharField(max_length=250, blank=True, null=True)
     quest_47 = models.CharField(max_length=250, blank=True, null=True)
-    quest_48 = models.CharField(max_length=250, blank=True, null=True)
+    quest_48 = models.CharField(max_length=1000, blank=True, null=True) #working hour
     quest_49 = models.CharField(max_length=250, blank=True, null=True)
     quest_50 = models.CharField(max_length=250, blank=True, null=True)
 
