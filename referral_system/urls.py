@@ -18,7 +18,7 @@ urlpatterns = [
     url(r'^authenticateMsicHotline/', views.authenticateMsicHotline, name='authenticateMsicHotline'),    
     url(r'^referralSaveOnlineForm/$', views.referralSaveOnlineForm, name='referralSaveOnlineForm'),
     url(r'^referralSaveExistingForm/$', views.referralSaveExistingForm, name='referralSaveExistingForm'),   
-    
+    url(r'^send-sms/', views.send_sms, name='send-sms'),
      
     url(r'^notificationPage/(?P<typenotif>.+)/$', views.notificationPage, name='notificationPage'),
     

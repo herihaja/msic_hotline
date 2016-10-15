@@ -1,0 +1,43 @@
+{% extends 'referral/scriptOnly.html' %}
+{% load staticfiles%}
+
+{% block content %}
+
+<style type="text/css">
+body {background: #009fda;}
+.signup-panel {background: #fff;}
+#logo img{
+    height: 63px;
+}
+</style>
+
+<div class="row">
+	<div class="large-3 columns">&nbsp;</div>
+    <div class="large-6 columns">
+
+      <div class="signup-panel">
+		<div id="logo" style="text-align: center;">
+		        <img src="/referral_system/static/referral_system/images/msic-logo.png"/>
+		</div>
+		<br />
+		
+        <p class="welcome">Website is down for maintenance.</p>
+		<br />
+
+
+      </div>
+
+      <div class="row copyright">
+            <div class="large-12 columns">
+                <p>Powered by <a href="http://www.hni.org" target="_blank"><img alt="Human Network International" src="http://hni.org/wp-content/uploads/2014/01/hni_logo_toosmall.png"></a></p>
+            </div>
+    	</div>
+
+    </div>
+
+    <div class="large-6 columns">
+
+    </div>
+
+   </div>
+   {% endblock %}
