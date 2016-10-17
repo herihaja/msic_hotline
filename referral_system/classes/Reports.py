@@ -19,7 +19,7 @@ class Reports:
         count(referral_id) AS number_client
         FROM (SELECT
                 CASE
-                        WHEN ro.status = 1 and a.expiry_date > CURRENT_DATE THEN 5
+                        WHEN ro.status = 1 and a.expiry_date < CURRENT_DATE THEN 5
                         ELSE ro.status END
                      as status,
                     a.referral_id,
@@ -76,7 +76,7 @@ class Reports:
         referral_operation ro
         INNER JOIN appointment a ON a.referral_id = ro.referral_id 
         INNER JOIN client cli ON cli.id_client = a.id_client
-        WHERE status = 2
+        WHERE 1 = 1
         """
 
         if start_date:
