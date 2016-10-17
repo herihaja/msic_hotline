@@ -129,10 +129,11 @@ class MSerializers:
         db_services = ReferredServices.objects.all()
         if len(db_services) > int(nb_service) :
             for objService in db_services :
-                service = {}
-                service["name"] = objService.service_name
-                service["created"] = objService.created.strftime('%Y-%m-%d %H:%M:%S.%f')
-                services.append(service)
+                if objService is not None :
+                    service = {}
+                    service["name"] = objService.service_name
+                    service["created"] = objService.created.strftime('%Y-%m-%d %H:%M:%S.%f')
+                    services.append(service)
         return services
 
     def getUser(self,username):
