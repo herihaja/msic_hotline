@@ -56,7 +56,7 @@ class Reports:
         elif id_referrer != '' and str(int(id_referrer)) == id_referrer:
             sqlReport += " AND t.actor_id = '" + id_referrer + "' "
 
-        dict_referrer_type = {'hotline_counselors': 1, 'hf': 3, 'garment_factory':2}
+        dict_referrer_type = {'hotline_counselors': 1, 'hf': 3, 'garment_factory':2, "whc": 5}
         if referrer_type and dict_referrer_type.has_key(referrer_type):
             sqlReport += " AND t.actor_id IN (select u.id as actor_id FROM auth_user u inner join auth_user_groups " \
                 + "ug on ug.authuser_id = u.id and ug.group_id = %d)" % dict_referrer_type.get(referrer_type)
@@ -94,7 +94,7 @@ class Reports:
         elif id_referrer != '' and str(int(id_referrer)) == id_referrer:
             sqlReport += " AND ro.actor_id = '" + id_referrer + "' "
 
-        dict_referrer_type = {'hotline_counselors': 1, 'hf': 3, 'garment_factory':2}
+        dict_referrer_type = {'hotline_counselors': 1, 'hf': 3, 'garment_factory':2, "whc": 5}
         if referrer_type and dict_referrer_type.has_key(referrer_type):
             sqlReport += " AND ro.actor_id IN (select u.id as actor_id FROM auth_user u inner join auth_user_groups" + \
                          " ug on ug.authuser_id = u.id and ug.group_id = %d)" % dict_referrer_type.get(referrer_type)

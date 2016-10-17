@@ -9,9 +9,7 @@
         "facility_id": null,
         "is_staff": true,
         "last_login": "2016-09-22T14:28:12.548Z",
-        "groups": [
-            1
-        ],
+        "groups": [],
         "user_permissions": [],
         "password": "pbkdf2_sha256$20000$rpTZ3FeGSfPp$pHhG8WDWY02wH3SFLxXxeuBhYaXsqvo79+pHfvVpAgA=",
         "email": "krisna.keo@mariestopes.org.kh",
@@ -49,7 +47,7 @@
         "is_active": true,
         "is_superuser": false,
         "facility_id": "whpf8",
-        "is_staff": true,
+        "is_staff": false,
         "last_login": "2016-09-05T14:32:13.948Z",
         "groups": [
             2
@@ -71,7 +69,7 @@
         "is_active": true,
         "is_superuser": false,
         "facility_id": null,
-        "is_staff": true,
+        "is_staff": false,
         "last_login": null,
         "groups": [
             3

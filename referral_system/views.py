@@ -257,7 +257,7 @@ def viewReferral(request):
     if request.user.groups.all()[0].name == "Hotline Counselor":
         referrerList.update({u"%s" % request.user.id:'My Referral', 'all_counselors': 'All counselors'})
     else:
-        for counselor in AuthUser.objects.exclude(groups__name__in=['Project Team']).order_by('first_name'):
+        for counselor in AuthUser.objects.filter(is_staff=False).exclude(groups__name__in=['Project Team']).order_by('first_name'):
             referrerList.update({u"%s" % counselor.id:"%s %s" % (counselor.first_name, counselor.last_name)})
 
     
