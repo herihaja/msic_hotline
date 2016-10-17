@@ -160,6 +160,13 @@ class ReferredServices(models.Model):
         return ordered
 
 
+    def __repr__(self):
+        return self.service_name
+
+    def __str__(self):
+        return self.service_name
+
+
 class Sms(models.Model):
     id_niveau = models.IntegerField(null=True)
     id_soumission = models.CharField(max_length=35, null=True)

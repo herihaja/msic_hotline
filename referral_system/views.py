@@ -221,11 +221,10 @@ def viewReferral(request):
     listService = []
     listObjectService = []
     numberServices = 0
+    allServicesName = [service.service_name for service in allServices]
     for itemServiceDelivered in servicesDelivered:
-        listServicesDelivered = itemServiceDelivered['referred_services'].split(";")
-        for itemS in listServicesDelivered:
-            if itemS.strip() != "":
-                numberServices = numberServices + 1
+        listServicesDelivered = [itemS for itemS in itemServiceDelivered['referred_services'].split(";") if itemS in allServicesName]
+        numberServices += len(listServicesDelivered)
             
     for itemService in allServices:
         itemObj = []

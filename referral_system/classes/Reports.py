@@ -62,7 +62,6 @@ class Reports:
                 + "ug on ug.authuser_id = u.id and ug.group_id = %d)" % dict_referrer_type.get(referrer_type)
             
         sqlReport += "GROUP BY t.status"
-        print sqlReport
         return AjaxFunction.runSQL(sqlReport)
     
     def servicesDelivered(self, start_date='', end_date= '', province = '', id_referrer = '', referrer_type=''):
@@ -100,7 +99,6 @@ class Reports:
             sqlReport += " AND ro.actor_id IN (select u.id as actor_id FROM auth_user u inner join auth_user_groups" + \
                          " ug on ug.authuser_id = u.id and ug.group_id = %d)" % dict_referrer_type.get(referrer_type)
 
-                    
         return AjaxFunction.runSQL(sqlReport)
     
     def smsTextNewReferral(self, referralId, actorId):
