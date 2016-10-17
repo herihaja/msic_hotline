@@ -383,7 +383,7 @@ def referralSaveExistingForm(request):
         client_adr_village = request.POST['adr_village']
         client_adr_commune = request.POST['adr_commune']
         client_adr_district = request.POST['adr_district']
-        client_adr_province = request.POST['adr_province']
+        client_adr_province = request.POST.get('adr_province', '')
         services = request.POST.getlist('service[]')  #should be an array
         id_selected_facility = request.POST['id_selected_facility']
         referral_date = request.POST['referral_date']

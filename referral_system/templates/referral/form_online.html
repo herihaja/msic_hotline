@@ -147,6 +147,10 @@
  function validateForm(){
 	 if($("#id_selected_facility").val() == '') { alert("Please select a suitable Health Facility !"); return false; }
 	 if($("#occupation").val() == "1" && $("#garment").val() == "0") { alert("You must select your Garment Factory !"); return false;}
+     if ( $("[name='service[]']:checked").length ==0 ) {
+         alert("Please select at least one Service.");
+         return false;
+     }
 	 $("#referral-form").submit();
      return true;
  }

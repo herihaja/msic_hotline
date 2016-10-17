@@ -31,7 +31,7 @@ class Referral:
         
         #self.allFacilities = list(dictFacilities)
         
-        self.allFacilities = SmsFac.objects.all().filter(
+        self.allFacilities = SmsFac.objects.exclude(quest_21="Garment factory infirmary").filter(
                                                          Q(quest_50 = "Both (Referral System and Public Facing Platform)")                                                         
                                                          |
                                                          Q(quest_50 = "Referral System only")

@@ -16,7 +16,7 @@
     	<div class="row">
 	    	<div class="large-6 columns">
 	    		<label class="mandatory"> <span>Referral ID</span>
-  					<input type="text" name="referral_id" value="" placeholder="M000001" maxlength="20">
+  					<input type="text" name="referral_id" value="" placeholder="M000001" maxlength="20" required>
   					<span class="form-error">The Referral ID field is required !</span>
 				</label>
 	    	</div>
@@ -144,8 +144,17 @@ $(function(){
 });
  
  function validateForm(){
+
 	 if($("#selected_facility").val() == '0' || $("#selected_facility").val() == 0) { alert("Please select a suitable Health Facility !"); return false;}
 	 if($("#occupation").val() == "1" && $("#garment").val() == "0") { alert("You must select your Garment Factory !"); return false;}
+     if($("#occupation").val() !="1" && $("#adr_province option:selected").val() == "0") {
+         alert("Please select at least a Province!");
+         return false;
+     }
+     if ( $("[name='service[]']:checked").length ==0 ) {
+         alert("Please select at least one Service.");
+         return false;
+     }
 	 $("#referral-form").submit();
 	 return true;
  }
