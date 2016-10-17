@@ -8,9 +8,12 @@ from django.db import connection
 class ReferralFunctions:
     
     def generateUniqueID(self):
-        lastVoucher = VoucherCode.objects.latest('unique_id')
+        try:
+            lastVoucher = VoucherCode.objects.latest('unique_id')
+            return self.returnNextId(lastVoucher.unique_id)
+        except Exception as e:
+            return 'A000001'
         
-        return self.returnNextId(lastVoucher.unique_id)
         
     def returnNextId(self,_currentID):
         number = int(_currentID[1:])

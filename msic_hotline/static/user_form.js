@@ -5,7 +5,7 @@ $(document).ready(function(){
     $("#id_group").change(function(){
         var selected = $(this).find("option:selected").text();
         facility_garment.hide();
-        if (selected == "Garment Factory") {
+        if ( $.inArray(selected, ["Garment Factory", "WorkerHealth Champions"]) != -1) {
             garment_selector.show();
         } else if ( selected == "QAN Facility") {
             fac_selector.show();
