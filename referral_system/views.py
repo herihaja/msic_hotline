@@ -571,6 +571,7 @@ def exportExcel(request, context):
         row += 1
 
 
+    referral_sheet.write(row, 0, "Total")
     referral_sheet.write(row, 1, "%s%s" % (context.get('totalReferrals'), "%"))
     referral_sheet.write(row, 2, context.get('numberClients'))
 
@@ -586,6 +587,7 @@ def exportExcel(request, context):
         services_sheet.write(row,2, service[2])
         row += 1
 
+    services_sheet.write(row, 0, "Total")
     services_sheet.write(row, 2, context.get("numberServices"))
     services_sheet.write(row, 1, "%s%s" % (context.get("totalServices"),"%"))
 

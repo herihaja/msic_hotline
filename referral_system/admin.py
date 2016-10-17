@@ -20,7 +20,7 @@ def _remove_default_name_fields():
 
 def get_facility_choices():
     choices_facility = [('', '-- Select --')]
-    facility_objects = SmsFac.objects.filter(quest_50__in=["Both (Referral System and Public Facing Platform)",
+    facility_objects = SmsFac.objects.exclude(quest_21="Garment factory infirmary").filter(quest_50__in=["Both (Referral System and Public Facing Platform)",
                                                            "Referral System only"]).order_by('quest_19')
     facilities = [(facility.quest_20, facility.quest_19) for facility in facility_objects]
     choices_facility.extend(facilities)
@@ -29,7 +29,9 @@ def get_facility_choices():
 def get_garment_choices():
     choices_garment = [('', '-- Select --')]
     garments = [(facility.quest_20, facility.quest_19) for facility in
-                                                       SmsFac.objects.filter(quest_21="Garment factory infirmary").
+                                                       SmsFac.objects.filter(quest_21="Garment factory infirmary",
+                                                                             quest_50__in=["Both (Referral System and Public Facing Platform)",
+                                                           "Referral System only"]).
                                                        order_by('quest_19')]
     choices_garment.extend(garments)
     return choices_garment
