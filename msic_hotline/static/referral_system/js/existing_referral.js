@@ -6,7 +6,7 @@
     		 format: 'yyyy-mm-dd',
     		 weekStart: 1,
     	 	 onRender: function (date) {
-    	 		//return date.valueOf() < now.valueOf() ? 'disabled' : '';
+    	 		return date.valueOf() > now.valueOf() ? 'disabled' : '';
     	 	 }
     	 }).on('changeDate', function (ev) {
     	 	if (ev.date.valueOf() > checkout.date.valueOf()) {
