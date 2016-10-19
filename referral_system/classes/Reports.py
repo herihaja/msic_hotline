@@ -155,7 +155,7 @@ class Reports:
 
         phoneNumber = objSms["phone"]
         if phoneNumber[:3] == "855":
-            phoneNumber = "0%s" % phoneNumber[:3]
+            phoneNumber = "0%s" % phoneNumber[3:]
         
         sms += self.cleanSmsContent(phoneNumber)
         sms += self.cleanSmsContent(objSms["expiry_date"])
