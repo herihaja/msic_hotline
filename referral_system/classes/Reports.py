@@ -153,7 +153,11 @@ class Reports:
             sms += self.cleanSmsContent(objSms["adr_street_khmer"])
             sms += self.cleanSmsContent(objSms["adr_village_khmer"])
 
-        sms += self.cleanSmsContent(objSms["phone"])
+        phoneNumber = objSms["phone"]
+        if phoneNumber[:3] == "855":
+            phoneNumber = "0%s" % phoneNumber[:3]
+        
+        sms += self.cleanSmsContent(phoneNumber)
         sms += self.cleanSmsContent(objSms["expiry_date"])
         sms += self.cleanSmsContent(objSms["referral_id"])
         strSms = strSms + sms + "</i>\""

@@ -12,7 +12,7 @@ class ReferralFunctions:
             lastVoucher = VoucherCode.objects.latest('unique_id')
             return self.returnNextId(lastVoucher.unique_id)
         except Exception as e:
-            return 'A000001'
+            return self.insertedUniqueID('A000001')
         
         
     def returnNextId(self,_currentID):

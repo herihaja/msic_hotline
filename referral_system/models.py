@@ -147,7 +147,7 @@ class ReferredServices(models.Model):
         allServices = ReferredServices.objects.all()
         unordered_list = []
         expected = ["Pills", "Injectable", "Implant insertion", "Implant removal", "IUD Insertion", "IUD removal",
-                    "Voluntary permanent method", "STI screening and testing", "Cervical cancer screening"]
+                    "Voluntary permanent method", "STI screening and treatment", "Cervical cancer screening"]
         dict_order = dict()
         for index, service in enumerate(allServices):
             if service.service_name in expected:
