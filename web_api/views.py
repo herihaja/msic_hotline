@@ -386,7 +386,7 @@ def saveReRefer(request):
         referralOperation.save()
 
 #        send notification re_referred
-        _re_referred_send_notification(last_actor_id)
+        _re_referred_send_notification(last_actor_id, id_selected_facility)
 
 #        send SMS
         reports = Reports()
@@ -488,7 +488,7 @@ def _redeem_send_notification(last_actor_id,status):
         push_service = FCMNotification(api_key=settings.NOTIFICATION_FCM_API_KEY)
         result = push_service.notify_single_device(registration_id=registration_id, data_message=data_message)
 
-def _re_referred_send_notification(last_actor_id):
+def _re_referred_send_notification(last_actor_id, facility_id):
     registration_id = None
     notified_user = AuthUser.objects.filter(pk=last_actor_id)
     if notified_user is not None and len(notified_user)!=0:
@@ -501,3 +501,20 @@ def _re_referred_send_notification(last_actor_id):
         }
         push_service = FCMNotification(api_key=settings.NOTIFICATION_FCM_API_KEY)
         result = push_service.notify_single_device(registration_id=registration_id, data_message=data_message)
+
+    registration_ids = []
+    notified_users = AuthUser.objects.filter(facility_id=facility_id)
+    if notified_users is not None:
+        for user in notified_users:
+            reg_id = user.fcm_token
+            if reg_id:
+                registration_ids.append(reg_id)
+
+    data_message = {
+        "status" : 4,
+        "notification_type" : "re_referred",
+        "facility_id": facility_id
+    }
+    if len(registration_ids) != 0:
+        push_service = FCMNotification(api_key=settings.NOTIFICATION_FCM_API_KEY)
+        result = push_service.notify_multiple_devices(registration_ids=registration_ids, data_message=data_message)
