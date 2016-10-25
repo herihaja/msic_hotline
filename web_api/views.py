@@ -61,11 +61,12 @@ def getAllUpdate(request):
     appointments = mSerializer.select_all_appointments(user,appointment_last_date)
     services = mSerializer.select_all_services(nb_service)
 #    referOperations = mSerializer.select_all_operation()
-    referOperations = mSerializer.update_operations(user,referral_status_last_date)
+#    referOperations = mSerializer.update_operations(user,referral_status_last_date)
     occupations = mSerializer.select_all_occupations(nb_occupation)
     referLocations = mSerializer.select_all_locations(location_last_date)
+#    referLocations = []
 
-    if(user["group_id"] == 2):
+    if(user["group_id"] == 2 or user["group_id"] == 5):
         garment_report = mSerializer.update_garment_report(user)
         return HttpResponse(
         content_type='application/json',
@@ -75,7 +76,6 @@ def getAllUpdate(request):
                 "facilities": facilities,
                 "appointments": appointments,
                 "referred_services":services,
-                "operations":referOperations,
                 "occupations":occupations,
                 "locations":referLocations,
                 "refer_report":garment_report
@@ -90,7 +90,6 @@ def getAllUpdate(request):
                 "facilities": facilities,
                 "appointments": appointments,
                 "referred_services":services,
-                "operations":referOperations,
                 "occupations":occupations,
                 "locations":referLocations,
                 "refer_report":facility_report
@@ -297,6 +296,12 @@ def saveRedeem(request):
                                               facility_id = id_selected_facility
                                               )
         referralOperation.save()
+
+        #Save appointment
+        appointment = Appointment.objects.get(pk=referral_id)
+        if appointment is not None:
+            appointment.save()
+            
 #        send notification redeemed
         _redeem_send_notification(last_actor_id,status)
         mSerial = MSerializers()
@@ -361,7 +366,15 @@ def saveReRefer(request):
         newClient.save()
 
         #Save appointment
-        appointment = Appointment(
+        appointment = Appointment.objects.get(pk=referral_id)
+        if appointment is not None:
+            appointment.referral_date = referral_date
+            appointment.expiry_date = expiry_date
+            appointment.language = language_sms
+            appointment.id_client = newClient.id_client
+            appointment.mode = mode
+        else:
+            appointment = Appointment(
                                  referral_id =  referral_id,
                                  referral_date = referral_date,
                                  expiry_date = expiry_date,
@@ -371,7 +384,6 @@ def saveReRefer(request):
                                   )
         appointment.save()
 
-        #save the operation
         #save the operation
         referralOperation = ReferralOperation(
                                               referral_id = referral_id,

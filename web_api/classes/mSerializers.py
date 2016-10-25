@@ -119,9 +119,7 @@ class MSerializers:
                 client["created"] = objAppointment["last_updated"].strftime('%Y-%m-%d %H:%M:%S.%f')
                 client["last_updated"] = objAppointment["last_updated"].strftime('%Y-%m-%d %H:%M:%S.%f')
                 appointment["appointment_client"] = client
-                
-#            appointment["id_facility"] = objAppointment["id_facility
-#            appointment["id_garment"] = "whgf4"
+            appointment["operations"] = self.getOperations(objAppointment['referral_id'])
             appointments.append(appointment)
         return appointments
 
@@ -188,6 +186,56 @@ class MSerializers:
             referOperation["has_alternative"] = objOperation.has_alternative
             referOperation["provider"] = objOperation.provider
             referOperation["redeem_date"] = objOperation.redeem_date
+            referOperations.append(referOperation)
+        return referOperations
+
+    def getOperations(self, referral_id=None):
+        referOperations = []
+        sql = '''
+        SELECT op.*
+        ,u.username as u_user_name
+        ,u.first_name as u_first_name
+        ,u.last_name as u_last_name
+        ,f.quest_20 as f_id
+        ,gr.id as group_id
+        ,gr.name as group_name
+        from referral_operation as op
+        INNER JOIN auth_user as u on u.id = op.actor_id
+        LEFT JOIN sms_fac as f on f.quest_20 = u.facility_id
+        INNER JOIN auth_user_groups ug on ug.authuser_id = u.id
+        INNER JOIN auth_group gr on gr.id = ug.group_id
+        WHERE 1=1
+        and op.referral_id = '%s'
+        ORDER BY op.last_updated
+        '''%(referral_id)
+        listOperations = StaticTools.run_sql(sql)
+        for objOperation in listOperations :
+            referOperation = {}
+            referOperation["op_id"] = objOperation["id"]
+            referOperation["op_referral_id"] = objOperation["referral_id"]
+            referOperation["op_actor_id"] = objOperation["actor_id"]
+            referOperation["op_actor_username"] = objOperation["u_user_name"]
+            referOperation["op_actor_last_name"] = objOperation["u_last_name"]
+            referOperation["op_actor_first_name"] = objOperation["u_first_name"]
+            referOperation["op_actor_facility_id"] = objOperation["f_id"]
+            referOperation["op_actor_group_id"] = objOperation["group_id"]
+            referOperation["op_actor_group_name"] = objOperation["group_name"]
+            referOperation["op_referred_services"] = objOperation["referred_services"]
+            referOperation["op_other_services"] = objOperation["other_services"]
+            referOperation["op_status"] = objOperation["status"]
+            if(objOperation["last_updated"] is not None):
+                referOperation["op_last_updated"] = objOperation["last_updated"].strftime('%Y-%m-%d %H:%M:%S.%f')
+            else:
+                referOperation["op_last_updated"] = ""
+
+            referOperation["op_is_completed"] = objOperation["is_completed"]
+            referOperation["op_has_alternative"] = objOperation["has_alternative"]
+            referOperation["op_provider"] = objOperation["provider"]
+            if(objOperation["redeem_date"] is not None):
+                referOperation["op_redeem_date"] = objOperation["redeem_date"].strftime('%Y-%m-%d')
+            else:
+                referOperation["op_redeem_date"] = ""
+            referOperation["op_facility_id"] = objOperation["facility_id"]
             referOperations.append(referOperation)
         return referOperations
 
