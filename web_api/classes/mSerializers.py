@@ -80,8 +80,9 @@ class MSerializers:
             inner join appointment ap on ap.referral_id = op.referral_id
             where 1=1
             and (op.facility_id = '%s' or op.actor_id = '%s')
-            and op.status = 1
-            and ap.last_updated > '%s';
+            and op.status = 1 or op.status = 4
+            and ap.last_updated > '%s'
+            GROUP BY ap.referral_id;
             '''%(user["facility_id"],user["user_id"],date_last_updated)
             db_appointments = StaticTools.run_sql(sql)
         for objAppointment in db_appointments :
@@ -369,7 +370,6 @@ class MSerializers:
             ,today,user["user_id"],user["user_id"]
             ,today,user["user_id"],user["user_id"]
             ,user["user_id"],user["user_id"])
-        print sql
         list_report = StaticTools.run_sql(sql)
         if len(list_report) == 0:
             return report_garment
