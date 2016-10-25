@@ -19,7 +19,7 @@ class Reports:
         count(referral_id) AS number_client
         FROM (SELECT
                 CASE
-                        WHEN ro.status = 1 and a.expiry_date < CURRENT_DATE THEN 5
+                        WHEN ro.status IN (1, 4) and a.expiry_date < CURRENT_DATE THEN 5
                         ELSE ro.status END
                      as status,
                     a.referral_id,

@@ -56,7 +56,7 @@ class MsicUserChangeForm(UserChangeForm):
         self.instance.groups.add(self.cleaned_data['group'])
         if self.cleaned_data['group'] == '3':
             self.instance.facility_id = self.cleaned_data['facility_id']
-        elif self.cleaned_data['group'] == '2':
+        elif self.cleaned_data['group'] in ['2', '5']:
             self.instance.facility_id = self.cleaned_data['garment_id']
         return self.cleaned_data['group']
 
@@ -103,7 +103,7 @@ class MsicUserAdmin(UserAdmin):
 
     def save_model(self, request, obj, form, change):
         try:
-            if obj.groups.all()[0].name == "Garment Factory":
+            if obj.groups.all()[0].name in ["Garment Factory", "WorkerHealth Champions"]:
                 obj.facility_id = form.cleaned_data['garment_id']
         except:
             pass
