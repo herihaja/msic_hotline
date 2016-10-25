@@ -298,9 +298,9 @@ def referralSaveOnlineForm(request):
         client_occupation = request.POST['occupation']
         id_selected_gf = request.POST['selected_gf']
         client_adr_street = request.POST['adr_street']
-        client_adr_village = request.POST['adr_village']
-        client_adr_commune = request.POST['adr_commune']
-        client_adr_district = request.POST['adr_district']
+        client_adr_village = request.POST['adr_village'] if request.POST.get('adr_village') != '0' else ''
+        client_adr_commune = request.POST['adr_commune'] if request.POST.get('adr_commune') != '0' else ''
+        client_adr_district = request.POST['adr_district'] if request.POST.get('adr_district') != '0' else ''
         client_adr_province = request.POST.get('adr_province', '')
         services = request.POST.getlist('service[]')  #should be an array
         searchtype = request.POST['searchtype'] #search by GF or address
@@ -380,9 +380,9 @@ def referralSaveExistingForm(request):
         client_occupation = request.POST['occupation']
         id_selected_gf = request.POST['selected_gf']
         client_adr_street = request.POST['adr_street']
-        client_adr_village = request.POST['adr_village']
-        client_adr_commune = request.POST['adr_commune']
-        client_adr_district = request.POST['adr_district']
+        client_adr_village = request.POST['adr_village'] if request.POST.get('adr_village') != '0' else ''
+        client_adr_commune = request.POST['adr_commune'] if request.POST.get('adr_commune') != '0' else ''
+        client_adr_district = request.POST['adr_district'] if request.POST.get('adr_district') != '0' else ''
         client_adr_province = request.POST.get('adr_province', '')
         services = request.POST.getlist('service[]')  #should be an array
         id_selected_facility = request.POST['id_selected_facility']
