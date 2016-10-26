@@ -67,7 +67,6 @@ def getAllUpdate(request):
 #    referLocations = []
 
     if(user["group_id"] == 2 or user["group_id"] == 5):
-        garment_report = mSerializer.update_garment_report(user)
         return HttpResponse(
         content_type='application/json',
         content=json.dumps({
@@ -77,11 +76,9 @@ def getAllUpdate(request):
                 "appointments": appointments,
                 "referred_services":services,
                 "occupations":occupations,
-                "locations":referLocations,
-                "refer_report":garment_report
+                "locations":referLocations
         },default=_json_serial))
     else:
-        facility_report = mSerializer.update_facility_report(user)
         return HttpResponse(
         content_type='application/json',
         content=json.dumps({
@@ -91,8 +88,7 @@ def getAllUpdate(request):
                 "appointments": appointments,
                 "referred_services":services,
                 "occupations":occupations,
-                "locations":referLocations,
-                "refer_report":facility_report
+                "locations":referLocations
         },default=_json_serial))
 
 
@@ -251,8 +247,7 @@ def saveReferral(request):
 #        sms_content = "It is Just a SMS Sample which should be displayed here!"'
         mSerial = MSerializers()
         appointment_return = mSerial.getAppointment(uniqueID,referralOperation.id)
-        user = mSerial.getUserById(actor_id)
-        garment_report = mSerial.update_garment_report(user)
+
         return HttpResponse(
         content_type='application/json',
         content=json.dumps({
@@ -261,14 +256,11 @@ def saveReferral(request):
                 "referral_id": uniqueID,
                 "sms_status" : sms_status,
                 "sms_content" : sms_content,
-                "appointments" : appointment_return,
-                "refer_report" : garment_report
-
+                "appointments" : appointment_return
         },default=_json_serial))
 
 def saveRedeem(request):
     if request.method == 'POST':
-
         referral_id = request.POST['referral_id']
         actor_id = int(request.POST['actor_id'])
         last_actor_id = int(request.POST['last_actor_id'])
@@ -306,8 +298,6 @@ def saveRedeem(request):
         _redeem_send_notification(last_actor_id,status)
         mSerial = MSerializers()
         operation = mSerial.getOperation(referralOperation.id)
-        user = mSerial.getUserById(actor_id)
-        facility_report = mSerial.update_facility_report(user)
         
         return HttpResponse(
         content_type='application/json',
@@ -316,8 +306,7 @@ def saveRedeem(request):
                 'error_msg': "Client Referral created SUCCESSFUL",
                 "referral_id": referral_id,
                 "status": status,
-                "operations": operation,
-                "refer_report" : facility_report
+                "operations": operation
         },default=_json_serial))
 def saveReRefer(request):
     import datetime
@@ -407,9 +396,6 @@ def saveReRefer(request):
 #        sms_content = "It is Just a SMS Sample which should be displayed here!"
         mSerial = MSerializers()
         appointment_return = mSerial.getAppointment(referral_id,referralOperation.id)
-        user = mSerial.getUserById(actor_id)
-        facility_report = mSerial.update_facility_report(user)
-
         return HttpResponse(
             content_type='application/json',
             content=json.dumps({
@@ -418,8 +404,7 @@ def saveReRefer(request):
                     "referral_id": referralOperation.referral_id,
                     "sms_status" : sms_status,
                     "sms_content" : sms_content,
-                    "appointments" : appointment_return,
-                    "refer_report" : facility_report
+                    "appointments" : appointment_return
             },default=_json_serial))
 
 def resetPassword(request):
