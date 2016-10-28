@@ -1,78 +1,93 @@
 from collections import Counter
 import datetime
 from django.db.models.query_utils import Q
-from msic_hotline import settings
 from referral_system.models import SmsFac, Appointment, \
     Client, AuthUser, ReferredServices, ReferralOperation, \
     Occupation, SmsLoc
 from web_api.classes.StaticTools import StaticTools
-from pyfcm import FCMNotification
 
 class MSerializers:
-
-
-
+    
     def __init__(self):
         pass
 
-    def select_all_facilities(self, date_last_update=None):
-        date_last_update = self.my_format_date(date_last_update)
+    def select_all_facilities(self, user, date_last_update=None):
+#        date_last_update = self.my_format_date(date_last_update)
         facilities =[];
+        db_facilities = None
 #        db_facilities = SmsFac.objects.all().extra(where=[" UPPER(quest_26) = 'YES' "])
-        db_facilities = SmsFac.objects.all().filter(
-            (Q(quest_50 = "Both (Referral System and Public Facing Platform)")|
-            Q(quest_50 = "Referral System only"))|
-            Q(quest_21 = "Garment factory infirmary"),
-            date_soumission__gt=date_last_update
-        )\
-        .distinct('quest_20')\
-        .order_by('quest_20','-date_soumission')
+#        db_facilities = SmsFac.objects.all().filter(
+#            (Q(quest_50 = "Both (Referral System and Public Facing Platform)")|
+#            Q(quest_50 = "Referral System only"))
+#            | Q(quest_21 = "Garment factory infirmary")
+#            , date_soumission__gt=date_last_update
+#            )\
+#            .distinct('quest_20')\
+#            .order_by('quest_20','-date_soumission')
+        if user["group_id"] == 3 :
+            sql = '''
+            SELECT
+            DISTINCT ON (f.quest_20)
+            f.*
+            FROM sms_fac f
+            WHERE
+            ((f.quest_50 ILIKE 'Both (Referral System and Public Facing Platform)'
+            OR f.quest_50 ILIKE 'Referral System only')
+            OR quest_21 ILIKE 'Garment factory infirmary')
+            AND f.date_soumission > '%s'
+            ORDER BY f.quest_20,f.quest_21 ASC, f.date_soumission DESC;
+            '''%(date_last_update)
+            db_facilities = StaticTools.run_sql(sql)
+        else:
+            sql = '''
+            SELECT
+            DISTINCT ON (f.quest_20)
+            f.*
+            FROM sms_fac f
+            WHERE
+            (((f.quest_50 ILIKE 'Both (Referral System and Public Facing Platform)'
+            OR f.quest_50 ILIKE 'Referral System only')
+            AND quest_21 NOT ILIKE 'Garment factory infirmary')
+            OR
+            quest_20 = '%s')
+            AND f.date_soumission > '%s'
+            ORDER BY f.quest_20,f.quest_21 ASC, f.date_soumission DESC;
+            '''%(user["facility_id"],date_last_update)
+            db_facilities = StaticTools.run_sql(sql)
 
         for objFacility in db_facilities :
             facility = {}
-            facility["id"] = objFacility.quest_20
-            facility["name"] = objFacility.quest_19
-            facility["name_khmer"] = objFacility.quest_12
-            facility["coordinates"] = objFacility.quest_24
-            facility["street"] = objFacility.quest_16
-            facility["street_khmer"] = objFacility.quest_34
-            facility["village"] = objFacility.quest_18
-            facility["village_khmer"] = objFacility.quest_34
-            facility["commune"] = objFacility.quest_13
-            facility["commune_khmer"] = objFacility.quest_39
-            facility["district"] = objFacility.quest_30
-            facility["district_khmer"] = objFacility.quest_41
-            facility["province"] = objFacility.quest_15
-            facility["province_khmer"] = objFacility.quest_42
-            facility["phone1"] = objFacility.quest_11
-            facility["phone2"] = objFacility.quest_26
-            facility["phone3"] = objFacility.quest_31
-            facility["hours"] = objFacility.quest_48
-            facility["services"] = objFacility.quest_49
-            facility["facility_type"] = objFacility.quest_21
+            facility["id"] = objFacility['quest_20']
+            facility["name"] = objFacility['quest_19']
+            facility["name_khmer"] = objFacility['quest_12']
+            facility["coordinates"] = objFacility['quest_24']
+            facility["street"] = objFacility['quest_16']
+            facility["street_khmer"] = objFacility['quest_34']
+            facility["village"] = objFacility['quest_18']
+            facility["village_khmer"] = objFacility['quest_34']
+            facility["commune"] = objFacility['quest_13']
+            facility["commune_khmer"] = objFacility['quest_39']
+            facility["district"] = objFacility['quest_30']
+            facility["district_khmer"] = objFacility['quest_41']
+            facility["province"] = objFacility['quest_15']
+            facility["province_khmer"] = objFacility['quest_42']
+            facility["phone1"] = objFacility['quest_11']
+            facility["phone2"] = objFacility['quest_26']
+            facility["phone3"] = objFacility['quest_31']
+            facility["hours"] = objFacility['quest_48']
+            facility["services"] = objFacility['quest_49']
+            facility["facility_type"] = objFacility['quest_21']
 
-            facility["created"] = objFacility.date_soumission.strftime('%Y-%m-%d %H:%M:%S.%f')
-            facility["last_updated"] = objFacility.date_soumission.strftime('%Y-%m-%d %H:%M:%S.%f')
+            facility["created"] = objFacility['date_soumission'].strftime('%Y-%m-%d %H:%M:%S.%f')
+            facility["last_updated"] = objFacility['date_soumission'].strftime('%Y-%m-%d %H:%M:%S.%f')
 
             facilities.append(facility)
         return facilities
 
     def select_all_appointments(self, user=None, date_last_updated=None):
         appointments =[];
-        if(user["group_id"] == 2):
+        if user["group_id"] == 3 :
 #            db_appointments = Appointment.objects.all().filter(date_soumission__gt=date_last_updated)
-            sql = '''
-            select
-            ap.*
-            from referral_operation op
-            inner join appointment ap on ap.referral_id = op.referral_id
-            where 1=1
-            and (op.actor_id = '%s')
-            and op.status = 1
-            and ap.last_updated > '%s';
-            '''%(user["user_id"],date_last_updated)
-            db_appointments = StaticTools.run_sql(sql)
-        else:
             sql = '''
             select
             ap.*
@@ -82,9 +97,25 @@ class MSerializers:
             and (op.facility_id = '%s' or op.actor_id = '%s')
             and op.status = 1 or op.status = 4
             and ap.last_updated > '%s'
-            GROUP BY ap.referral_id;
+            GROUP BY ap.referral_id
+            ORDER BY ap.last_updated DESC;
             '''%(user["facility_id"],user["user_id"],date_last_updated)
             db_appointments = StaticTools.run_sql(sql)
+        else:
+            sql = '''
+            select
+            ap.*
+            from referral_operation op
+            inner join appointment ap on ap.referral_id = op.referral_id
+            where 1=1
+            and (op.actor_id = '%s')
+            and op.status = 1
+            and ap.last_updated > '%s'
+            GROUP BY ap.referral_id
+            ORDER BY ap.last_updated DESC;
+            '''%(user["user_id"],date_last_updated)
+            db_appointments = StaticTools.run_sql(sql)
+        print sql
         for objAppointment in db_appointments :
             appointment = {}
             appointment["id"] = objAppointment['referral_id']
@@ -95,9 +126,8 @@ class MSerializers:
             appointment["notification_facility_id"] = objAppointment["notification_facility_id"]
             appointment["mode"] = objAppointment["mode"]
             
-            appointment["created"] = objAppointment["created"].strftime('%Y-%m-%d %H:%M:%S.%f')
-            appointment["last_updated"] = objAppointment["last_updated"].strftime('%Y-%m-%d %H:%M:%S.%f')
-
+            appointment["created"] = objAppointment["created"].strftime('%Y-%m-%d %H:%M:%S.%f%z')
+            appointment["last_updated"] = objAppointment["last_updated"].strftime('%Y-%m-%d %H:%M:%S.%f%z')
             client_id = objAppointment["id_client"]
             appointment["appointment_client_id"] = client_id
             db_client = Client.objects.get(pk=client_id)
@@ -327,25 +357,35 @@ class MSerializers:
         return occupations
 
     def select_all_locations(self, date_last_updated=None):
-        date_last_updated = self.my_format_date(date_last_updated)
         referLocations = []
-        db_locations = SmsLoc.objects.all()\
-            .filter(date_soumission__gt=date_last_updated)\
-            .distinct('quest_5')\
-            .order_by('quest_5','-date_soumission')
+#        db_locations = SmsLoc.objects.all()\
+#            .filter(date_soumission__gt=date_last_updated)\
+#            .distinct('quest_5')\
+#            .order_by('quest_5','-date_soumission')
+        sql = '''
+            SELECT
+            DISTINCT ON (l.quest_5)
+            l.*
+            FROM sms_loc l
+            WHERE
+            l.date_soumission > '%s'
+            ORDER BY l.quest_5 ASC, l.date_soumission DESC;
+            '''%(date_last_updated)
+        db_locations = StaticTools.run_sql(sql)
+        
         for objLocation in db_locations :
             referLocation = {}
-            referLocation["id_location"] = objLocation.quest_5
-            referLocation["village"] = objLocation.quest_3
-            referLocation["village_khmer"] = objLocation.quest_7
-            referLocation["commune"] = objLocation.quest_9
-            referLocation["commune_khmer"] = objLocation.quest_2
-            referLocation["district"] = objLocation.quest_4
-            referLocation["district_khmer"] = objLocation.quest_8
-            referLocation["province"] = objLocation.quest_6
-            referLocation["province_khmer"] = objLocation.quest_1
-            referLocation["created"] = objLocation.date_soumission.strftime('%Y-%m-%d %H:%M:%S.%f')
-            referLocation["last_updated"] = objLocation.date_soumission.strftime('%Y-%m-%d %H:%M:%S.%f')
+            referLocation["id_location"] = objLocation['quest_5']
+            referLocation["village"] = objLocation['quest_3']
+            referLocation["village_khmer"] = objLocation['quest_7']
+            referLocation["commune"] = objLocation['quest_9']
+            referLocation["commune_khmer"] = objLocation['quest_2']
+            referLocation["district"] = objLocation['quest_4']
+            referLocation["district_khmer"] = objLocation['quest_8']
+            referLocation["province"] = objLocation['quest_6']
+            referLocation["province_khmer"] = objLocation['quest_1']
+            referLocation["created"] = objLocation['date_soumission'].strftime('%Y-%m-%d %H:%M:%S.%f')
+            referLocation["last_updated"] = objLocation['date_soumission'].strftime('%Y-%m-%d %H:%M:%S.%f')
             referLocations.append(referLocation)
         return referLocations
 

@@ -57,7 +57,7 @@ def getAllUpdate(request):
 
     mSerializer = MSerializers()
     user = mSerializer.getUser(user_name)
-    facilities = mSerializer.select_all_facilities(facility_last_date)
+    facilities = mSerializer.select_all_facilities(user,facility_last_date)
     appointments = mSerializer.select_all_appointments(user,appointment_last_date)
     services = mSerializer.select_all_services(nb_service)
 #    referOperations = mSerializer.select_all_operation()
