@@ -98,7 +98,7 @@ class MSerializers:
             and op.status = 1 or op.status = 4
             and ap.last_updated > '%s'
             GROUP BY ap.referral_id
-            ORDER BY ap.last_updated DESC;
+            ORDER BY ap.last_updated ASC;
             '''%(user["facility_id"],user["user_id"],date_last_updated)
             db_appointments = StaticTools.run_sql(sql)
         else:
@@ -112,7 +112,7 @@ class MSerializers:
             and op.status = 1
             and ap.last_updated > '%s'
             GROUP BY ap.referral_id
-            ORDER BY ap.last_updated DESC;
+            ORDER BY ap.last_updated ASC;
             '''%(user["user_id"],date_last_updated)
             db_appointments = StaticTools.run_sql(sql)
         print sql
