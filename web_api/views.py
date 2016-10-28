@@ -295,7 +295,13 @@ def saveRedeem(request):
             appointment.save()
             
 #        send notification redeemed
-        _redeem_send_notification(last_actor_id,status)
+        reReferredOperations = ReferralOperation.objects.all().filter(referral_id=referral_id, status=4)
+        reReferredOperation = reReferredOperations.first()
+        if reReferredOperation :
+            _reReferred_redeem_send_notification(reReferredOperation.last_actor_id,reReferredOperation.actor_id , status)
+        else:
+            _redeem_send_notification(last_actor_id,status)
+
         mSerial = MSerializers()
         operation = mSerial.getOperation(referralOperation.id)
         
@@ -481,6 +487,24 @@ def _redeem_send_notification(last_actor_id,status):
             "status" : status,
             "notification_type" : "redeemed",
             "facility_id": last_actor_id
+        }
+        push_service = FCMNotification(api_key=settings.NOTIFICATION_FCM_API_KEY)
+        result = push_service.notify_single_device(registration_id=registration_id, data_message=data_message)
+
+def _reReferred_redeem_send_notification(referrer, reReferrer, status):
+    _send_notification_by_user_id(referrer,status)
+    _send_notification_by_user_id(reReferrer,status)
+
+def _send_notification_by_user_id(user_id,status):
+    registration_id = None
+    notified_user = AuthUser.objects.filter(pk=user_id)
+    if notified_user is not None and len(notified_user)!=0:
+        registration_id = notified_user[0].fcm_token
+    if registration_id is not None:
+        data_message = {
+            "status" : status,
+            "notification_type" : "redeemed",
+            "facility_id": user_id
         }
         push_service = FCMNotification(api_key=settings.NOTIFICATION_FCM_API_KEY)
         result = push_service.notify_single_device(registration_id=registration_id, data_message=data_message)

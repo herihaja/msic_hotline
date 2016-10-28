@@ -236,7 +236,7 @@ class MSerializers:
         INNER JOIN auth_group gr on gr.id = ug.group_id
         WHERE 1=1
         and op.referral_id = '%s'
-        ORDER BY op.last_updated
+        ORDER BY op.last_updated ASC
         '''%(referral_id)
         listOperations = StaticTools.run_sql(sql)
         for objOperation in listOperations :
@@ -654,7 +654,6 @@ class MSerializers:
             appointment["appointment_client"] = client
         appointment["operations"] = self.getOperation (operation_id)
         return appointment
-
 
 #    def my_format_date(self, date_str="", format="%Y-%m-%d %H:%M:%S"):frep_all_referred
 #        from datetime import datetime
