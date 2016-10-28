@@ -1,7 +1,7 @@
 from referral_system.classes.AjaxFunction import AjaxFunction
 import requests
 from django.conf import settings
-import json, urlparse
+import json, urlparse, urllib
 from datetime import datetime
 from referral_system.models import MessagesLog
 
@@ -179,14 +179,16 @@ class Reports:
             toNumber = "855%s" % toNumber[1:]
         
         if language == 'english':
-            data_string_sample = "gw-text=%s&gw-username=mscambodia&gw-password=msckh2016&gw-from=mariestopes&gw-to=%s"
+            sms_data_dict = {"gw-text":"%s", "gw-username":"mscambodia", "gw-password":"msckh2016",
+                             "gw-from":"mariestopes", "gw-to":"%s"}
             conversion_method = english_conversion
         else:
-            data_string_sample = "gw-coding=3&gw-text=%s&gw-username=mscambodia&gw-password=msckh2016&gw-from=mariestopes&gw-to=%s"
+            sms_data_dict = {"gw-coding":"3", "gw-text":"%s", "gw-username":"mscambodia", "gw-password": "msckh2016",
+                             "gw-from":"mariestopes", "gw-to":"%s"}
             conversion_method = khmer_conversion
 
-        data_string = data_string_sample % (conversion_method(message_content), toNumber)
-        response = requests.post(settings.SMS_API_URL, verify=False, data=data_string)
+        sms_data_dict.update({"gw-text": conversion_method(message_content), "gw-to": toNumber})
+        response = requests.post(settings.SMS_API_URL, verify=False, data=urllib.urlencode(sms_data_dict))
 
         status = self.saveSmsLog(response, toNumber, message_content.encode("UTF-8"), actorId, recipientId)
         return message_content, status
