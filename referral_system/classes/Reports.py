@@ -101,10 +101,12 @@ class Reports:
 
         return AjaxFunction.runSQL(sqlReport)
     
-    def smsTextNewReferral(self, referralId, actorId):
+    def smsTextNewReferral(self, referralId, actorId, status=None):
         # <Health facility name>, <house #>, <street>, <village>, 
         # <commune>, telephone number-<code> <expiry date>
-        
+        if status is None:
+            status = 1
+
         sqlSms = """
             SELECT
             facility.quest_19 AS facility_name,
@@ -128,7 +130,8 @@ class Reports:
             op.referral_id
             FROM
             appointment app
-            INNER JOIN referral_operation op ON op.referral_id = app.referral_id and op.status = 1
+            INNER JOIN referral_operation op ON op.referral_id = app.referral_id and op.status =
+            """ + status + """
             INNER JOIN sms_fac facility ON  facility.quest_20 = op.facility_id
             INNER JOIN client cli ON cli.id_client = app.id_client
             LEFT JOIN sms_loc loc_village ON loc_village.quest_3 = cli.adr_village

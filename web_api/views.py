@@ -214,6 +214,7 @@ def saveReferral(request):
                 },default=_json_serial))
 
         #Save appointment
+        today = datetime.date.today().strftime("%Y-%m-%d %H:%M:%S.%f")
         appointment = Appointment(
                                  referral_id =  uniqueID,
                                  referral_date = referral_date,
@@ -221,7 +222,9 @@ def saveReferral(request):
                                  language = language_sms,
                                  id_client = newClient.id_client,
 #                                 id_facility = id_selected_facility,
-                                 mode = mode #1=new ; 2=existing
+                                 mode = mode, #1=new ; 2=existing
+                                 created = today,
+                                 last_updated = today
                                   )
         appointment.save()
 
@@ -233,7 +236,8 @@ def saveReferral(request):
                                               last_actor_id = 0,
                                               referred_services = services,
                                               other_services = service_other,
-                                              status = 1 # 1 = referred
+                                              status = 1, # 1 = referred
+                                              last_updated = today
                                               )
         referralOperation.save()
 
@@ -274,6 +278,7 @@ def saveRedeem(request):
         id_selected_facility = request.POST['id_selected_facility']
 
         #save the operation
+        today = datetime.date.today().strftime("%Y-%m-%d %H:%M:%S.%f")
         referralOperation = ReferralOperation(
                                               referral_id = referral_id,
                                               actor_id = actor_id,
@@ -285,13 +290,15 @@ def saveRedeem(request):
                                               has_alternative = has_alternative,
                                               provider = provider,
                                               redeem_date = redeem_date,
-                                              facility_id = id_selected_facility
+                                              facility_id = id_selected_facility,
+                                              last_updated = today
                                               )
         referralOperation.save()
 
         #Save appointment
         appointment = Appointment.objects.get(pk=referral_id)
         if appointment is not None:
+            appointment.last_updated = today
             appointment.save()
             
 #        send notification redeemed
@@ -361,6 +368,7 @@ def saveReRefer(request):
         newClient.save()
 
         #Save appointment
+        today = datetime.date.today().strftime("%Y-%m-%d %H:%M:%S.%f")
         appointment = Appointment.objects.get(pk=referral_id)
         if appointment is not None:
             appointment.referral_date = referral_date
@@ -368,6 +376,7 @@ def saveReRefer(request):
             appointment.language = language_sms
             appointment.id_client = newClient.id_client
             appointment.mode = mode
+            appointment.last_updated = today
         else:
             appointment = Appointment(
                                  referral_id =  referral_id,
@@ -375,7 +384,9 @@ def saveReRefer(request):
                                  expiry_date = expiry_date,
                                  language = language_sms,
                                  id_client = newClient.id_client,
-                                 mode = mode
+                                 mode = mode,
+                                 created = today,
+                                 last_updated = today
                                   )
         appointment.save()
 
@@ -388,7 +399,8 @@ def saveReRefer(request):
                                               referred_services = services,
                                               other_services = service_other,
                                               status = status, # 4 = re-referred
-                                              redeem_date = redeem_date
+                                              redeem_date = redeem_date,
+                                              last_updated = today
                                               )
         referralOperation.save()
 
@@ -397,7 +409,7 @@ def saveReRefer(request):
 
 #        send SMS
         reports = Reports()
-        sms_content,sms_status = reports.smsTextNewReferral(referral_id, actor_id)
+        sms_content,sms_status = reports.smsTextNewReferral(referral_id, actor_id,status)
 #        sms_status = "19"
 #        sms_content = "It is Just a SMS Sample which should be displayed here!"
         mSerial = MSerializers()

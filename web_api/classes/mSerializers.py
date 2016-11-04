@@ -64,13 +64,13 @@ class MSerializers:
             facility["street"] = objFacility['quest_16']
             facility["street_khmer"] = objFacility['quest_34']
             facility["village"] = objFacility['quest_18']
-            facility["village_khmer"] = objFacility['quest_34']
+            facility["village_khmer"] = objFacility['quest_43']
             facility["commune"] = objFacility['quest_13']
             facility["commune_khmer"] = objFacility['quest_39']
             facility["district"] = objFacility['quest_30']
-            facility["district_khmer"] = objFacility['quest_41']
+            facility["district_khmer"] = objFacility['quest_47']
             facility["province"] = objFacility['quest_15']
-            facility["province_khmer"] = objFacility['quest_42']
+            facility["province_khmer"] = objFacility['quest_41']
             facility["phone1"] = objFacility['quest_11']
             facility["phone2"] = objFacility['quest_26']
             facility["phone3"] = objFacility['quest_31']
@@ -78,8 +78,8 @@ class MSerializers:
             facility["services"] = objFacility['quest_49']
             facility["facility_type"] = objFacility['quest_21']
 
-            facility["created"] = objFacility['date_soumission'].strftime('%Y-%m-%d %H:%M:%S.%f')
-            facility["last_updated"] = objFacility['date_soumission'].strftime('%Y-%m-%d %H:%M:%S.%f')
+            facility["created"] = objFacility['date_soumission']
+            facility["last_updated"] = objFacility['date_soumission']
 
             facilities.append(facility)
         return facilities
@@ -115,7 +115,6 @@ class MSerializers:
             ORDER BY ap.last_updated ASC;
             '''%(user["user_id"],date_last_updated)
             db_appointments = StaticTools.run_sql(sql)
-        print sql
         for objAppointment in db_appointments :
             appointment = {}
             appointment["id"] = objAppointment['referral_id']
@@ -126,8 +125,8 @@ class MSerializers:
             appointment["notification_facility_id"] = objAppointment["notification_facility_id"]
             appointment["mode"] = objAppointment["mode"]
             
-            appointment["created"] = objAppointment["created"].strftime('%Y-%m-%d %H:%M:%S.%f%z')
-            appointment["last_updated"] = objAppointment["last_updated"].strftime('%Y-%m-%d %H:%M:%S.%f%z')
+            appointment["created"] = objAppointment["created"]
+            appointment["last_updated"] = objAppointment["last_updated"]
             client_id = objAppointment["id_client"]
             appointment["appointment_client_id"] = client_id
             db_client = Client.objects.get(pk=client_id)
@@ -146,8 +145,8 @@ class MSerializers:
                 client["adr_province"] = db_client.adr_province
     #            client["created"] = db_client.created
     #            client["last_updated"] = db_client.last_updated
-                client["created"] = objAppointment["last_updated"].strftime('%Y-%m-%d %H:%M:%S.%f')
-                client["last_updated"] = objAppointment["last_updated"].strftime('%Y-%m-%d %H:%M:%S.%f')
+                client["created"] = objAppointment["last_updated"]
+                client["last_updated"] = objAppointment["last_updated"]
                 appointment["appointment_client"] = client
             appointment["operations"] = self.getOperations(objAppointment['referral_id'])
             appointments.append(appointment)
@@ -161,7 +160,7 @@ class MSerializers:
                 if objService is not None :
                     service = {}
                     service["name"] = objService.service_name
-                    service["created"] = objService.created.strftime('%Y-%m-%d %H:%M:%S.%f')
+                    service["created"] = objService.created
                     services.append(service)
         return services
 
@@ -254,7 +253,7 @@ class MSerializers:
             referOperation["op_other_services"] = objOperation["other_services"]
             referOperation["op_status"] = objOperation["status"]
             if(objOperation["last_updated"] is not None):
-                referOperation["op_last_updated"] = objOperation["last_updated"].strftime('%Y-%m-%d %H:%M:%S.%f')
+                referOperation["op_last_updated"] = objOperation["last_updated"]
             else:
                 referOperation["op_last_updated"] = ""
 
@@ -328,7 +327,7 @@ class MSerializers:
             referOperation["op_other_services"] = objOperation["other_services"]
             referOperation["op_status"] = objOperation["status"]
             if(objOperation["last_updated"] is not None):
-                referOperation["op_last_updated"] = objOperation["last_updated"].strftime('%Y-%m-%d %H:%M:%S.%f')
+                referOperation["op_last_updated"] = objOperation["last_updated"]
             else:
                 referOperation["op_last_updated"] = ""
 
@@ -384,8 +383,8 @@ class MSerializers:
             referLocation["district_khmer"] = objLocation['quest_8']
             referLocation["province"] = objLocation['quest_6']
             referLocation["province_khmer"] = objLocation['quest_1']
-            referLocation["created"] = objLocation['date_soumission'].strftime('%Y-%m-%d %H:%M:%S.%f')
-            referLocation["last_updated"] = objLocation['date_soumission'].strftime('%Y-%m-%d %H:%M:%S.%f')
+            referLocation["created"] = objLocation['date_soumission']
+            referLocation["last_updated"] = objLocation['date_soumission']
             referLocations.append(referLocation)
         return referLocations
 
@@ -595,7 +594,7 @@ class MSerializers:
         referOperation["op_other_services"] = objOperation["other_services"]
         referOperation["op_status"] = objOperation["status"]
         if(objOperation["last_updated"] is not None):
-            referOperation["op_last_updated"] = objOperation["last_updated"].strftime('%Y-%m-%d %H:%M:%S.%f')
+            referOperation["op_last_updated"] = objOperation["last_updated"]
         else:
             referOperation["op_last_updated"] = ""
 
@@ -628,8 +627,8 @@ class MSerializers:
         appointment["notification_facility_id"] = objAppointment["notification_facility_id"]
         appointment["mode"] = objAppointment["mode"]
 
-        appointment["created"] = objAppointment["created"].strftime('%Y-%m-%d %H:%M:%S.%f')
-        appointment["last_updated"] = objAppointment["last_updated"].strftime('%Y-%m-%d %H:%M:%S.%f')
+        appointment["created"] = objAppointment["created"]
+        appointment["last_updated"] = objAppointment["last_updated"]
 
         client_id = objAppointment["id_client"]
         appointment["appointment_client_id"] = client_id
@@ -649,8 +648,8 @@ class MSerializers:
             client["adr_province"] = db_client.adr_province
 #            client["created"] = db_client.created
 #            client["last_updated"] = db_client.last_updated
-            client["created"] = objAppointment["last_updated"].strftime('%Y-%m-%d %H:%M:%S.%f')
-            client["last_updated"] = objAppointment["last_updated"].strftime('%Y-%m-%d %H:%M:%S.%f')
+            client["created"] = objAppointment["created"]
+            client["last_updated"] = objAppointment["last_updated"]
             appointment["appointment_client"] = client
         appointment["operations"] = self.getOperation (operation_id)
         return appointment
