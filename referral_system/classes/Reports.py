@@ -147,7 +147,7 @@ class Reports:
         
         strSms = "The SMS below was sent to the client: <br><br><i>\""
         
-        if objSms['ref_lang'] == 'english':
+        if objSms['ref_lang'].lower() == 'english':
             sms = unicode(objSms["facility_name"])
             sms += self.cleanSmsContent(objSms["house_number"])
             sms += self.cleanSmsContent(objSms["adr_street"])
