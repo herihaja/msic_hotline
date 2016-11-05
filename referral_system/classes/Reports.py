@@ -105,7 +105,9 @@ class Reports:
         # <Health facility name>, <house #>, <street>, <village>, 
         # <commune>, telephone number-<code> <expiry date>
         if status is None:
-            status = 1
+            status = str(1)
+        else:
+            status = str(status)
 
         sqlSms = """
             SELECT

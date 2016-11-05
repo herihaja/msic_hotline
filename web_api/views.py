@@ -1,17 +1,12 @@
-from datetime import datetime
+import datetime
 from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render, redirect
 from django.http.response import HttpResponse
-from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import authenticate, login
 from msic_hotline import settings
-from referral_system.classes.Referral import Referral
 import json
-from referral_system.classes.AjaxFunction import AjaxFunction
 from referral_system.classes.Reports import Reports
-from referral_system.models import SmsFac, Client, Appointment, ReferralOperation, AuthUser
-from django.core import serializers
+from referral_system.models import Client, Appointment, ReferralOperation, AuthUser
 from referral_system.classes.ReferralFunctions import ReferralFunctions
 from pyfcm import FCMNotification
 
@@ -214,7 +209,7 @@ def saveReferral(request):
                 },default=_json_serial))
 
         #Save appointment
-        today = datetime.date.today().strftime("%Y-%m-%d %H:%M:%S.%f")
+        today = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
         appointment = Appointment(
                                  referral_id =  uniqueID,
                                  referral_date = referral_date,
@@ -278,7 +273,7 @@ def saveRedeem(request):
         id_selected_facility = request.POST['id_selected_facility']
 
         #save the operation
-        today = datetime.date.today().strftime("%Y-%m-%d %H:%M:%S.%f")
+        today = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
         referralOperation = ReferralOperation(
                                               referral_id = referral_id,
                                               actor_id = actor_id,
@@ -368,7 +363,7 @@ def saveReRefer(request):
         newClient.save()
 
         #Save appointment
-        today = datetime.date.today().strftime("%Y-%m-%d %H:%M:%S.%f")
+        today = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
         appointment = Appointment.objects.get(pk=referral_id)
         if appointment is not None:
             appointment.referral_date = referral_date
