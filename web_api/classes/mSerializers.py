@@ -160,7 +160,7 @@ class MSerializers:
                 if objService is not None :
                     service = {}
                     service["name"] = objService.service_name
-                    service["created"] = objService.created
+                    service["created"] = objService.created.strftime("%Y-%m-%d %H:%M:%S.%f")
                     services.append(service)
         return services
 
