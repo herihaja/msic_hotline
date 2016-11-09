@@ -94,12 +94,11 @@ class MSerializers:
             from referral_operation op
             inner join appointment ap on ap.referral_id = op.referral_id
             where 1=1
-            and (op.facility_id = '%s' or op.actor_id = '%s')
-            and op.status = 1 or op.status = 4
+            and (op.facility_id = '%s' and (op.status = 1 or op.status = 4))
             and ap.last_updated > '%s'
             GROUP BY ap.referral_id
             ORDER BY ap.last_updated ASC;
-            '''%(user["facility_id"],user["user_id"],date_last_updated)
+            '''%(user["facility_id"],date_last_updated)
             db_appointments = StaticTools.run_sql(sql)
         else:
             sql = '''
