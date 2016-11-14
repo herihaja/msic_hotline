@@ -19,13 +19,13 @@ class Reports:
         count(referral_id) AS number_client
         FROM (SELECT
                 CASE
-                        WHEN ro.status IN (1, 4) and a.expiry_date < CURRENT_DATE THEN 5
-                        ELSE ro.status END
+                        WHEN MAX(ro.status) IN (1, 4) and a.expiry_date < CURRENT_DATE THEN 5
+                        ELSE MAX(ro.status) END
                      as status,
                     a.referral_id,
                     a.referral_date,
                     a.id_client,
-                    ro.actor_id
+                    referrer.actor_id
                 FROM  appointment a
         INNER JOIN
         (
@@ -35,7 +35,10 @@ class Reports:
             GROUP BY referral_id
         ) MaxId ON a.referral_id = MaxId.referral_id
         INNER JOIN referral_operation ro
-        ON   MaxId.referral_id = ro.referral_id AND MaxId.max_id = ro.id
+        ON   MaxId.referral_id = ro.referral_id
+        INNER JOIN referral_operation referrer
+            ON referrer.referral_id = a.referral_id and referrer.status = 1
+        GROUP BY a.referral_id, referrer.actor_id order by referral_id
         ) as t
         INNER JOIN client cli ON cli.id_client = t.id_client
         WHERE 1 = 1
@@ -62,6 +65,7 @@ class Reports:
                 + "ug on ug.authuser_id = u.id and ug.group_id = %d)" % dict_referrer_type.get(referrer_type)
             
         sqlReport += "GROUP BY t.status"
+        
         return AjaxFunction.runSQL(sqlReport)
     
     def servicesDelivered(self, start_date='', end_date= '', province = '', id_referrer = '', referrer_type=''):
@@ -74,8 +78,9 @@ class Reports:
         ro.referred_services
         FROM    
         referral_operation ro
-        INNER JOIN appointment a ON a.referral_id = ro.referral_id 
+        INNER JOIN appointment a ON a.referral_id = ro.referral_id and ro.status = 1
         INNER JOIN client cli ON cli.id_client = a.id_client
+        
         WHERE 1 = 1
         """
 
@@ -99,6 +104,8 @@ class Reports:
             sqlReport += " AND ro.actor_id IN (select u.id as actor_id FROM auth_user u inner join auth_user_groups" + \
                          " ug on ug.authuser_id = u.id and ug.group_id = %d)" % dict_referrer_type.get(referrer_type)
 
+        sqlReport += " group by ro.referral_id, ro.referred_services"
+        
         return AjaxFunction.runSQL(sqlReport)
     
     def smsTextNewReferral(self, referralId, actorId, status=None):
@@ -167,7 +174,8 @@ class Reports:
         sms += self.cleanSmsContent(objSms["referral_id"])
         strSms = strSms + sms + "</i>\""
 
-        message_content, status = self.sendMessage(objSms['client_phone'], sms, actorId, objSms['id_client'], objSms['ref_lang'])
+        message_content, status = self.sendMessage(objSms['client_phone'], sms, actorId, objSms['id_client'],
+                                                   objSms['ref_lang'])
         return strSms,status
     
     def cleanSmsContent(self, input):

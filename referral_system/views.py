@@ -361,15 +361,18 @@ def referralSaveOnlineForm(request):
         _refer_send_notification(id_selected_facility)
         
         #Notification format: ok_referalid
+        reports = Reports()
         notifParam = "ok_" + uniqueID
               
             
         
-    return redirect(notificationPage, typenotif = notifParam)
+        return notificationPage(request, typenotif=notifParam)
+    return redirect(referralFormOnline)
 
 @login_required(login_url='/referral_system/loginPage/')
 @user_passes_test(group_check, login_url='/referral_system/loginPage/access')
 def referralSaveExistingForm(request):
+
     if request.method == 'POST':
         #here function
         
@@ -450,7 +453,8 @@ def referralSaveExistingForm(request):
         #Notification format: ok_referalid
         notifParam = "ok_" + uniqueID  
         
-    return redirect(notificationPage, typenotif = notifParam)
+        return notificationPage(request, typenotif=notifParam)
+    return redirect(referralFormExisting)
 
 #Ajax functions for facilities
 def ajaxListDistrict(request):
