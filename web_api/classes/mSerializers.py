@@ -61,6 +61,7 @@ class MSerializers:
             facility["name"] = objFacility['quest_19']
             facility["name_khmer"] = objFacility['quest_12']
             facility["coordinates"] = objFacility['quest_24']
+            facility["house_number"] = objFacility['quest_33']
             facility["street"] = objFacility['quest_16']
             facility["street_khmer"] = objFacility['quest_34']
             facility["village"] = objFacility['quest_18']

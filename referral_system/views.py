@@ -12,6 +12,7 @@ from referral_system.models import SmsFac, Client, Appointment,\
 from django.core import serializers
 from referral_system.classes.ReferralFunctions import ReferralFunctions
 from referral_system.classes.Reports import Reports
+import datetime
 from django.contrib.auth import models
 
 
@@ -335,6 +336,7 @@ def referralSaveOnlineForm(request):
         
         
         #Save appointment
+        today = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
         appointment = Appointment(
                                  referral_id =  uniqueID,
                                  referral_date = referral_date,
@@ -342,7 +344,9 @@ def referralSaveOnlineForm(request):
                                  language = language_sms,
                                  id_client = newClient.id_client,
 #                                 id_facility = id_selected_facility,
-                                 mode = 1 #1=new ; 2=existing
+                                 mode = 1, #1=new ; 2=existing
+                                 created = today,
+                                 last_updated = today
                                   )
         appointment.save()
         
@@ -354,10 +358,12 @@ def referralSaveOnlineForm(request):
                                               last_actor_id = request.user.id,
                                               referred_services = ';'.join(services),
                                               other_services = service_other,
-                                              status = 1 # 1 = referred                                               
+                                              status = 1, # 1 = referred
+                                              last_updated = today
                                               )
         referralOperation.save()
 
+        #        send notification
         _refer_send_notification(id_selected_facility)
         
         #Notification format: ok_referalid
@@ -424,6 +430,7 @@ def referralSaveExistingForm(request):
         
         
         #Save appointment
+        today = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
         appointment = Appointment(
                                  referral_id =  uniqueID,
                                  referral_date = referral_date,
@@ -431,7 +438,9 @@ def referralSaveExistingForm(request):
                                  language = language_sms,
                                  id_client = newClient.id_client,
 #                                 id_facility = id_selected_facility,
-                                 mode = 2 #1=new ; 2=existing
+                                 mode = 2, #1=new ; 2=existing
+                                 created = today,
+                                 last_updated = today
                                   )
         appointment.save()
         
@@ -443,10 +452,12 @@ def referralSaveExistingForm(request):
                                               last_actor_id = request.user.id,
                                               referred_services = ';'.join(services),
                                               other_services = service_other,
-                                              status = 1 # 1 = referred                                               
+                                              status = 1, # 1 = referred
+                                              last_updated = today
                                               )
         referralOperation.save()
 
+        #        send notification
         _refer_send_notification(id_selected_facility)
         
         
