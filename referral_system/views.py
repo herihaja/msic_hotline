@@ -217,60 +217,28 @@ def viewReferral(request):
     ## SERVICES DELIVERED
     servicesDelivered = reports.servicesDelivered(startDate, endDate, adr_province, referrer, referrer_type)
     allServices = ReferredServices.get_all_in_customized_order()
-    
-    reportServices = {}
-    listService = []
-    listObjectService = []
-    numberServices = 0
     allServicesName = [service.service_name for service in allServices]
-    for itemServiceDelivered in servicesDelivered:
-        listServicesDelivered = [itemS for itemS in itemServiceDelivered['referred_services'].split(";") if itemS in allServicesName]
-        numberServices += len(listServicesDelivered)
-            
-    for itemService in allServices:
-        itemObj = []
-        nb = 0
-        for itemServiceDelivered in servicesDelivered:
-            listServicesDelivered = itemServiceDelivered['referred_services'].split(";")
-            for itemS in listServicesDelivered:
-                if itemS.strip() == itemService.service_name.strip():
-                    nb = nb + 1
-                    
-                    
-        reportServices[itemService.service_name] = nb
-        listService.append("{name:'" + itemService.service_name + "',y:" + str(nb) + ",drilldown:'" + itemService.service_name + "'}")
-        
-        
-        if numberServices == 0:
-            _percentage = 0
-        else:
-            _percentage = (nb * 100) / numberServices
-        
-        itemObj.append(itemService.service_name)
-        itemObj.append("%.2f%s" % (_percentage, "%"))
-        itemObj.append(nb)
-        listObjectService.append(itemObj)
-        
-    jsonService = ",".join(listService)
 
-    from collections import OrderedDict
-    referrerList = OrderedDict({})
-    if request.user.groups.all()[0].name == "Hotline Counselor":
-        referrerList.update({u"%s" % request.user.id:'My Referral', 'all_counselors': 'All counselors'})
-    else:
-        for counselor in AuthUser.objects.filter(is_staff=False).exclude(groups__name__in=['Project Team']).order_by('first_name'):
-            referrerList.update({u"%s" % counselor.id:"%s %s" % (counselor.first_name, counselor.last_name)})
+    jsonService, listObjectService, numberReferredServices = format_data_per_service(servicesDelivered, allServices, allServicesName)
 
-    
+    referrerList = get_referrer_list(request.user.groups.all()[0].name, request.user.id)
+
+    ### Services redeemed
+    redeemedSces = reports.servicesRedeemed(startDate, endDate, adr_province, referrer, referrer_type)
+    pieChartDataRedeemed, listRedeemed, numberRedeemed = format_data_per_service(redeemedSces, allServices, allServicesName)
+
     context = {
+               "pieChartDataRedeemed": pieChartDataRedeemed,
+               "listRedeemed": listRedeemed,
+               "numberRedeemed": numberRedeemed,
+               "totalRedeemed": "100" if numberRedeemed > 0 else "0",
                "listObject" : listClientObject ,
                "listObjectService" : listObjectService ,
-               "reportServices" : reportServices ,
                "jsonService" : jsonService ,
                "menuactive" : "view",
                "jsonData" : strData,
                "numberClients" : numberClients,
-               "numberServices" : numberServices,
+               "numberServices" : numberReferredServices,
                "localityProvinces" : localityProvinces,
                "startDate" : startDate,
                "endDate": endDate,
@@ -278,7 +246,7 @@ def viewReferral(request):
                "user_id" : str(request.user.id),
                "referrer" : referrer,
                "totalReferrals": "100" if numberClients > 0 else "0",
-               "totalServices": "100" if numberServices > 0 else "0",
+               "totalServices": "100" if numberReferredServices > 0 else "0",
                "referrerList": referrerList,
                "referrer_type": referrer_type,
                }
@@ -525,9 +493,6 @@ def ajaxSelectFacility(request):
         
         facility += "====" + objFacility.quest_49 # referred service 18
         
-        
-        
-        
     return HttpResponse(facility)
 
 #Ajax functions for Garment factory
@@ -585,32 +550,40 @@ def exportExcel(request, context):
         referral_sheet.write(row, 2, int(object[2]))
         row += 1
 
-
     referral_sheet.write(row, 0, "Total")
     referral_sheet.write(row, 1, "%s%s" % (context.get('totalReferrals'), "%"))
     referral_sheet.write(row, 2, context.get('numberClients'))
 
-    services_sheet = book.add_sheet("Services referred")
+    create_and_write_to_sheet(book, context.get('listObjectService'), 'Services referred',
+                              context.get("numberServices"), context.get("totalServices"))
+
+    create_and_write_to_sheet(book, context.get('listRedeemed'), 'Services redeemed',
+                              context.get('numberRedeemed'), context.get('totalRedeemed'))
+
+    response = HttpResponse(content_type="application/ms-excel")
+    response['Content-Disposition'] = 'attachment; filename=report.xls'
+    book.save(response)
+    return response
+
+
+def create_and_write_to_sheet(book, data, sheet_name, total_number, total_percentage):
+    services_sheet = book.add_sheet(sheet_name)
     services_sheet.write(0,0, "Services")
     services_sheet.write(0,1, "Percentage")
     services_sheet.write(0,2, "Number of services")
 
     row = 1
-    for service in context.get('listObjectService'):
+    for service in data:
         services_sheet.write(row,0, service[0].capitalize())
         services_sheet.write(row,1, service[1])
         services_sheet.write(row,2, service[2])
         row += 1
 
     services_sheet.write(row, 0, "Total")
-    services_sheet.write(row, 2, context.get("numberServices"))
-    services_sheet.write(row, 1, "%s%s" % (context.get("totalServices"),"%"))
+    services_sheet.write(row, 2, total_number)
+    services_sheet.write(row, 1, "%s%s" % (total_percentage,"%"))
 
-        
-    response = HttpResponse(content_type="application/ms-excel")
-    response['Content-Disposition'] = 'attachment; filename=report.xls'
-    book.save(response)
-    return response
+
 
 def send_sms(request):
     sms_content = "this is a very long sms to test the behavior when the message is longer than one sixty characters, Aimee, Please let me know when you get it, if possible to have a screenshot that will be very helpful, thanks"
@@ -618,3 +591,52 @@ def send_sms(request):
     sms_content = unicode("នេះគឺជាការផ្ញើសារជាអក្សរបានយ៉ាងយូរដើម្បីសាកល្បងឥរិយាបថពេលដែលសារនេះគឺជាតួអក្សរហុកសិបយូរជាងមួយរបស់ Aimee, សូមអនុញ្ញាតឱ្យខ្ញុំដឹងថានៅពេលដែលអ្នកទទួលបានវាបើអាចធ្វើទៅបានដើម្បីឱ្យមានរូបថតអេក្រង់ដែលនឹងមានប្រយោជន៍ខ្លាំងណាស់, អរគុណ")
     Reports().sendMessage("012818614", sms_content, 1, 1, 'khmer')
     return HttpResponse(sms_content)
+
+
+def get_referrer_list(current_user_group, current_user_id):
+        from collections import OrderedDict
+        referrerList = OrderedDict({})
+        if current_user_group == "Hotline Counselor":
+            referrerList.update({u"%s" % current_user_id:'My Referral', 'all_counselors': 'All counselors'})
+        else:
+            for counselor in AuthUser.objects.filter(is_staff=False).exclude(groups__name__in=['Project Team']).order_by('first_name'):
+                referrerList.update({u"%s" % counselor.id:"%s %s" % (counselor.first_name, counselor.last_name)})
+        return referrerList
+
+
+def format_data_per_service(servicesDelivered, allServices, allServicesName):
+
+    reportServices = {}
+    listService = []
+    listObjectService = []
+    numberServices = 0
+    for itemServiceDelivered in servicesDelivered:
+        listServicesDelivered = [itemS for itemS in itemServiceDelivered['referred_services'].split(";") if itemS in allServicesName]
+        numberServices += len(listServicesDelivered)
+
+    for itemService in allServices:
+        itemObj = []
+        nb = 0
+        for itemServiceDelivered in servicesDelivered:
+            listServicesDelivered = itemServiceDelivered['referred_services'].split(";")
+            for itemS in listServicesDelivered:
+                if itemS.strip() == itemService.service_name.strip():
+                    nb = nb + 1
+
+
+        reportServices[itemService.service_name] = nb
+        listService.append("{name:'" + itemService.service_name + "',y:" + str(nb) + ",drilldown:'" + itemService.service_name + "'}")
+
+        if numberServices == 0:
+            _percentage = 0
+        else:
+            _percentage = (nb * 100) / numberServices
+
+        itemObj.append(itemService.service_name)
+        itemObj.append("%.2f%s" % (_percentage, "%"))
+        itemObj.append(nb)
+        listObjectService.append(itemObj)
+
+    jsonService = ",".join(listService)
+
+    return jsonService, listObjectService, numberServices

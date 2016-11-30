@@ -65,7 +65,7 @@ class Reports:
                 + "ug on ug.authuser_id = u.id and ug.group_id = %d)" % dict_referrer_type.get(referrer_type)
             
         sqlReport += "GROUP BY t.status"
-        
+
         return AjaxFunction.runSQL(sqlReport)
     
     def servicesDelivered(self, start_date='', end_date= '', province = '', id_referrer = '', referrer_type=''):
@@ -231,7 +231,47 @@ class Reports:
             return date_text
         except Exception:
             return ''
-        
+
+    def servicesRedeemed(self, start_date='', end_date= '', province = '', id_referrer = '', referrer_type=''):
+
+        start_date = self.validate_date(start_date)
+        end_date = self.validate_date(end_date)
+
+        sqlReport = """
+        SELECT
+        ro.referred_services
+        FROM
+        referral_operation ro
+        INNER JOIN appointment a ON a.referral_id = ro.referral_id and ro.status = 2
+        INNER JOIN client cli ON cli.id_client = a.id_client
+
+        WHERE 1 = 1
+        """
+
+        if start_date:
+            sqlReport += " and ro.redeem_date >= '%s'" % start_date
+
+        if end_date:
+            sqlReport += " and ro.redeem_date <= '%s'" % end_date
+
+        if province != '':
+            sqlReport += " AND cli.adr_province = '" + province + "' "
+
+        if id_referrer == 'all_counselors':
+            sqlReport += " AND ro.actor_id IN (select u.id as actor_id FROM auth_user u inner join auth_user_groups" + \
+                         " ug on ug.authuser_id = u.id and ug.group_id = 1)"
+
+        elif id_referrer != '' and str(int(id_referrer)) == id_referrer:
+            sqlReport += " AND ro.actor_id = '" + id_referrer + "' "
+
+        dict_referrer_type = {'hotline_counselors': 1, 'hf': 3, 'garment_factory':2, "whc": 5}
+        if referrer_type and dict_referrer_type.has_key(referrer_type):
+            sqlReport += " AND ro.actor_id IN (select u.id as actor_id FROM auth_user u inner join auth_user_groups" + \
+                         " ug on ug.authuser_id = u.id and ug.group_id = %d)" % dict_referrer_type.get(referrer_type)
+
+        sqlReport += " group by ro.referral_id, ro.referred_services"
+
+        return AjaxFunction.runSQL(sqlReport)
 
 def english_conversion(input_text):
     return input_text
