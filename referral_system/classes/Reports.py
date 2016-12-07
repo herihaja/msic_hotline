@@ -7,14 +7,14 @@ from referral_system.models import MessagesLog
 
 
 class Reports:
-    
+
     def clientsPerStatus(self, start_date='', end_date = '', province = '', id_referrer = '', referrer_type=''):
-        
+
         start_date = self.validate_date(start_date)
         end_date = self.validate_date(end_date)
-        
-        sqlReport = """ 
-        SELECT 
+
+        sqlReport = """
+        SELECT
         DISTINCT status ,
         count(referral_id) AS number_client
         FROM (SELECT
@@ -42,18 +42,18 @@ class Reports:
         ) as t
         INNER JOIN client cli ON cli.id_client = t.id_client
         WHERE 1 = 1
-        
+
         """
-        
+
         if start_date :
             sqlReport += " AND t.referral_date >= '%s' " % start_date
 
         if end_date :
             sqlReport += " AND t.referral_date <= '%s' " % end_date
-            
+
         if province != '':
             sqlReport += " AND cli.adr_province = '" + province + "' "
-            
+
         if id_referrer == 'all_counselors': #all hotline counsellor
             sqlReport += " AND t.actor_id IN (select u.id as actor_id FROM auth_user u inner join auth_user_groups ug on ug.authuser_id = u.id and ug.group_id = 1)"
         elif id_referrer != '' and str(int(id_referrer)) == id_referrer:
@@ -63,24 +63,24 @@ class Reports:
         if referrer_type and dict_referrer_type.has_key(referrer_type):
             sqlReport += " AND t.actor_id IN (select u.id as actor_id FROM auth_user u inner join auth_user_groups " \
                 + "ug on ug.authuser_id = u.id and ug.group_id = %d)" % dict_referrer_type.get(referrer_type)
-            
+
         sqlReport += "GROUP BY t.status"
 
         return AjaxFunction.runSQL(sqlReport)
-    
+
     def servicesDelivered(self, start_date='', end_date= '', province = '', id_referrer = '', referrer_type=''):
-        
+
         start_date = self.validate_date(start_date)
         end_date = self.validate_date(end_date)
-        
-        sqlReport = """ 
-        SELECT 
+
+        sqlReport = """
+        SELECT
         ro.referred_services
-        FROM    
+        FROM
         referral_operation ro
         INNER JOIN appointment a ON a.referral_id = ro.referral_id and ro.status = 1
         INNER JOIN client cli ON cli.id_client = a.id_client
-        
+
         WHERE 1 = 1
         """
 
@@ -92,7 +92,7 @@ class Reports:
 
         if province != '':
             sqlReport += " AND cli.adr_province = '" + province + "' "
-            
+
         if id_referrer == 'all_counselors':
             sqlReport += " AND ro.actor_id IN (select u.id as actor_id FROM auth_user u inner join auth_user_groups" + \
                          " ug on ug.authuser_id = u.id and ug.group_id = 1)"
@@ -105,11 +105,11 @@ class Reports:
                          " ug on ug.authuser_id = u.id and ug.group_id = %d)" % dict_referrer_type.get(referrer_type)
 
         sqlReport += " group by ro.referral_id, ro.referred_services"
-        
+
         return AjaxFunction.runSQL(sqlReport)
-    
+
     def smsTextNewReferral(self, referralId, actorId, status=None):
-        # <Health facility name>, <house #>, <street>, <village>, 
+        # <Health facility name>, <house #>, <street>, <village>,
         # <commune>, telephone number-<code> <expiry date>
         if status is None:
             status = str(1)
@@ -151,9 +151,9 @@ class Reports:
 
         resSms = AjaxFunction.runSQL(sqlSms)
         objSms = resSms[0]
-        
+
         strSms = "The SMS below was sent to the client: <br><br><i>\""
-        
+
         if objSms['ref_lang'].lower() == 'english':
             sms = unicode(objSms["facility_name"])
             sms += self.cleanSmsContent(objSms["house_number"])
@@ -168,7 +168,7 @@ class Reports:
         phoneNumber = objSms["phone"]
         if phoneNumber[:3] == "855":
             phoneNumber = "0%s" % phoneNumber[3:]
-        
+
         sms += self.cleanSmsContent(phoneNumber)
         sms += self.cleanSmsContent(objSms["expiry_date"])
         sms += self.cleanSmsContent(objSms["referral_id"])
@@ -177,7 +177,7 @@ class Reports:
         message_content, status = self.sendMessage(objSms['client_phone'], sms, actorId, objSms['id_client'],
                                                    objSms['ref_lang'])
         return strSms,status
-    
+
     def cleanSmsContent(self, input):
         if len(unicode(input)) == 0 or input == 'n/a':
             return ''
@@ -190,7 +190,7 @@ class Reports:
 
         if toNumber[0] == "0":
             toNumber = "855%s" % toNumber[1:]
-        
+
         if language == 'english':
             sms_data_dict = {"gw-text":"%s", "gw-username":"mscambodia", "gw-password":"msckh2016",
                              "gw-from":"mariestopes", "gw-to":"%s"}
@@ -206,7 +206,7 @@ class Reports:
         status = self.saveSmsLog(response, toNumber, message_content.encode("UTF-8"), actorId, recipientId)
         return message_content, status
 
-        
+
     def saveSmsLog(self, response, to_number, msg_content, actor_id, recipient_id):
         query_string = urlparse.parse_qs(response.content)
         if query_string.get('status')[0] == '0':
@@ -244,7 +244,7 @@ class Reports:
         referral_operation ro
         INNER JOIN appointment a ON a.referral_id = ro.referral_id and ro.status = 2
         INNER JOIN client cli ON cli.id_client = a.id_client
-
+        INNER JOIN referral_operation ref ON ref.status = 1 and ref.referral_id = ro.referral_id
         WHERE 1 = 1
         """
 
@@ -258,15 +258,15 @@ class Reports:
             sqlReport += " AND cli.adr_province = '" + province + "' "
 
         if id_referrer == 'all_counselors':
-            sqlReport += " AND ro.actor_id IN (select u.id as actor_id FROM auth_user u inner join auth_user_groups" + \
+            sqlReport += " AND ref.actor_id IN (select u.id as actor_id FROM auth_user u inner join auth_user_groups" + \
                          " ug on ug.authuser_id = u.id and ug.group_id = 1)"
 
         elif id_referrer != '' and str(int(id_referrer)) == id_referrer:
-            sqlReport += " AND ro.actor_id = '" + id_referrer + "' "
+            sqlReport += " AND ref.actor_id = '" + id_referrer + "' "
 
         dict_referrer_type = {'hotline_counselors': 1, 'hf': 3, 'garment_factory':2, "whc": 5}
         if referrer_type and dict_referrer_type.has_key(referrer_type):
-            sqlReport += " AND ro.actor_id IN (select u.id as actor_id FROM auth_user u inner join auth_user_groups" + \
+            sqlReport += " AND ref.actor_id IN (select u.id as actor_id FROM auth_user u inner join auth_user_groups" + \
                          " ug on ug.authuser_id = u.id and ug.group_id = %d)" % dict_referrer_type.get(referrer_type)
 
         sqlReport += " group by ro.referral_id, ro.referred_services"
