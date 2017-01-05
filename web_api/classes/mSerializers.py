@@ -34,10 +34,10 @@ class MSerializers:
             ((f.quest_50 ILIKE 'Both (Referral System and Public Facing Platform)'
             OR f.quest_50 ILIKE 'Referral System only')
             OR quest_21 ILIKE 'Garment factory infirmary')
-            AND f.date_soumission > '%s'
             ORDER BY f.quest_20,f.quest_21 ASC, f.date_soumission DESC;
-            '''%(date_last_update)
+            '''
             db_facilities = StaticTools.run_sql(sql)
+#            AND f.date_soumission > '%s'
         else:
             sql = '''
             SELECT
@@ -50,11 +50,10 @@ class MSerializers:
             AND quest_21 NOT ILIKE 'Garment factory infirmary')
             OR
             quest_20 = '%s')
-            AND f.date_soumission > '%s'
             ORDER BY f.quest_20,f.quest_21 ASC, f.date_soumission DESC;
-            '''%(user["facility_id"],date_last_update)
+            '''%(user["facility_id"])
             db_facilities = StaticTools.run_sql(sql)
-
+#            AND f.date_soumission > '%s'
         for objFacility in db_facilities :
             facility = {}
             facility["id"] = objFacility['quest_20']
