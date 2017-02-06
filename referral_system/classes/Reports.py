@@ -193,11 +193,11 @@ class Reports:
 
         if language == 'english':
             sms_data_dict = {"gw-text":"%s", "gw-username":"mscambodia", "gw-password":"msckh2016",
-                             "gw-from":"mariestopes", "gw-to":"%s"}
+                             "gw-from":"Mariestopes", "gw-to":"%s"}
             conversion_method = english_conversion
         else:
             sms_data_dict = {"gw-coding":"3", "gw-text":"%s", "gw-username":"mscambodia", "gw-password": "msckh2016",
-                             "gw-from":"mariestopes", "gw-to":"%s"}
+                             "gw-from":"Mariestopes", "gw-to":"%s"}
             conversion_method = khmer_conversion
 
         sms_data_dict.update({"gw-text": conversion_method(message_content), "gw-to": toNumber})
