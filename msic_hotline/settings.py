@@ -136,7 +136,12 @@ STATICFILES_DIRS = [
     './msic_hotline/static/',
 ]
 
-SMS_API_URL = "http://tool.plasgate.com:11040/cgi-bin/sendsms"
+#SMS_API_URL = "http://tool.plasgate.com:11040/cgi-bin/sendsms"
+SMS_API_URL = "http://sms.plasgate.com:29062/cgi-bin/sendsms"
+SMS_API_CHECK_BALANCE = "http://sms.plasgate.com:29062/cgi-bin/requestbalance"
+SMS_API_USERNAME = "msckh"
+SMS_API_PWD = "Msc@Kh2016"
+
 NOTIFICATION_FCM_API_KEY = "AIzaSyACW4qbzlFfu9OAQqst2CgHE7c_uBJKP5M"
 
 

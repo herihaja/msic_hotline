@@ -14,6 +14,9 @@ from referral_system.classes.ReferralFunctions import ReferralFunctions
 from referral_system.classes.Reports import Reports
 import datetime
 from django.contrib.auth import models
+from django.conf import settings
+import requests
+import json, urlparse, urllib
 
 
 
@@ -586,10 +589,12 @@ def create_and_write_to_sheet(book, data, sheet_name, total_number, total_percen
 
 
 def send_sms(request):
-    sms_content = "this is a very long sms to test the behavior when the message is longer than one sixty characters, Aimee, Please let me know when you get it, if possible to have a screenshot that will be very helpful, thanks"
-    sms_content = "Hi Aimee, did you get my previous sms from the system? It's Heri."
-    sms_content = unicode("នេះគឺជាការផ្ញើសារជាអក្សរបានយ៉ាងយូរដើម្បីសាកល្បងឥរិយាបថពេលដែលសារនេះគឺជាតួអក្សរហុកសិបយូរជាងមួយរបស់ Aimee, សូមអនុញ្ញាតឱ្យខ្ញុំដឹងថានៅពេលដែលអ្នកទទួលបានវាបើអាចធ្វើទៅបានដើម្បីឱ្យមានរូបថតអេក្រង់ដែលនឹងមានប្រយោជន៍ខ្លាំងណាស់, អរគុណ")
-    Reports().sendMessage("012818614", sms_content, 1, 1, 'khmer')
+    #sms_content = "this is a very long sms to test the behavior when the message is longer than one sixty characters, Aimee, Please let me know when you get it, if possible to have a screenshot that will be very helpful, thanks"
+    sms_content = "Hi Sotha, Let me know if you get this sms? It's Heri."
+    #sms_content = unicode("នេះគឺជាការផ្ញើសារជាអក្សរបានយ៉ាងយូរដើម្បីសាកល្បងឥរិយាបថពេលដែលសារនេះគឺជាតួអក្សរហុកសិបយូរជាងមួយរបស់ Aimee, សូមអនុញ្ញាតឱ្យខ្ញុំដឹងថានៅពេលដែលអ្នកទទួលបានវាបើអាចធ្វើទៅបានដើម្បីឱ្យមានរូបថតអេក្រង់ដែលនឹងមានប្រយោជន៍ខ្លាំងណាស់, អរគុណ")
+    #Sotha: 010530777
+    #Aimee: 012818614
+    Reports().sendMessage("010530777", sms_content, 1, 1, 'khmer')
     return HttpResponse(sms_content)
 
 
@@ -640,3 +645,9 @@ def format_data_per_service(servicesDelivered, allServices, allServicesName):
     jsonService = ",".join(listService)
 
     return jsonService, listObjectService, numberServices
+
+
+def check_balance(request):
+    sms_data_dict = {"gw-username":settings.SMS_API_USERNAME, "gw-password":settings.SMS_API_PWD}
+    response = requests.post(settings.SMS_API_URL, verify=False, data=urllib.urlencode(sms_data_dict))
+    return HttpResponse(response)

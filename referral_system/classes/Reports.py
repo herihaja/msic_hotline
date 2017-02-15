@@ -192,11 +192,11 @@ class Reports:
             toNumber = "855%s" % toNumber[1:]
 
         if language == 'english':
-            sms_data_dict = {"gw-text":"%s", "gw-username":"mscambodia", "gw-password":"msckh2016",
+            sms_data_dict = {"gw-text":"%s", "gw-username":settings.SMS_API_USERNAME, "gw-password":settings.SMS_API_PWD,
                              "gw-from":"Mariestopes", "gw-to":"%s"}
             conversion_method = english_conversion
         else:
-            sms_data_dict = {"gw-coding":"3", "gw-text":"%s", "gw-username":"mscambodia", "gw-password": "msckh2016",
+            sms_data_dict = {"gw-coding":"3", "gw-text":"%s", "gw-username":settings.SMS_API_USERNAME, "gw-password":settings.SMS_API_PWD,
                              "gw-from":"Mariestopes", "gw-to":"%s"}
             conversion_method = khmer_conversion
 

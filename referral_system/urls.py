@@ -19,6 +19,7 @@ urlpatterns = [
     url(r'^referralSaveOnlineForm/$', views.referralSaveOnlineForm, name='referralSaveOnlineForm'),
     url(r'^referralSaveExistingForm/$', views.referralSaveExistingForm, name='referralSaveExistingForm'),   
     url(r'^send-sms/', views.send_sms, name='send-sms'),
+    url(r'^check-balance/', views.check_balance, name='check-balance'),
      
     url(r'^notificationPage/(?P<typenotif>.+)/$', views.notificationPage, name='notificationPage'),
     
